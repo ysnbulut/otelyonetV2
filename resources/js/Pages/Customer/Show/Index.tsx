@@ -12,6 +12,7 @@ import TomSelect from '../../../Components/TomSelect'
 import route from 'ziggy-js'
 import { FormLabel, FormInput } from '../../../Components/Form'
 import axios from 'axios'
+import { number } from 'yup'
 
 function Index({ ...props }: PageProps) {
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
@@ -119,6 +120,72 @@ function Index({ ...props }: PageProps) {
 								{errors.payment_date &&
 									(<div className='text-theme-6 mt-2 text-danger'>{errors.payment_date}</div>)}
 							</div>
+              <div className='form-control mt-5'>
+                <FormLabel htmlFor='currency'
+                           className='justify-beetwen flex'>Döviz Cinsi
+                </FormLabel>
+                <TomSelect id='currency'
+                           name='currency'
+                           data-placeholder='Döviz Cinsi'
+                           value={data.currency}
+                           onChange={(e) => setData('currency', e.toString())}
+                           className='w-full rounded-md'>
+                  <option value='TRY'
+                          selected={data.currency === 'TRY'}>Türk Lirası
+                  </option>
+                  <option value='USD'
+                          selected={data.currency === 'USD'}>Amerikan Doları
+                  </option>
+                  <option value='EUR'
+                          selected={data.currency === 'EUR'}>Euro
+                  </option>
+                  <option value='GBP'
+                          selected={data.currency === 'GBP'}>İngiliz Sterlini
+                  </option>
+                  <option value='SAR'
+                          selected={data.currency === 'SAR'}>Suudi Arabistan Riyali
+                  </option>
+                  <option value='AUD'
+                          selected={data.currency === 'AUD'}>Avustralya Doları
+                  </option>
+                  <option value='CHF'
+                          selected={data.currency === 'CHF'}>İsveç Frangı
+                  </option>
+                  <option value='CAD'
+                          selected={data.currency === 'CAD'}>Kanada Doları
+                  </option>
+                  <option value='KWD'
+                          selected={data.currency === 'KWD'}>Kuveyt Dinarı
+                  </option>
+                  <option value='JPY'
+                          selected={data.currency === 'JPY'}>Japon Yeni
+                  </option>
+                  <option value='DKK'
+                          selected={data.currency === 'DKK'}>Danimarka Kronu
+                  </option>
+                  <option value='SEK'
+                          selected={data.currency === 'SEK'}>İsveç Kronu
+                  </option>
+                  <option value='NOK'
+                          selected={data.currency === 'NOK'}>Norveç Kronu
+                  </option>
+                </TomSelect>
+                {errors.currency && (<div className='text-theme-6 mt-2 text-danger'>{errors.currency}</div>)}
+              </div>
+              <div className='form-control mt-5'>
+                <FormLabel htmlFor='currency-amount'>Meblağ</FormLabel>
+                <CurrencyInput id='currency-amount'
+                               allowNegativeValue={false}
+                               suffix={` ${data.currency}` || ' TRY'}
+                               value={data.currency_amount}
+                               decimalsLimit={4}
+                               required={true}
+                               onValueChange={(value) => setData('currency_amount', value || '0')}
+                               name='currency_amount'
+                               className="w-full text-right font-extrabold text-xl disabled:bg-slate-100 disabled:cursor-not-allowed dark:disabled:bg-darkmode-800/50 dark:disabled:border-transparent [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50 [&[readonly]]:dark:border-transparent transition duration-200 ease-in-out border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" />
+                {errors.currency_amount && (
+                  <div className='text-theme-6 mt-2 text-danger'>{errors.currency_amount}</div>)}
+              </div>
 							<div className='form-control mt-5'>
 								<FormLabel htmlFor='case'>Kasa / Banka</FormLabel>
 								<TomSelect id='case' name='case_and_banks_id' className='w-full'
@@ -132,58 +199,7 @@ function Index({ ...props }: PageProps) {
 								{errors.case_and_banks_id && (
 									<div className='text-theme-6 mt-2 text-danger'>{errors.case_and_banks_id}</div>)}
 							</div>
-							<div className='form-control mt-5'>
-								<FormLabel htmlFor='currency'
-													 className='justify-beetwen flex'>Döviz Cinsi
-								</FormLabel>
-								<TomSelect id='currency'
-													 name='currency'
-													 data-placeholder='Döviz Cinsi'
-													 value={data.currency}
-													 onChange={(e) => setData('currency', e.toString())}
-													 className='w-full rounded-md'>
-									<option value='TRY'
-													selected={data.currency === 'TRY'}>Türk Lirası
-									</option>
-									<option value='USD'
-													selected={data.currency === 'USD'}>Amerikan Doları
-									</option>
-									<option value='EUR'
-													selected={data.currency === 'EUR'}>Euro
-									</option>
-									<option value='GBP'
-													selected={data.currency === 'GBP'}>İngiliz Sterlini
-									</option>
-									<option value='SAR'
-													selected={data.currency === 'SAR'}>Suudi Arabistan Riyali
-									</option>
-									<option value='AUD'
-													selected={data.currency === 'AUD'}>Avustralya Doları
-									</option>
-									<option value='CHF'
-													selected={data.currency === 'CHF'}>İsveç Frangı
-									</option>
-									<option value='CAD'
-													selected={data.currency === 'CAD'}>Kanada Doları
-									</option>
-									<option value='KWD'
-													selected={data.currency === 'KWD'}>Kuveyt Dinarı
-									</option>
-									<option value='JPY'
-													selected={data.currency === 'JPY'}>Japon Yeni
-									</option>
-									<option value='DKK'
-													selected={data.currency === 'DKK'}>Danimarka Kronu
-									</option>
-									<option value='SEK'
-													selected={data.currency === 'SEK'}>İsveç Kronu
-									</option>
-									<option value='NOK'
-													selected={data.currency === 'NOK'}>Norveç Kronu
-									</option>
-								</TomSelect>
-								{errors.currency && (<div className='text-theme-6 mt-2 text-danger'>{errors.currency}</div>)}
-							</div>
+
 							<div className='form-control mt-5'>
 								<FormLabel htmlFor='payment-method'
 													 className='justify-beetwen flex'>Ödeme Türü
@@ -207,20 +223,7 @@ function Index({ ...props }: PageProps) {
 								{errors.payment_method && (
 									<div className='text-theme-6 mt-2 text-danger'>{errors.payment_method}</div>)}
 							</div>
-							<div className='form-control mt-5'>
-								<FormLabel htmlFor='currency-amount'>Meblağ</FormLabel>
-								<CurrencyInput id='currency-amount'
-															 allowNegativeValue={false}
-															 suffix={` ${data.currency}` || ' TRY'}
-															 value={data.currency_amount}
-															 decimalsLimit={4}
-															 required={true}
-															 onValueChange={(value) => setData('currency_amount', value || '0')}
-															 name='currency_amount'
-															 className="w-full text-right font-extrabold text-xl disabled:bg-slate-100 disabled:cursor-not-allowed dark:disabled:bg-darkmode-800/50 dark:disabled:border-transparent [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50 [&[readonly]]:dark:border-transparent transition duration-200 ease-in-out border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" />
-								{errors.currency_amount && (
-									<div className='text-theme-6 mt-2 text-danger'>{errors.currency_amount}</div>)}
-							</div>
+
 							<div className='form-control mt-5'>
 								<FormLabel htmlFor='description'>Açıkalama</FormLabel>
 								<FormInput id='payment-description'
