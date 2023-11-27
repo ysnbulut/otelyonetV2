@@ -13,7 +13,7 @@ class CustomerPaymentRequest
  public function handle(Request $request, Closure $next)
  {
   if ($request->isMethod('post')) {
-   if ($request->routeIs('customer_payments.store')) {
+   if ($request->routeIs('hotel.customer_payments.store')) {
     $payment_date = Carbon::createFromFormat('d.m.Y', $request->payment_date)->format('Y-m-d');
     unset($request['payment_date']);
     $currency_amount = $this->getCleanAmount($request->currency_amount);
@@ -21,7 +21,7 @@ class CustomerPaymentRequest
     $settings = new GeneralSettings();
     if ($settings->pricing_currency !== 'TRY') {
      if ($request->currency !== 'TRY') {
-      if ($request->currency_amount > 0) {
+      if ($currency_amount > 0) {
        $doviz = new Doviz();
        $kur = $doviz->kurAlis($request->currency, Doviz::TYPE_EFEKTIFALIS);
        $amount_paid = round($currency_amount * $kur, 2);
@@ -50,7 +50,7 @@ class CustomerPaymentRequest
    str_replace(
     [' TRY', ' USD', ' EUR', ' GBP', ' SAR', ' AUD', ' CHF', ' CAD', ' KWD', ' JPY', ' DKK', ' SEK', ' NOK'],
     '',
-    str_replace(',', '', trim($amount))
+    str_replace(',', '.', trim($amount))
    )
   );
  }

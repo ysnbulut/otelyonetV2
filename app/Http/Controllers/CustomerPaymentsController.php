@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomerPayments;
 use App\Http\Requests\StoreCustomerPaymentsRequest;
 use App\Http\Requests\UpdateCustomerPaymentsRequest;
+use Inertia\Inertia;
 
 class CustomerPaymentsController extends Controller
 {
@@ -29,15 +30,17 @@ class CustomerPaymentsController extends Controller
      */
     public function store(StoreCustomerPaymentsRequest $request)
     {
-//	    CustomerPayments::create($request->validated());
+	    CustomerPayments::create($request->validated());
 			if($request->has('booking_id')) {
-//				return redirect()
-//					->route('hotel.bookings.show', $request->booking_id)
-//					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+				return Inertia::render('Booking/Show', [
+          'booking' => $request->booking_id,
+          'success' => 'Rezervasyon ödeme tahsilatı başarılı.'
+        ]);
 			} else {
-//				return redirect()
-//					->route('hotel.customers.show', $request->customer_id)
-//					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+				return Inertia::render('Customer/Show', [
+          'customer' => $request->customer_id,
+          'success' => 'Müşteri ödeme tahsilatı başarılı.'
+        ]);
 			}
 
     }
