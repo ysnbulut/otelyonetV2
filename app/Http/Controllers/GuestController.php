@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guest;
 use App\Http\Requests\StoreGuestRequest;
 use App\Http\Requests\UpdateGuestRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
@@ -82,10 +83,11 @@ class GuestController extends Controller
 			->with('success', 'Guest updated.');
 	}
 
-	/**
-	 * Remove the specified resource from storage.
-	 */
-	public function destroy(Guest $guest)
+  /**
+   * @param Guest $guest
+   * @return RedirectResponse
+   */
+  public function destroy(Guest $guest)
 	{
 		$guest->delete();
 		return redirect()
