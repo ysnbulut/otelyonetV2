@@ -48,8 +48,20 @@ function Index({ ...props }: PageProps) {
 
   const paymentFormSubmit = (e: any) => {
     e.preventDefault()
-    console.log(data)
-    post(route('hotel.customer_payments.store'))
+    post(route('hotel.customer_payments.store'), {
+      onSuccess: () => {
+        setShowPaymentForm(false)
+        setData(data => ({
+          ...data,
+          payment_date: dayjs().format('DD.MM.YYYY'),
+          case_and_banks_id: '',
+          currency: 'TRY',
+          payment_method: '',
+          currency_amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+          description: '',
+        }))
+      },
+    })
   }
   return (<AuthenticatedLayout
     user={props.auth.user}

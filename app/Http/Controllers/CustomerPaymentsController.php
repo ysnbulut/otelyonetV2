@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CustomerPayments;
 use App\Http\Requests\StoreCustomerPaymentsRequest;
 use App\Http\Requests\UpdateCustomerPaymentsRequest;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
 class CustomerPaymentsController extends Controller
@@ -37,10 +38,7 @@ class CustomerPaymentsController extends Controller
           'success' => 'Rezervasyon ödeme tahsilatı başarılı.'
         ]);
 			} else {
-				return Inertia::render('Customer/Show', [
-          'customer' => $request->customer_id,
-          'success' => 'Müşteri ödeme tahsilatı başarılı.'
-        ]);
+				return Redirect::back()->with('success', 'Ödeme tahsilatı başarılı.');
 			}
 
     }
