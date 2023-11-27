@@ -29,15 +29,15 @@ class CustomerPaymentsController extends Controller
      */
     public function store(StoreCustomerPaymentsRequest $request)
     {
-	    CustomerPayments::create($request->validated());
+//	    CustomerPayments::create($request->validated());
 			if($request->has('booking_id')) {
-				return redirect()
-					->route('hotel.bookings.show', $request->booking_id)
-					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+//				return redirect()
+//					->route('hotel.bookings.show', $request->booking_id)
+//					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
 			} else {
-				return redirect()
-					->route('hotel.customers.show', $request->customer_id)
-					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+//				return redirect()
+//					->route('hotel.customers.show', $request->customer_id)
+//					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
 			}
 
     }

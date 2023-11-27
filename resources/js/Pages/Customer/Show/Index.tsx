@@ -26,6 +26,9 @@ function Index({ ...props }: PageProps) {
 		description: '',
 	})
 
+  console.log(errors)
+  console.log(props)
+
 	useEffect(() => {
 		if (data.currency !== 'TRY') {
 			setData('currency_amount', 0);
@@ -39,9 +42,22 @@ function Index({ ...props }: PageProps) {
 	}, [data.currency])
 
 	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		// post(route('hotel.customers.payments.store', props.customer.id))
-	}
+		post(route('hotel.customer_payments.store'), {
+      preserveScroll: true,
+      preserveState: true,
+      // onSuccess: () => {
+      //   setShowPaymentForm(false)
+      //   // Inertia.reload(
+      //   //   {
+      //   //     only: ['flash', 'errors', 'customer', 'case_and_banks', 'customer.transactions'],
+      //   //     preserveScroll: true,
+      //   //     preserveState: true,
+      //   //   }
+      //   // )
+      // }
+
+    })
+  }
 	return (<AuthenticatedLayout
 		user={props.auth.user}
 		role={props.auth.role}
@@ -180,7 +196,7 @@ function Index({ ...props }: PageProps) {
                                value={data.currency_amount}
                                decimalsLimit={4}
                                required={true}
-                               onValueChange={(value) => setData('currency_amount', value || '0')}
+                               onValueChange={(value) => setData('currency_amount', value ? parseFloat(value) : 0)}
                                name='currency_amount'
                                className="w-full text-right font-extrabold text-xl disabled:bg-slate-100 disabled:cursor-not-allowed dark:disabled:bg-darkmode-800/50 dark:disabled:border-transparent [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50 [&[readonly]]:dark:border-transparent transition duration-200 ease-in-out border-slate-200 shadow-sm rounded-md placeholder:text-slate-400/90 focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus:border-primary focus:border-opacity-40 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:placeholder:text-slate-500/80" />
                 {errors.currency_amount && (
