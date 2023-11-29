@@ -1,20 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { PageProps } from '../Show/index'
-import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout'
-import { Inertia } from '@inertiajs/inertia'
-import { Head, Link, router, useForm } from '@inertiajs/react'
-import Lucide from '../../../Components/Lucide'
+import React, { useEffect, useState } from 'react'
+import { PageProps } from './types/show'
+import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout'
+import { Head, Link, useForm } from '@inertiajs/react'
+import Lucide from '../../Components/Lucide'
 import CurrencyInput from 'react-currency-input-field'
 import { twMerge } from 'tailwind-merge'
-import Button from '../../../Components/Button'
-import Litepicker from '../../../Components/Litepicker'
-import TomSelect from '../../../Components/TomSelect'
+import Button from '../../Components/Button'
+import Litepicker from '../../Components/Litepicker'
+import TomSelect from '../../Components/TomSelect'
 import route from 'ziggy-js'
-import { FormLabel, FormInput } from '../../../Components/Form'
+import { FormLabel, FormInput } from '../../Components/Form'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import TransactionsSection from './components/TransactionsSection'
 
-function Index({ ...props }: PageProps) {
+function Show({ ...props }: PageProps) {
+
   const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
   const { data, setData, post, processing, errors } = useForm(
     {
@@ -45,6 +46,7 @@ function Index({ ...props }: PageProps) {
       }))
     }
   }, [data.currency])
+
 
   const paymentFormSubmit = (e: any) => {
     e.preventDefault()
@@ -79,7 +81,7 @@ function Index({ ...props }: PageProps) {
                     className='h-12 w-12 me-4 stroke-1.5' />
             <span className='text-2xl font-extrabold'>{props.customer.title}</span>
           </div>
-          <fieldset className='col-span-12 py-2 px-4 mb-5 border rounded-md bg-secondary/70'>
+          <fieldset className='col-span-12 py-2 px-4 mb-5 border rounded-md bg-slate-50 dark:bg-darkmode-400/70'>
             <legend className='bg-primary px-2 py-1 border-primary text-light font-semibold rounded-md'>
               Müşteri
             </legend>
@@ -91,29 +93,7 @@ function Index({ ...props }: PageProps) {
             <p className='font-light text-sm'>Vergi No / TC No : {props.customer.tax_number}</p>
           </fieldset>
         </div>
-        <div className='bg-white/80 rounded-b-lg mx-3 p-5'>
-          <ul>
-            {props.customer.transactions.data.length > 0 ?
-              props.customer.transactions.data.map((transaction, index) => {
-                return (
-                  <li key={index}
-                      className='flex justify-start gap-3 items-center text-slate-500 py-2 border-b last:border-b-0'>
-                    <p className='whitespace-pre-wrap break-words'>
-                      <span className='text-base font-semibold'>{transaction.date} </span>
-                      <span className='text-xs font-light'>Tarihli </span>
-                      <span className='text-sm font-semibold'>{transaction.type} </span>
-                      <span
-                        className={twMerge(['text-green-700', transaction.type === 'Rezervasyon' && 'text-danger', 'text-lg', 'font-bold whitespace-pre-wrap break-words'])}>{transaction.amount} </span>
-                      <span className='text-xs font-light itelic'>{transaction.info}</span>
-                    </p>
-                  </li>
-                )
-              })
-              : (<li className='flex justify-start gap-2 items-center text-slate-500'>
-                <span className='text-base font-semibold'>Henüz ödeme yapılmamış.</span>
-              </li>)}
-          </ul>
-        </div>
+        <TransactionsSection customer={props.customer} />
       </div>
       <div className='w-full xl:w-1/3'>
         <div className='xl:border-l xl:p-5 xl:h-full'>
@@ -123,12 +103,9 @@ function Index({ ...props }: PageProps) {
               className={twMerge(['xl:text-xl 2xl:text-3xl font-bold font-sans', props.customer.remaining_balance < 0 ? 'text-red-600' : 'text-green-700'])}>{props.customer.remaining_balance_formatted}</span>
           </div>
           <div className='mt-5 p-5 box flex flex-col gap-2 justify-between items-center'>
-            {props.customer.remaining_balance < 0 ?
-              (<Button variant='primary' onClick={() => setShowPaymentForm(!showPaymentForm)}
-                       className='shadow-md w-full text-xl font-semibold' type='button'>TAHSİLAT EKLE</Button>) :
-              (<Button variant='soft-primary' className='shadow-md w-full text-xl font-semibold' type='button' as='div'
-                       disabled>TAHSİLAT EKLE</Button>)
-            }
+            <Button variant={props.customer.remaining_balance < 0 ? 'primary' : 'soft-dark'}
+                    onClick={() => props.customer.remaining_balance < 0 && setShowPaymentForm(!showPaymentForm) }
+                    className='shadow-md w-full text-xl font-semibold' type="button" disabled={props.customer.remaining_balance == 0}>TAHSİLAT EKLE</Button>
             <form onSubmit={(e) => paymentFormSubmit(e)} id='payment-form'
                   className={twMerge(['intro-y w-full mt-5', !errors || !showPaymentForm && 'hidden'])}>
               <h3 className='font-extrabold text-center text-lg mb-5'> TAHSİLAT EKLE </h3>
@@ -244,4 +221,4 @@ function Index({ ...props }: PageProps) {
   </AuthenticatedLayout>)
 }
 
-export default Index
+export default Show

@@ -57,55 +57,6 @@ class Customer extends Model
     return $this->hasMany(CustomerPayments::class, 'customer_id', 'id');
   }
 
-  public function scopeTransactions(): LengthAwarePaginator
-  {
-    $settings = new GeneralSettings();
-    return $this->bookings()
-      ->select(['id', 'customer_id', 'check_in as date', 'type' => DB::raw("'booking'")])
-      ->union(
-        $this->payments()
-          ->select(['id', 'customer_id', 'payment_date as date', 'type' => DB::raw("'payment'")])
-      )->orderBy('date', 'desc')
-      ->paginate(10)->through(function ($transaction) use ($settings) {
-        $info = '';
-        if ($transaction->booking === 'booking') {
-          $booking = $this->bookings()->where('id', $transaction->id)->first();
-          $amount = $booking->amount->grand_total;
-          $currency = $settings->currency;
-          $info .= $booking->rooms->pluck('name')->implode(', ') . ' - ' . $booking->stayDurationNight() . ' (' . $booking->rooms->sum('pivot.number_of_adults') . ' Yetişkin ' . $booking->rooms->sum('pivot.number_of_children') . ' Çocuk)';
-        } else {
-          $payment = $this->payments()->where('id', $transaction->id)->first();
-          if ($payment->payment_method == 'cash') {
-            $payment_method = 'Nakit';
-          } elseif ($payment->payment_method == 'credit_card') {
-            $payment_method = 'Kredi Kartı';
-          } elseif ($payment->payment_method == 'bank_transfer') {
-            $payment_method = 'Banka Havale/EFT';
-          } else {
-            $payment_method = 'Bilinmiyor.';
-          }
-          if ($payment->currency !== $settings->currency) {
-            $amount = $payment->currency_amount;
-            $info .= '(' . number_format($payment->amount_paid, 2, ',', '.') . ' ' . $settings->currency . ') ';
-          } else {
-            $amount = $payment->amount_paid;
-          }
-          $currency = $payment->currency;
-          $info .= $payment->case->name . ' ' . $payment_method . ' Ödendi. ';
-          $info .= $payment->description !== NULL ? '(' . $payment->description . ')' : '';
-        }
-        $amount_formatted = number_format($amount, 2, ',', '.') . ' ' . $currency;
-        return [
-          'id' => $transaction->id,
-          'customer_id' => $transaction->customer_id,
-          'type' => $transaction->booking === 'booking' ? 'Rezervasyon' : 'Ödeme',
-          'date' => Carbon::createFromFormat('Y-m-d', $transaction->date)->format('d.m.Y'),
-          'amount' => $amount_formatted,
-          'info' => $info,
-        ];
-      });
-  }
-
   public function scopeFilter($query, array $filters)
   {
     $query

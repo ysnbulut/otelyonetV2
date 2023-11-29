@@ -16,7 +16,7 @@ class GuestController extends Controller
 	 */
 	public function index()
 	{
-		return Inertia::render('Guest/Index', [
+		return Inertia::render('Guest/Show', [
             'filters' => Request::all('search', 'trashed'),
 			'guests' => Guest::orderBy('id')
                 ->filter(Request::only('search', 'trashed'))
