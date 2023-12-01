@@ -2,7 +2,7 @@ import React from 'react'
 
 function Index(props) {
   return (
-    <div></div>
+    <div>asdasd</div>
   )
 }
 
