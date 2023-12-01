@@ -28,7 +28,7 @@ function Create(props: PageProps) {
       <h2 className='my-5 text-lg font-medium intro-y'>Müşteri Ekle</h2>
         <form method='POST'
               action={route('hotel.customers.store')}
-              className='box p-10'>
+              className='intro-y box p-5'>
           <div className='flex flex-col'>
             <div className='mb-2 w-full'>
               <FormLabel htmlFor='title'

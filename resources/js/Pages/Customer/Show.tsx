@@ -72,10 +72,13 @@ function Show({ ...props }: PageProps) {
     pricingPolicy={props.auth.pricing_policy}
   >
     <Head title='Müşteriler' />
-    <h2 className='mt-10 text-lg font-medium intro-y'>Müşteriler</h2>
     <div className='flex flex-col-reverse xl:flex-row grid-cols-12 gap-3'>
       <div className='w-full xl:w-2/3'>
         <div className='box mt-5 px-5 pt-5 grid grid-cols-12 gap-3'>
+          <Button as='a' variant='soft-secondary' size="sm" href={route('hotel.customers.edit', props.customer.id)} className='absolute top-5 right-5'>
+            <Lucide icon='PencilLine' className='h-4 w-4 stroke-1.5 lg:hidden' />
+            <span className="hidden lg:inline-block">Düzenle</span>
+          </Button>
           <div className='col-span-12 flex items-center pb-5 border-b'>
             <Lucide icon={props.customer.type === 'individual' ? 'User' : 'Factory'}
                     className='h-12 w-12 me-4 stroke-1.5' />

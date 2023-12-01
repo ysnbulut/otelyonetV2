@@ -109,7 +109,7 @@ class DashboardController extends Controller
 					'info' => $info,
 				];
 			});
-		return Inertia::render('Dashboard/Show', [
+		return Inertia::render('Dashboard/Index', [
 			'room_count' => $rooms->count(),
 			'booked_rooms' => $booked_rooms->count(),
 			'booked_rooms_percent' => '%' . ($rooms->count() > 0 ? ($booked_rooms->count() / $rooms->count() * 100) : 0),
