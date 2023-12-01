@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { PageProps } from './types'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Inertia } from '@inertiajs/inertia'
-import { Head, Link} from '@inertiajs/react'
+import { Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import { FormInput, FormSelect } from '@/Components/Form'
@@ -47,10 +47,9 @@ function Index({ ...props }: PageProps) {
         <h2 className='mt-10 text-lg font-medium intro-y'>Müşteriler</h2>
         <div className='grid grid-cols-12 gap-6 mt-5'>
             <div className='flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap'>
-                <Link href={route('hotel.customers.create')} as='button'
-                      className='btn btn-primary shadow-md mr-2'>
+                <Button as='a' variant='primary' href={route('hotel.customers.create')} className='mr-2 shadow-md'>
                     Yeni Müşteri Ekle
-                </Link>
+                </Button>
                 <div className='hidden mx-auto md:block text-slate-500'>
                     {`${props.customers.total} kayıttan ${props.customers.from} ile ${props.customers.to} arası gösteriliyor`}
                 </div>

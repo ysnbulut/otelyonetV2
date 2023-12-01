@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout'
 import { Head, Link, router } from '@inertiajs/react'
-import { PageProps } from './index'
+import { PageProps } from './types'
 import Lucide from '../../Components/Lucide'
 import OccupancyWeeklyChart from '../../Components/OccupancyLineCharts/weeklyLineChart'
-import RoomStatusTodayDonutChartCard from './RoomStatusDonutChartCard'
-import GeneralReports from './GeneralReports'
+import RoomStatusTodayDonutChartCard from './components/RoomStatusDonutChartCard'
+import GeneralReports from './components/GeneralReports'
 import Button from '../../Components/Button'
 import route from 'ziggy-js'
 import { useRef } from 'react'
@@ -12,7 +12,7 @@ import TinySlider, {
     TinySliderElement,
 } from '../../Components/TinySlider'
 import { twMerge } from 'tailwind-merge'
-import UpcomingBokingsSection from './UpcomingBokingsSection'
+import UpcomingBokingsSection from './components/UpcomingBokingsSection'
 
 export default function Index({
                                   auth,

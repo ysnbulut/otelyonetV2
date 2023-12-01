@@ -16,7 +16,7 @@ class GuestController extends Controller
 	 */
 	public function index()
 	{
-		return Inertia::render('Guest/Show', [
+		return Inertia::render('Guest/Index', [
             'filters' => Request::all('search', 'trashed'),
 			'guests' => Guest::orderBy('id')
                 ->filter(Request::only('search', 'trashed'))
@@ -66,8 +66,10 @@ class GuestController extends Controller
 	 */
 	public function edit(Guest $guest)
 	{
-		return view('hotel.pages.guests.edit', [
-			'guest' => $guest,
+		return Inertia::render('Guest/Edit', [
+			'guest' => collect($guest)->merge([
+        'full_name' => $guest->fullName,
+      ])->forget(['created_at', 'updated_at', 'deleted_at']),
 		]);
 	}
 

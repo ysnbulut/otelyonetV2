@@ -189,8 +189,8 @@ class CustomerController extends Controller
    */
   public function edit(Customer $customer)
   {
-    return view('hotel.pages.customers.edit', [
-      'customer' => $customer,
+    return Inertia::render('Customer/Edit', [
+      'customer' => collect($customer)->forget(['created_at', 'updated_at', 'deleted_at']),
     ]);
   }
 

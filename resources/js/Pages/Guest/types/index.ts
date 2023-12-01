@@ -4,7 +4,7 @@ export interface User {
     email: string;
     email_verified_at: string;
 }
-interface GuestDataProps {
+export interface GuestDataProps {
     id: number;
     full_name: string;
     nationality: string;
@@ -18,7 +18,7 @@ export interface Links {
     active: boolean;
 }
 
-interface Guests {
+export interface Guests {
     current_page: number;
     data: GuestDataProps[] | [];
     first_page_url: string;
