@@ -16,9 +16,9 @@ export interface BookingsData {
 	rooms_count: number;
 	number_of_adults: number;
 	number_of_children: number;
-	amount: null | string;
+	amount: null | number;
 	amount_formatted: null | string;
-	remaining_balance: null | string;
+	remaining_balance: null | number;
 	remaining_balance_formatted: null | string;
 }
 

@@ -1,22 +1,18 @@
 import AuthenticatedLayout from '../../Layouts/AuthenticatedLayout'
 import { Head, Link, router } from '@inertiajs/react'
-import { PageProps } from './index'
+import { PageProps } from './types'
 import Lucide from '../../Components/Lucide'
-import clsx from 'clsx'
-import Table from '../../Components/Table'
-import Pagination from '../../Components/Pagination'
-import { FormSelect } from '../../Components/Form'
 import OccupancyWeeklyChart from '../../Components/OccupancyLineCharts/weeklyLineChart'
-import RoomStatusTodayDonutChartCard from './RoomStatusDonutChartCard'
-import GeneralReports from './GeneralReports'
+import RoomStatusTodayDonutChartCard from './components/RoomStatusDonutChartCard'
+import GeneralReports from './components/GeneralReports'
 import Button from '../../Components/Button'
 import route from 'ziggy-js'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import TinySlider, {
     TinySliderElement,
 } from '../../Components/TinySlider'
 import { twMerge } from 'tailwind-merge'
-import UpcomingBokingsSection from './UpcomingBokingsSection'
+import UpcomingBokingsSection from './components/UpcomingBokingsSection'
 
 export default function Index({
                                   auth,
@@ -50,7 +46,7 @@ export default function Index({
         permissions={auth.permissions}
         pricingPolicy={auth.pricing_policy}
         //todo burda bir header var ama kullanılmıyor. Ayrıca buraya breadcumb için bir dizi obje gönder topbarın içinde düzenle
-        // header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Index</h2>}
+        // header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Show</h2>}
     >
         <Head title='Dashboard' />
         <div className='py-12'>

@@ -266,6 +266,7 @@ Route::middleware([
         Route::post('/', [CustomerController::class, 'store'])->name('hotel.customers.store');
         Route::get('/search/{query}', [CustomerController::class, 'search'])->name('hotel.customers.search');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('hotel.customers.show');
+        Route::get('/{customer}/transactions', [CustomerController::class, 'transactions'])->name('hotel.customers.transactions');
         Route::get('/{customer}/get', [CustomerController::class, 'get'])->name('hotel.customers.get');
         Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('hotel.customers.edit');
         Route::put('/{customer}', [CustomerController::class, 'update'])->name('hotel.customers.update');

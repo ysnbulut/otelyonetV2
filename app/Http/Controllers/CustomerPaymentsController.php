@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CustomerPayments;
 use App\Http\Requests\StoreCustomerPaymentsRequest;
 use App\Http\Requests\UpdateCustomerPaymentsRequest;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class CustomerPaymentsController extends Controller
 {
@@ -31,13 +33,12 @@ class CustomerPaymentsController extends Controller
     {
 	    CustomerPayments::create($request->validated());
 			if($request->has('booking_id')) {
-				return redirect()
-					->route('hotel.bookings.show', $request->booking_id)
-					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+				return Inertia::render('Booking/Show', [
+          'booking' => $request->booking_id,
+          'success' => 'Rezervasyon ödeme tahsilatı başarılı.'
+        ]);
 			} else {
-				return redirect()
-					->route('hotel.customers.show', $request->customer_id)
-					->with('success', 'Rezervasyon ödeme tahsilatı başarılı.');
+				return Redirect::back()->with('success', 'Ödeme tahsilatı başarılı.');
 			}
 
     }

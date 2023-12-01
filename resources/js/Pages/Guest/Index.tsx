@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { PageProps } from './guest'
+import { PageProps } from './types'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { Inertia } from '@inertiajs/inertia'
 import { Head, Link } from '@inertiajs/react'
@@ -48,10 +48,10 @@ function Index({ ...props }: PageProps) {
         <Head title='Misafirler' />
         <h2 className='mt-10 text-lg font-medium intro-y'>Misafirler</h2>
         <div className='grid grid-cols-12 gap-6 mt-5'>
-            <div className='flex flex-wrap items-center col-span-12 mt-2 intro-y sm:flex-nowrap'>
-                <Button variant='primary' className='mr-2 shadow-md'>
-                    Yeni Misafir Ekle
-                </Button>
+            <div className='flex flex-wrap justify-between px-5 items-center col-span-12 mt-2 intro-y sm:flex-nowrap'>
+                {/*<Button variant='primary' className='mr-2 shadow-md'>*/}
+                {/*    Yeni Misafir Ekle*/}
+                {/*</Button>*/}
                 {/*<Menu>*/}
                 {/*    <Menu.Button as={Button} className="px-2 !box">*/}
                 {/*      <span className="flex items-center justify-center w-5 h-5">*/}
@@ -68,7 +68,7 @@ function Index({ ...props }: PageProps) {
                 {/*        </Menu.Item>*/}
                 {/*    </Menu.Items>*/}
                 {/*</Menu>*/}
-                <div className='hidden mx-auto md:block text-slate-500'>
+                <div className='hidden md:block text-slate-500'>
                     {`${props.guests.total} kayıttan ${props.guests.from} ile ${props.guests.to} arası gösteriliyor`}
                 </div>
                 <div className='w-full mt-3 sm:w-auto sm:mt-0 sm:ml-auto md:ml-0'>

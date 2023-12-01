@@ -19,7 +19,7 @@ export interface Links {
     active: boolean;
 }
 
-interface Customers {
+export interface Customers {
     current_page: number;
     data: CustomerDataProps[] | [];
     first_page_url: string;

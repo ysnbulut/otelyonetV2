@@ -66,8 +66,10 @@ class GuestController extends Controller
 	 */
 	public function edit(Guest $guest)
 	{
-		return view('hotel.pages.guests.edit', [
-			'guest' => $guest,
+		return Inertia::render('Guest/Edit', [
+			'guest' => collect($guest)->merge([
+        'full_name' => $guest->fullName,
+      ])->forget(['created_at', 'updated_at', 'deleted_at']),
 		]);
 	}
 
