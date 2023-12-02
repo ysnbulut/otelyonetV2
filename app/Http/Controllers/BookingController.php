@@ -23,19 +23,29 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class BookingController extends Controller
 {
 	/**
 	 * Display a listing of the resource.
 	 */
-	public function index(): View|\Illuminate\Foundation\Application|Factory|Application
+	public function index()
 	{
 		$settings = new GeneralSettings();
-		return view('hotel.pages.bookings.index', data: [
+		return [
 			'currency' => $settings->currency,
+      'filters' => Request::all('search', 'trashed'),
 			'bookings' => Booking::getBookings(),
-		]);
+      'can' => [
+        'create' => auth()->user()->can('booking.create'),
+        'edit' => auth()->user()->can('edit booking'),
+        'update' => auth()->user()->can('update booking'),
+        'delete' => auth()->user()->can('delete booking'),
+        'restore' => auth()->user()->can('restore booking'),
+        'forceDelete' => auth()->user()->can('forceDelete booking'),
+      ],
+		];
 	}
 
     public function upcoming() {
