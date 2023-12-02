@@ -1,9 +1,4 @@
-export interface User {
-	id: number;
-	name: string;
-	email: string;
-	email_verified_at: string;
-}
+import { PageProps as BasePageProps } from '@/types'
 
 export interface BookingsData {
 	id: number;
@@ -41,13 +36,7 @@ export interface Transactions {
     info: string;
 }
 
-export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
-    auth: {
-        user: User;
-        role: string;
-        permissions: string[];
-        pricing_policy: string;
-    },
+export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
     room_count: number,
     booked_rooms: number,
     booked_rooms_percent: string,

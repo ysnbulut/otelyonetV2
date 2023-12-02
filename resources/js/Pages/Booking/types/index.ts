@@ -1,6 +1,5 @@
-import { PageProps as BasePageProps, User } from '@/types'
-
-interface BankDataProps {
+import { PageProps as BasePageProps} from '@/types';
+interface BookingDataProps {
   id: number;
   name: string;
   currency: string;
@@ -14,9 +13,9 @@ export interface Links {
   active: boolean;
 }
 
-export interface Banks {
+export interface BookingsProps {
   current_page: number;
-  data: BankDataProps[] | [];
+  data: BookingDataProps[] | [];
   first_page_url: string;
   from: number;
   last_page: number;
@@ -30,10 +29,12 @@ export interface Banks {
   total: number;
 }
 
+interface FiltersProps {
+  search: string;
+  trashed: boolean;
+}
+
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
   banks: Banks;
-  filters: {
-    search: string;
-    trashed: boolean;
-  }
-}
+  filters: FiltersProps;
+};

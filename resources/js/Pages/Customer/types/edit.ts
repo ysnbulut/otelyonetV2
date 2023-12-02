@@ -1,12 +1,6 @@
-import { User } from '@/Pages/Customer/types/index'
+import { PageProps as BasePageProps } from '@/types'
 
-export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
-  auth: {
-    user: User;
-    role: string;
-    permissions: string[];
-    pricing_policy: string;
-  },
+export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
   customer: {
     id: string;
     title: string,
