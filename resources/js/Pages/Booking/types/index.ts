@@ -1,10 +1,19 @@
 import { PageProps as BasePageProps} from '@/types';
 interface BookingDataProps {
   id: number;
-  name: string;
-  currency: string;
-  type: string;
-  balance: string;
+  check_in: string;
+  check_out: string | null;
+  open_booking: boolean;
+  customer_id: number;
+  customer: string;
+  rooms: string;
+  rooms_count: number;
+  number_of_adults: number;
+  number_of_children: number;
+  amount: number;
+  amount_formatted: string;
+  remaining_balance: number;
+  remaining_balance_formatted: string;
 }
 
 export interface Links {
@@ -35,6 +44,7 @@ interface FiltersProps {
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
-  banks: Banks;
+  currency: string;
+  bookings: BookingsProps;
   filters: FiltersProps;
 };
