@@ -34,15 +34,6 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
 		search: string;
 		trashed: boolean;
 	},
-  flash: {
-    success: string;
-    errors: string[];
-    message: string;
-    info: string;
-    warning: string;
-    status: string;
-    old: string[];
-  },
   can: {
     create: boolean;
     update: boolean;

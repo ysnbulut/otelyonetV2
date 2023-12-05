@@ -8,6 +8,7 @@ use App\Models\Season;
 use App\Http\Requests\StoreUnitPriceRoomTypeAndViewRequest;
 use App\Http\Requests\UpdateUnitPriceRoomTypeAndViewRequest;
 use App\Settings\GeneralSettings;
+use Inertia\Inertia;
 
 class UnitPriceRoomTypeAndViewController extends Controller
 {
@@ -17,17 +18,14 @@ class UnitPriceRoomTypeAndViewController extends Controller
  public function index()
  {
 	 $settings = new GeneralSettings();
-  return view('hotel.pages.unit-prices.index', [
+  return Inertia::render('UnitPrice/Index',[
    'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
     ->whereHas('rooms')
-    ->paginate(15)
-    ->withQueryString()
-    ->through(
-     fn($typeHasView) => [
+    ->get()->map(fn($typeHasView) => [
       'id' => $typeHasView->id,
-      'name' => $typeHasView->typeAndViewName,
-     ]
-    ),
+     'name' => $typeHasView->typeAndViewName,
+     'room_count' => $typeHasView->rooms->count(),
+    ]),
 	  'pricing_policy' => $settings->pricing_policy,
   ]);
  }

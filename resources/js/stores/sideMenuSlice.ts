@@ -127,12 +127,12 @@ const initialState: SideMenuState = {
 
 			]
 		},
-		{
-			icon: 'AlignVerticalJustifyEnd',
-			title: 'Kat Yönetimi',
-			pathname: route('hotel.floors.index'),
-			permission: ['hotel.floors.index'],
-		},
+		// {
+		// 	icon: 'AlignVerticalJustifyEnd',
+		// 	title: 'Kat Yönetimi',
+		// 	pathname: route('hotel.floors.index'),
+		// 	permission: ['hotel.floors.index'],
+		// },
 		{
 			icon: 'UserCog2',
 			title: 'Kullanıcı Yönetimi',
