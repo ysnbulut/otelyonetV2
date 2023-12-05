@@ -28,7 +28,7 @@ function Index(props: PageProps) {
       <div>
         <ul>
           <li className="h-20 bg-red-500">asdasdasdadasd</li>
-          <li>asdasd</li>
+          <li>asdasda</li>
           <li>asdasd</li>
         </ul>
       </div>
