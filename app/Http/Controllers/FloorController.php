@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Floor;
 use App\Http\Requests\StoreFloorRequest;
 use App\Http\Requests\UpdateFloorRequest;
+use Inertia\Inertia;
 
 class FloorController extends Controller
 {
@@ -13,7 +14,7 @@ class FloorController extends Controller
 	 */
 	public function index()
 	{
-		return view('hotel.pages.floors.index', [
+		return Inertia::render('Floor/Index', [
 			'floors' => Floor::orderBy('id')
 				->select(['id', 'name'])
 				->paginate(10)

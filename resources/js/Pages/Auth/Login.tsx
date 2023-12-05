@@ -21,7 +21,6 @@ export default function Login({ status, canResetPassword }: { status?: string, c
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         post(route('login.store'));
     };
 
@@ -73,6 +72,7 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                                 onChange={(e) => setData('email', e.target.value)}
                                 required
                             />
+                            {errors.email && ( <div className="text-theme-6 mt-2 text-danger">{errors.email}</div>)}
                             <FormInput
                                 type="password"
                                 className="block px-4 py-3 mt-4 intro-x min-w-full xl:min-w-[350px]"
@@ -81,6 +81,7 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                                 onChange={(e) => setData('password', e.target.value)}
                                 required
                             />
+                            {errors.password && ( <div className="text-theme-6 mt-2 text-danger">{errors.password}</div>)}
                         </div>
                         <div className="flex mt-4 text-xs intro-x text-slate-600 dark:text-slate-500 sm:text-sm">
                             <div className="flex items-center mr-auto">

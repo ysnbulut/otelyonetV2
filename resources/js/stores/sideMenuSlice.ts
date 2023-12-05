@@ -24,25 +24,25 @@ const initialState: SideMenuState = {
 		{
 			icon: 'CalendarSearch',
 			title: 'Rezervasyon Yön.',
-			permission: ['bookings.create.*'],
+			permission: ['hotel.bookings.create.*'],
 			subMenu: [
 				{
 					icon: 'CalendarPlus',
 					title: 'Rezervasyon Oluştur',
 					pathname: route('hotel.bookings.create'),
-					permission: ['bookings.create.*'],
+					permission: ['hotel.bookings.create.*'],
 				},
 				{
 					icon: 'CalendarCheck2',
 					title: 'Rezervasyon Listesi',
 					pathname: route('hotel.bookings.index'),
-					permission: ['bookings.index'],
+					permission: ['hotel.bookings.index'],
 				},
 				{
 					icon: 'CalendarRange',
 					title: 'Rezervasyon Takvimi',
 					pathname: route('hotel.bookings.calendar'),
-					permission: ['bookings.index'],
+					permission: ['hotel.bookings.index'],
 				},
 			]
 		},
@@ -50,54 +50,54 @@ const initialState: SideMenuState = {
 			icon: 'Users2',
 			title: 'Müşteriler',
 			pathname: route('hotel.customers.index'),
-			permission: ['customers.index'],
+			permission: ['hotel.customers.index'],
 		},
 		{
 			icon: 'PersonStanding',
 			title: 'Misafir Yönetimi',
 			pathname: route('hotel.guests.index'),
-			permission: ['guests.index'],
+			permission: ['hotel.guests.index'],
 		},
 		{
 			icon: 'Wallet2',
 			title: 'Kasa ve Bankalar',
 			pathname: route('hotel.case_and_banks.index'),
-			permission: ['case_and_banks.index'],
+			permission: ['hotel.case_and_banks.index'],
 		},
 		{
 			icon: 'DoorOpen',
 			title: 'Oda Yönetimi',
-			permission: ['rooms.index'],
+			permission: ['hotel.rooms.index'],
 			subMenu: [
 				{
 					icon: 'DoorClosed',
 					title: 'Odalar',
 					pathname: route('hotel.rooms.index'),
-					permission: ['rooms.index'],
+					permission: ['hotel.rooms.index'],
 				},
 				{
 					icon: 'Castle',
 					title: 'Oda Türleri',
 					pathname: route('hotel.room_types.index'),
-					permission: ['room_types.index'],
+					permission: ['hotel.room_types.index'],
 				},
 				{
 					icon: 'MountainSnow',
 					title: 'Oda Manzaraları',
 					pathname: route('hotel.room_views.index'),
-					permission: ['room_views.index'],
+					permission: ['hotel.room_views.index'],
 				},
 				{
 					icon: 'BedDouble',
 					title: 'Yatak Tipleri',
 					pathname: route('hotel.bed_types.index'),
-					permission: ['bed_types.index'],
+					permission: ['hotel.bed_types.index'],
 				},
 				{
 					icon: 'Lamp',
 					title: 'Oda Olanakları',
 					pathname: route('hotel.room_type_features.index'),
-					permission: ['room_type_features.index'],
+					permission: ['hotel.room_type_features.index'],
 				}
 			]
 		},
@@ -105,24 +105,24 @@ const initialState: SideMenuState = {
 			icon: 'SlidersHorizontal',
 			title: 'Otel Ayarları',
 			pathname: route('hotel.settings.index'),
-			permission: ['settings.index'],
+			permission: ['hotel.settings.index'],
 		},
 		{
 			icon: 'CandlestickChart',
 			title: 'Fiyatlandırma',
-			permission: ['seasons.index'],
+			permission: ['hotel.seasons.index'],
 			subMenu: [
 				{
 					icon: 'CalendarRange',
 					title: 'Sezon Yönetimi',
 					pathname: route('hotel.seasons.create'),
-					permission: ['seasons.index'],
+					permission: ['hotel.seasons.index'],
 				},
 				{
 					icon: 'Ungroup',
 					title: 'Ünite Fiyatları',
 					pathname: route('hotel.unit_prices.index'),
-					permission: ['seasons.index'],
+					permission: ['hotel.seasons.index'],
 				},
 
 			]
@@ -131,24 +131,24 @@ const initialState: SideMenuState = {
 			icon: 'AlignVerticalJustifyEnd',
 			title: 'Kat Yönetimi',
 			pathname: route('hotel.floors.index'),
-			permission: ['floors.index'],
+			permission: ['hotel.floors.index'],
 		},
 		{
 			icon: 'UserCog2',
 			title: 'Kullanıcı Yönetimi',
-			permission: ['users.index', 'roles.index'],
+			permission: ['hotel.users.index', 'hotel.roles.index'],
 			subMenu: [
 				{
 					icon: 'Users2',
 					title: 'Kullanıcılar',
 					pathname: route('hotel.users.index'),
-					permission: ['users.index'],
+					permission: ['hotel.users.index'],
 				},
 				{
 					icon: 'UserSquare2',
 					title: 'Roller',
 					pathname: route('hotel.roles.index'),
-					permission: ['roles.index'],
+					permission: ['hotel.roles.index'],
 				},
 			]
 		}

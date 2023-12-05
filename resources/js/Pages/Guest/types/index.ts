@@ -1,11 +1,4 @@
 import { PageProps as BasePageProps } from '@/types'
-
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    email_verified_at: string;
-}
 export interface GuestDataProps {
     id: number;
     full_name: string;

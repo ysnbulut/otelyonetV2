@@ -40,14 +40,14 @@ function TomSelect(props: TomSelectProps) {
     if (Array.isArray(props.value)) {
       options = {
         persist: false,
-        create: true,
+        create: false,
         onDelete: function (values: string[]) {
           return confirm(
             values.length > 1
-              ? "Are you sure you want to remove these " +
+              ? "Bu " +
                   values.length +
-                  " items?"
-              : 'Are you sure you want to remove "' + values[0] + '"?'
+                  " adet öğeyi kaldırmak istediğine emin misin?"
+              : 'Bu öğeyi kaldırmak istediğine emin misin?'
           );
         },
         ...options,
