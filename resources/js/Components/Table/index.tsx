@@ -94,7 +94,7 @@ type TbodyProps = React.PropsWithChildren<
 >;
 
 Table.Tbody = ({ className, ...props }: TbodyProps) => {
-  return <thead className={className}>{props.children}</thead>;
+  return <tbody className={className}>{props.children}</tbody>;
 };
 
 type TrProps = React.PropsWithChildren & React.ComponentPropsWithoutRef<"tr">;
@@ -142,10 +142,11 @@ Table.Th = ({ className, ...props }: ThProps) => {
 
 type TdProps = React.PropsWithChildren & React.ComponentPropsWithoutRef<"td">;
 
-Table.Td = ({ className, ...props }: TdProps) => {
+Table.Td = ({ dataLabel, className, ...props }: TdProps & {dataLabel: string}) => {
   const table = useContext(tableContext);
   return (
     <td
+      data-label={dataLabel}
       className={twMerge([
         "px-5 py-3 border-b dark:border-darkmode-300",
         table.dark && "border-slate-600 dark:border-darkmode-300",

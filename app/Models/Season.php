@@ -29,14 +29,10 @@ class Season extends Model
  use HasFactory, SoftDeletes;
 
 	protected $fillable = ['uid', 'name', 'start_date', 'end_date'];
-	/**
-	 * @var mixed|string
-	 */
-	private mixed $name;
 
-	public function unitPrices()
+	public function scopeUnitPrices()
  {
-  return $this->hasMany(UnitPriceRoomTypeAndView::class);
+  return $this->hasMany(UnitPriceRoomTypeAndView::class)->select(['id', 'unit_price']);
  }
 
  public function setStartDateAttribute($value)

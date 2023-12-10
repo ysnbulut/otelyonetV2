@@ -24,7 +24,7 @@ class StoreUnitPriceRoomTypeAndViewRequest extends FormRequest
   return [
    'type_has_view_id' => 'required|exists:type_has_views,id',
    'season_id' => 'nullable|exists:seasons,id',
-   'unit_price' => 'required|numeric|min:0',
+   'unit_price' => 'required|min:0',
   ];
  }
 }

@@ -2,114 +2,110 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UnitPriceRoomTypeAndView;
-use App\Models\TypeHasView;
-use App\Models\Season;
 use App\Http\Requests\StoreUnitPriceRoomTypeAndViewRequest;
 use App\Http\Requests\UpdateUnitPriceRoomTypeAndViewRequest;
+use App\Models\Season;
+use App\Models\TypeHasView;
+use App\Models\UnitPriceRoomTypeAndView;
 use App\Settings\GeneralSettings;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
 class UnitPriceRoomTypeAndViewController extends Controller
 {
- /**
-  * Display a listing of the resource.
-  */
- public function index()
- {
-	 $settings = new GeneralSettings();
-  return Inertia::render('UnitPrice/Index',[
-   'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
-    ->whereHas('rooms')
-    ->get()->map(fn($typeHasView) => [
-      'id' => $typeHasView->id,
-     'name' => $typeHasView->typeAndViewName,
-     'room_count' => $typeHasView->rooms->count(),
-    ]),
-	  'pricing_policy' => $settings->pricing_policy,
-  ]);
- }
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $settings = new GeneralSettings();
+        return Inertia::render('UnitPrice/Index', [
+            'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
+                ->whereHas('rooms')
+                ->get()->map(function ($typeHasView) {
+                    $warning = false;
+                    $seasons = Season::avilableSeasons()
+                        ->get()
+                        ->map(
+                            function ($season) use ($typeHasView, &$warning) {
+                                $unit_price = $season
+                                    ->unitPrices()
+                                    ->where('type_has_view_id', $typeHasView->id)
+                                    ->first() ?? null;
+                                $warning = $unit_price === null || $unit_price->unit_price === null;
+                                return [
+                                    'id' => $season->id,
+                                    'name' => $season->seasonName,
+                                    'unit_price' => $unit_price,
 
- /**
-  * Show the form for creating a new resource.
-  */
- public function create()
- {
-  //
- }
+                                ];
+                            }
+                        );
+                    $off_season_unit_price =
+                        UnitPriceRoomTypeAndView::select(['id', 'unit_price'])
+                            ->where('type_has_view_id', $typeHasView->id)
+                            ->where('season_id', null)
+                            ->first() ?? null;
+                    return [
+                        'id' => $typeHasView->id,
+                        'name' => $typeHasView->typeAndViewName,
+                        'roomCount' => $typeHasView->rooms->count(),
+                        'warning' => $warning || empty($seasons->toArray()) || $off_season_unit_price === null,
+                        'seasons' => $seasons,
+                        'off_season' => [
+                            'id' => null,
+                            'unit_price' => $off_season_unit_price,
+                        ],
+                    ];
+                }),
+            'pricingCurrency' => $settings->pricing_currency,
+            'pricingPolicy' => $settings->pricing_policy,
+        ]);
+    }
 
- /**
-  * Store a newly created resource in storage.
-  */
- public function store(StoreUnitPriceRoomTypeAndViewRequest $request)
- {
-  UnitPriceRoomTypeAndView::create($request->validated());
-  return redirect()
-   ->back()
-   ->with('success', 'Fiyat ekleme başarılı.');
- }
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreUnitPriceRoomTypeAndViewRequest $request)
+    {
+        $data = $request->validated();
+        $data['unit_price'] = (double) str_replace(',', '.', $data['unit_price']);
+        UnitPriceRoomTypeAndView::create($data);
+    }
 
- /**
-  * Display the specified resource.
-  */
- public function show(TypeHasView $typeHasView)
- {
-  $settings = new GeneralSettings();
-  return view('hotel.pages.unit-prices.show', [
-   'typeHasView' => [
-    'id' => $typeHasView->id,
-    'name' => $typeHasView->typeAndViewName,
-   ],
-   'seasons' => Season::avilableSeasons()
-    ->paginate(10)
-    ->withQueryString()
-    ->through(
-     fn($season) => [
-      'id' => $season->id,
-      'name' => $season->seasonName,
-      'unit_price' =>
-       $season
-        ->unitPrices()
-        ->where('type_has_view_id', $typeHasView->id)
-        ->first() ?? null,
-     ]
-    ),
-   'off_season' =>
-    UnitPriceRoomTypeAndView::where('type_has_view_id', $typeHasView->id)
-     ->where('season_id', null)
-     ->first(['id', 'type_has_view_id', 'unit_price']) ?? null,
-   'currency' => $settings->pricing_currency,
-  ]);
- }
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
 
- /**
-  * Show the form for editing the specified resource.
-  */
- public function edit(UnitPriceRoomTypeAndView $unitPriceRoomTypeAndView)
- {
-  //
- }
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(UnitPriceRoomTypeAndView $unitPriceRoomTypeAndView)
+    {
+        //
+    }
 
- /**
-  * Update the specified resource in storage.
-  */
- public function update(UpdateUnitPriceRoomTypeAndViewRequest $request, $unitPriceRoomTypeAndViewId)
- {
-  $unitPriceRoomTypeAndView = UnitPriceRoomTypeAndView::findOrFail($unitPriceRoomTypeAndViewId);
-  $unitPriceRoomTypeAndView->fill($request->validated());
-  $unitPriceRoomTypeAndView->update([
-   'unit_price' => $request->unit_price,
-  ]);
-  return redirect()
-   ->back()
-   ->with('success', 'Unit price updated successfully');
- }
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateUnitPriceRoomTypeAndViewRequest $request, $unitPriceRoomTypeAndViewId)
+    {
+        $unitPriceRoomTypeAndView = UnitPriceRoomTypeAndView::findOrFail((int) $unitPriceRoomTypeAndViewId);
+        $unitPriceRoomTypeAndView->fill($request->validated());
+        $unitPriceRoomTypeAndView->update([
+            'unit_price' => (double) str_replace(',', '.', $request->unit_price),
+        ]);
+    }
 
- /**
-  * Remove the specified resource from storage.
-  */
- public function destroy(UnitPriceRoomTypeAndView $unitPriceRoomTypeAndView)
- {
-  //
- }
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(UnitPriceRoomTypeAndView $unitPriceRoomTypeAndView)
+    {
+        //
+    }
 }

@@ -1,3 +1,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*@layer base {*/
+/*  table {*/
+/*    @apply w-full;*/
+/*  }*/
+
+/*  thead {*/
+/*    @apply hidden lg:table-header-group;*/
+/*  }*/
+
+/*  tr {*/
+/*    @apply max-w-full block relative border-b*/
+/*    lg:table-row lg:border-b-0;*/
+/*  }*/
+
+/*  tr:last-child {*/
+/*    @apply border-b;*/
+/*  }*/
+
+/*  th {*/
+/*    @apply lg:text-left lg:p-3;*/
+/*  }*/
+
+/*  td {*/
+/*    @apply flex justify-between text-right py-3 px-4 align-top border-b flex-wrap whitespace-pre-wrap*/
+/*    lg:table-cell lg:text-left lg:p-3 lg:align-middle lg:border-b;*/
+/*  }*/
+
+/*  td:before {*/
+/*    content: attr(data-label);*/
+/*    @apply font-semibold pr-3 text-left lg:hidden whitespace-nowrap;*/
+/*  }*/
+/*}*/
+
+@layer utilities {
+  .dark-scrollbars-compat {
+    scrollbar-color: rgb(71, 85, 105) rgb(30, 41, 59);
+  }
+
+  .dark-scrollbars::-webkit-scrollbar-track {
+    @apply bg-neutral-800;
+  }
+
+  .dark-scrollbars::-webkit-scrollbar-thumb {
+    @apply bg-slate-600;
+  }
+
+  .dark-scrollbars::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-500;
+  }
+}
