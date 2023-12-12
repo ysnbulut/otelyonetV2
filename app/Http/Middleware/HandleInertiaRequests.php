@@ -32,14 +32,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $settings = tenancy() !== null ?? new GeneralSettings();
+        $tenant = tenancy()->tenant !== null;
+        $settings = $tenant ? new GeneralSettings() : null;
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
                 'role' => $request->user()?->roles->first()?->name ?? 'User',
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
-                'pricing_policy' => tenancy() !== null ?? $settings->pricing_policy,
+                'pricing_policy' => $tenant ? $settings->pricing_policy : null,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

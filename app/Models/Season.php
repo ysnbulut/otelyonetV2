@@ -9,13 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\Season
  *
- * @property-read mixed $season_name
- * @property-write mixed $end_date
- * @property-write mixed $start_date
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
  * @property-read int|null $unit_prices_count
+ * @property int $id
+ * @property string $description
  * @method static \Illuminate\Database\Eloquent\Builder|Season avilableSeasons()
- * @method static \Database\Factories\SeasonFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Season newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Season newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Season onlyTrashed()
@@ -26,9 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Season extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
-	protected $fillable = ['uid', 'name', 'start_date', 'end_date'];
+    protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
 
 	public function scopeUnitPrices()
  {

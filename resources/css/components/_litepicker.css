@@ -196,6 +196,10 @@
       &.is-in-range:hover {
         background-color: theme("colors.slate.100");
       }
+      &.is-locked {
+        color: theme("colors.red.300");
+        background-color: theme("colors.red.600/5%");
+      }
     }
     .week-number {
       color: theme("colors.slate.400");
@@ -261,6 +265,10 @@
         &.is-today,
         &.is-today:hover {
           color: theme("colors.slate.200");
+        }
+        &.is-locked {
+          color: theme("colors.red.900");
+          background-color: theme("colors.red.900/5%");
         }
       }
     }
