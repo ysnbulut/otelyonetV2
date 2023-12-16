@@ -13,9 +13,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $beds_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomTypeFeature> $features
  * @property-read int|null $features_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PossibilitiesMultiplier> $possibilitiesMultipliers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationMultiplier> $possibilitiesMultipliers
  * @property-read int|null $possibilities_multipliers_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PossibilitiesOfGuestsRoomType> $possibilitiesOfGuests
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationsOfGuestsRoomType> $possibilitiesOfGuests
  * @property-read int|null $possibilities_of_guests_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $rooms
  * @property-read int|null $rooms_count
@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $views_count
  * @property mixed $adult_capacity
  * @property mixed $child_capacity
+ * @property mixed $variationsOfGuests
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType onlyTrashed()
@@ -37,7 +38,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class RoomType extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
 
 	protected $fillable = ['name', 'description', 'size', 'adult_capacity', 'child_capacity', 'room_count'];
@@ -83,13 +84,13 @@ class RoomType extends Model
   );
  }
 
- public function possibilitiesOfGuests()
+ public function variationsOfGuests()
  {
-  return $this->hasMany(PossibilitiesOfGuestsRoomType::class, 'room_type_id', 'id');
+  return $this->hasMany(VariationsOfGuestsRoomType::class, 'room_type_id', 'id');
  }
 
- public function possibilitiesMultipliers()
+ public function variationMultipliers()
  {
-  return $this->hasMany(PossibilitiesMultiplier::class, 'room_type_id', 'id');
+  return $this->hasMany(VariationMultiplier::class, 'room_type_id', 'id');
  }
 }

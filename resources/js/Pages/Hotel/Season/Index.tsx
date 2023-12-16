@@ -6,7 +6,7 @@ import tz from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import isBetween from 'dayjs/plugin/isBetween'
 import customFormat from 'dayjs/plugin/customParseFormat'
-import {Head, useForm} from '@inertiajs/react'
+import {Head} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import 'react-datepicker/dist/react-datepicker.css'
 import SeasonsCalendar from './components/SeasonsCalendar'
@@ -63,6 +63,7 @@ function Index(props: PageProps) {
 				setCalendarValue={setCalendarValue}
 				seasons={seasons}
 				setSeasons={setSeasons}
+				setSeasonsDays={setSeasonsDays}
 			/>
 			{/* BEGIN: Slide Over Content */}
 			<SeasonAddSlide

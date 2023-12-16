@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,41 +23,41 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Season extends Model
 {
- use SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
 
-	public function scopeUnitPrices()
- {
-  return $this->hasMany(UnitPriceRoomTypeAndView::class)->select(['id', 'unit_price']);
- }
+    public function scopeUnitPrices()
+    {
+        return $this->hasMany(UnitPriceRoomTypeAndView::class)->select(['id', 'unit_price']);
+    }
 
- public function setStartDateAttribute($value)
- {
-  $this->attributes['start_date'] = date('Y-m-d', strtotime($value));
- }
+    public function setStartDateAttribute($value)
+    {
+        $this->attributes['start_date'] = date('Y-m-d', strtotime($value));
+    }
 
- public function setEndDateAttribute($value)
- {
-  $this->attributes['end_date'] = date('Y-m-d', strtotime($value));
- }
+    public function setEndDateAttribute($value)
+    {
+        $this->attributes['end_date'] = date('Y-m-d', strtotime($value));
+    }
 
- public function getSeasonNameAttribute()
- {
-  return $this->name .
-   ' (' .
-   date('d.m.Y', strtotime($this->start_date)) .
-   ' - ' .
-   date('d.m.Y', strtotime($this->end_date)) .
-   ')';
- }
+    public function getSeasonNameAttribute()
+    {
+        return $this->name .
+            ' (' .
+            date('d.m.Y', strtotime($this->start_date)) .
+            ' - ' .
+            date('d.m.Y', strtotime($this->end_date)) .
+            ')';
+    }
 
- public function scopeAvilableSeasons($query)
- {
-  return $query
-   ->orderBy('start_date')
-   ->where('start_date', '<=', date('Y-m-d'))
-   ->where('end_date', '>=', date('Y-m-d'))
-   ->orWhere('start_date', '>=', date('Y-m-d'));
- }
+    public function scopeAvilableSeasons($query)
+    {
+        return $query
+            ->orderBy('start_date')
+            ->where('start_date', '<=', date('Y-m-d'))
+            ->where('end_date', '>=', date('Y-m-d'))
+            ->orWhere('start_date', '>=', date('Y-m-d'));
+    }
 }

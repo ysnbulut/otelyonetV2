@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -21,12 +20,68 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class RoomTypeFeature extends Model
 {
-	use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
-	protected $fillable = ['name'];
+    protected $fillable = ['order_no', 'name', 'is_paid'];
 
-	public function roomTypes()
-	{
-		return $this->belongsToMany(RoomType::class, 'type_has_features', 'feature_id', 'type_id');
-	}
+    protected static function booted()
+    {
+//        static::creating(function ($roomTypeFeature) {
+//            $roomTypeFeature->order_no = self::max('order_no') + 1;
+//        });
+
+        static::updated(function ($roomTypeFeature) {
+            if ($roomTypeFeature->isDirty('order_no')) {
+                if (request()->has('old_order_no') && request()->has('new_order_no')) {
+                    if ($roomTypeFeature->trashed()) {
+                        if (request()->old_order_no > request()->new_order_no) {
+                            self::onlyTrashed()->where('order_no', '>=', request()->new_order_no)
+                                ->where('order_no', '<', request()->old_order_no)->whereKeyNot($roomTypeFeature->id)
+                                ->increment('order_no');
+                        } else {
+                            self::onlyTrashed()->where('order_no', '>', request()->old_order_no)
+                                ->where('order_no', '<=', request()->new_order_no)->whereKeyNot($roomTypeFeature->id)
+                                ->decrement('order_no');
+                        }
+                    } else {
+                        if (request()->old_order_no > request()->new_order_no) {
+                            self::where('order_no', '>=', request()->new_order_no)
+                                ->where('order_no', '<', request()->old_order_no)->whereKeyNot($roomTypeFeature->id)
+                                ->increment('order_no');
+                        } else {
+                            self::where('order_no', '>', request()->old_order_no)
+                                ->where('order_no', '<=', request()->new_order_no)->whereKeyNot($roomTypeFeature->id)
+                                ->decrement('order_no');
+                        }
+                    }
+                }
+            }
+        });
+
+        static::restored(function ($roomTypeFeature) {
+            self::onlyTrashed()->where('order_no', '>', $roomTypeFeature->order_no)
+                ->increment('order_no');
+            $roomTypeFeature->update(['order_no' => request()->order_no]);
+            self::where('order_no', '>=', request()->order_no)->whereKeyNot($roomTypeFeature->id)
+                ->increment('order_no');
+        });
+
+        static::deleted(function ($roomTypeFeature) {
+            self::where('order_no', '>', $roomTypeFeature->order_no)
+                ->decrement('order_no');
+            $roomTypeFeature->update(['order_no' => request()->order_no]);
+            self::onlyTrashed()->where('order_no', '>=', request()->order_no)->whereKeyNot($roomTypeFeature->id)
+                ->increment('order_no');
+        });
+
+        static::forceDeleted(function ($roomTypeFeature) {
+            self::onlyTrashed()->where('order_no', '>', $roomTypeFeature->order_no)
+                ->decrement('order_no');
+        });
+    }
+
+    public function roomTypes()
+    {
+        return $this->belongsToMany(RoomType::class, 'type_has_features', 'feature_id', 'type_id');
+    }
 }

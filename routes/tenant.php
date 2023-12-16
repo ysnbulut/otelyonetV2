@@ -12,8 +12,7 @@ use App\Http\Controllers\Hotel\DashboardController;
 use App\Http\Controllers\Hotel\FloorController;
 use App\Http\Controllers\Hotel\GeneralSettingsController;
 use App\Http\Controllers\Hotel\GuestController;
-use App\Http\Controllers\Hotel\PossibilitiesMultiplierController;
-use App\Http\Controllers\Hotel\PossibilitiesOfGuestsRoomTypeController;
+use App\Http\Controllers\Hotel\GuestVariationMultiplierController;
 use App\Http\Controllers\Hotel\RoleController;
 use App\Http\Controllers\Hotel\RoomController;
 use App\Http\Controllers\Hotel\RoomTypeController;
@@ -91,12 +90,11 @@ Route::middleware([
     //room_type_features
     Route::prefix('room_type_features')->middleware('auth')->group(function () {
         Route::get('/', [RoomTypeFeatureController::class, 'index'])->name('hotel.room_type_features.index');
-        Route::get('/create', [RoomTypeFeatureController::class, 'create'])->name('hotel.room_type_features.create');
         Route::post('/', [RoomTypeFeatureController::class, 'store'])->name('hotel.room_type_features.store');
-        //Route::get('/{room_type_feature}', [RoomTypeFeatureController::class, 'show'])->name('hotel.room_type_features.show');
-        Route::get('/{room_type_feature}/edit', [RoomTypeFeatureController::class, 'edit'])->name('hotel.room_type_features.edit');
-        Route::put('/{room_type_feature}', [RoomTypeFeatureController::class, 'update'])->name('hotel.room_type_features.update');
-        Route::delete('/{room_type_feature}', [RoomTypeFeatureController::class, 'destroy'])->name('hotel.room_type_features.destroy');
+        Route::post('/{room_type_feature}', [RoomTypeFeatureController::class, 'update'])->name('hotel.room_type_features.update');
+        Route::post('/{room_type_feature}/destroy', [RoomTypeFeatureController::class, 'destroy'])->name('hotel.room_type_features.destroy');
+        Route::post('/{room_type_feature}/restore', [RoomTypeFeatureController::class, 'restore'])->name('hotel.room_type_features.restore');
+        Route::delete('/{room_type_feature}', [RoomTypeFeatureController::class, 'forceDelete'])->name('hotel.room_type_features.delete');
     });
     //room_types
     Route::prefix('room_types')->middleware('auth')->group(function () {
@@ -211,47 +209,18 @@ Route::middleware([
         Route::put('/{unit_price}', [UnitPriceRoomTypeAndViewController::class, 'update'])->name('hotel.unit_prices.update');
         //Route::delete('/{unit_price}', [UnitPriceRoomTypeAndViewController::class, 'destroy'])->name('hotel.unit_prices.destroy');
     });
-    //possibilities_of_guests
-    Route::prefix('possibilities_of_guests')->middleware('auth')->group(function () {
-        Route::get('/', [PossibilitiesOfGuestsRoomTypeController::class, 'index'])->name('hotel.possibilities_of_guests.index');
-        Route::get('/{room_type}/create', [PossibilitiesOfGuestsRoomTypeController::class, 'create'])->name(
-            'hotel.possibilities_of_guests.create'
+    //guest_variations
+    Route::prefix('variations')->middleware('auth')->group(function () {
+        Route::get('/', [GuestVariationMultiplierController::class, 'index'])->name('hotel.variations.index');
+        Route::post('/', [GuestVariationMultiplierController::class, 'store'])->name(
+            'hotel.variations.store'
         );
-        Route::post('/{room_type}', [PossibilitiesOfGuestsRoomTypeController::class, 'store'])->name(
-            'hotel.possibilities_of_guests.store'
+        Route::put('/{variation}', [GuestVariationMultiplierController::class, 'update'])->name(
+            'hotel.variations.update'
         );
-        Route::get('/{room_type}', [PossibilitiesOfGuestsRoomTypeController::class, 'show'])->name(
-            'hotel.possibilities_of_guests.show'
+        Route::delete('/{variation}', [GuestVariationMultiplierController::class, 'destroy'])->name(
+            'hotel.variations.destroy'
         );
-        Route::get('/{room_type}/edit', [PossibilitiesOfGuestsRoomTypeController::class, 'edit'])->name(
-            'hotel.possibilities_of_guests.edit'
-        );
-        Route::put('/{possibilities_of_guest}', [PossibilitiesOfGuestsRoomTypeController::class, 'update'])->name(
-            'hotel.possibilities_of_guests.update'
-        );
-        Route::delete('/{possibilities_of_guest}', [PossibilitiesOfGuestsRoomTypeController::class, 'destroy'])->name(
-            'hotel.possibilities_of_guests.destroy'
-        );
-    });
-    //possibilities_multipliers
-    Route::prefix('possibilities_multipliers')->middleware('auth')->group(function () {
-        Route::get('/', [PossibilitiesMultiplierController::class, 'index'])->name('hotel.possibilities_multipliers.index');
-        //Route::get('/{room_type}/create', [PossibilitiesMultiplierController::class, 'create'])->name(
-        // 'hotel.possibilities_multipliers.create'
-        //);
-        Route::post('/', [PossibilitiesMultiplierController::class, 'store'])->name('hotel.possibilities_multipliers.store');
-        Route::get('/{room_type}', [PossibilitiesMultiplierController::class, 'show'])->name(
-            'hotel.possibilities_multipliers.show'
-        );
-        //Route::get('/{room_type}/edit', [PossibilitiesMultiplierController::class, 'edit'])->name(
-        // 'hotel.possibilities_multipliers.edit'
-        //);
-        Route::put('/{possibilities_multiplier}', [PossibilitiesMultiplierController::class, 'update'])->name(
-            'hotel.possibilities_multipliers.update'
-        );
-        //Route::delete('/{unit_price}', [PossibilitiesMultiplierController::class, 'destroy'])->name(
-        // 'hotel.possibilities_multipliers.destroy'
-        //);
     });
     //settings
     Route::prefix('settings')->middleware('auth')->group(function () {

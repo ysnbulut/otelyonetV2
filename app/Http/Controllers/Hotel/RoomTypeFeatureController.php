@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\RoomTypeFeature;
 use App\Http\Requests\StoreRoomTypeFeatureRequest;
 use App\Http\Requests\UpdateRoomTypeFeatureRequest;
+use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 class RoomTypeFeatureController extends Controller
 {
@@ -14,69 +16,38 @@ class RoomTypeFeatureController extends Controller
 	 */
 	public function index()
 	{
-		return view('hotel.pages.room_type_features.index', [
-			'roomTypeFeatures' => RoomTypeFeature::orderBy('id')
-				->select(['id', 'name'])
-				->paginate(10)
-				->withQueryString()
-				->through(function ($roomTypeFeature) {
-					return [
-						'id' => $roomTypeFeature->id,
-						'name' => $roomTypeFeature->name,
-					];
-				}),
+		return Inertia::render('Hotel/Features/Index', [
+			'features' => RoomTypeFeature::orderBy('order_no')->get(['id', 'order_no', 'name', 'is_paid']),
+            'deletedFeatures' => RoomTypeFeature::orderBy('order_no')->onlyTrashed()->get(['id', 'order_no', 'name', 'is_paid'])
+                    ->sortBy('order_no'),
 		]);
-	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create()
-	{
-		return view('hotel.pages.room_type_features.create');
 	}
 
 	/**
 	 * Store a newly created resource in storage.
 	 */
-	public function store(StoreRoomTypeFeatureRequest $request)
+	public function store(StoreRoomTypeFeatureRequest $request, RoomTypeFeature $roomTypeFeature)
 	{
 		$data = $request->validated();
-		RoomTypeFeature::create($data);
-		return redirect()
-			->route('hotel.room_type_features.index')
-			->with('success', 'Oda Olanağı ekleme başarılı.');
+        $roomTypeFeature->create($data);
 	}
 
-	/**
-	 * Display the specified resource.
-	 */
-	public function show(RoomTypeFeature $roomTypeFeature)
-	{
-		//
-	}
-
-	/**
-	 * Show the form for editing the specified resource.
-	 */
-	public function edit(RoomTypeFeature $roomTypeFeature)
-	{
-		return view('hotel.pages.room_type_features.edit', [
-			'roomTypeFeature' => $roomTypeFeature,
-		]);
-	}
 
 	/**
 	 * Update the specified resource in storage.
 	 */
-	public function update(UpdateRoomTypeFeatureRequest $request, RoomTypeFeature $roomTypeFeature)
+	public function update(UpdateRoomTypeFeatureRequest $request, int $roomTypeFeatureId)
 	{
 		$data = $request->validated();
-		$roomTypeFeature->fill($data);
+        $roomTypeFeature = RoomTypeFeature::withTrashed()->findOrFail($roomTypeFeatureId);
+        if($request->has('old_order_no') && $request->has('new_order_no')) {
+            $roomTypeFeature->fill([
+                'order_no' => $data['new_order_no'],
+            ]);
+        } else {
+            $roomTypeFeature->fill($data);
+        }
 		$roomTypeFeature->update($roomTypeFeature->getDirty());
-		return redirect()
-			->route('hotel.room_type_features.index')
-			->with('success', 'Oda Olanağı ' . $roomTypeFeature->name . ' updated.');
 	}
 
 	/**
@@ -85,8 +56,21 @@ class RoomTypeFeatureController extends Controller
 	public function destroy(RoomTypeFeature $roomTypeFeature)
 	{
 		$roomTypeFeature->delete();
-		return redirect()
-			->route('hotel.room_type_features.index')
-			->with('success', 'Oda Olanağı ' . $roomTypeFeature->name . ' deleted.');
 	}
+
+/**
+     * Restore the specified resource from storage.
+     */
+    public function restore(int $feature_id)
+    {
+        RoomTypeFeature::onlyTrashed()->findOrFail($feature_id)->restore();
+    }
+
+    /**
+     * Permanently delete the specified resource from storage.
+     */
+    public function forceDelete(int $feature_id)
+    {
+        RoomTypeFeature::onlyTrashed()->findOrFail($feature_id)->forceDelete();
+    }
 }

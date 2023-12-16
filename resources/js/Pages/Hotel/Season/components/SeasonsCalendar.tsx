@@ -7,13 +7,13 @@ import listPlugin from '@fullcalendar/list'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 import googleCalendarPlugin from '@fullcalendar/google-calendar'
 import dayjs from 'dayjs'
-import {DateSelectArg, EventAddArg} from '@fullcalendar/core'
+import {DateSelectArg, EventAddArg, EventChangeArg} from '@fullcalendar/core'
 import moment from 'moment'
 import {SeasonCalendarComponentProps} from '../types/season-calendar'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import sqids from 'sqids'
-import {SeasonCalendarProps, SeasonDataProps} from '../types'
+import {SeasonCalendarProps} from '../types'
 import utc from 'dayjs/plugin/utc'
 import tz from 'dayjs/plugin/timezone'
 import customFormat from 'dayjs/plugin/customParseFormat'
@@ -26,7 +26,6 @@ dayjs.extend(tz)
 dayjs.extend(customFormat)
 dayjs.tz.setDefault('Europe/Istanbul')
 dayjs.extend(isBetween)
-
 function SeasonsCalendar({
 	data,
 	setData,
@@ -34,7 +33,7 @@ function SeasonsCalendar({
 	setSlideOver,
 	setCalendarValue,
 	seasons,
-	setSeasons,
+	setSeasonsDays,
 }: SeasonCalendarComponentProps) {
 	const hashids = new sqids()
 	const calendarRef = React.useRef(null)
@@ -65,6 +64,7 @@ function SeasonsCalendar({
 			groupId: groupId,
 			allDay: true,
 			editable: true,
+			is_new: true,
 		})
 	}
 
@@ -90,9 +90,17 @@ function SeasonsCalendar({
 				name: info.event.title,
 				description: info.event.extendedProps.description,
 			})
-			.then(function (response) {
+			.then(() => {
 				setSlideOver(false)
-				setSeasons(response.data.filter((season: SeasonDataProps) => season.uid !== info.event.id))
+				// setSeasons(response.data.filter((season: SeasonDataProps) => season.uid !== info.event.id))
+				let currentDate = dayjs(info.event.startStr, 'YYYY-MM-DD')
+				let endDate = dayjs(info.event.endStr, 'YYYY-MM-DD').subtract(1, 'day')
+				let days: string[] = []
+				while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+					days.push(currentDate.format('YYYY-MM-DD'))
+					currentDate = currentDate.add(1, 'day')
+				}
+				setSeasonsDays((prevState) => [...prevState, ...days])
 				setData({
 					title: '',
 					description: '',
@@ -100,10 +108,9 @@ function SeasonsCalendar({
 					end: '',
 				})
 			})
-			.catch(function (error) {
+			.catch(() => {
 				info.event.remove()
-				// console.log(error);
-				MySwal.fire({
+				Toast.fire({
 					icon: 'error',
 					title: 'Oops...',
 					text: 'Bir hata oluştu!',
@@ -186,38 +193,36 @@ function SeasonsCalendar({
 			eventClick={(e) => console.log(e)}
 			eventDrop={(e) => console.log(e)}
 			eventAdd={(info) => eventAdd(info)}
-			// dayCellDidMount={(info) => {
-			// 	info.el.addEventListener(
-			// 		'contextmenu',
-			// 		(ev) => {
-			// 			ev.preventDefault()
-			// 			return false
-			// 		},
-			// 		false,
-			// 	)
-			// }}
-			// eventDidMount={(info) => {
-			// 	info.el.addEventListener(
-			// 		'contextmenu',
-			// 		(ev) => {
-			// 			ev.preventDefault()
-			// 			// console.log('eventDidMount', info)
-			// 			return false
-			// 		},
-			// 		false,
-			// 	)
-			// }}
+			dayCellDidMount={(info) => {
+				info.el.addEventListener(
+					'contextmenu',
+					(ev) => {
+						ev.preventDefault()
+						return false
+					},
+					false,
+				)
+			}}
+			eventDidMount={(info) => {
+				info.el.addEventListener(
+					'contextmenu',
+					(ev) => {
+						ev.preventDefault()
+						console.log('eventDidMount', info)
+						return false
+					},
+					false,
+				)
+			}}
 			select={async function (info: DateSelectArg) {
 				const calendar = info.view.calendar
-				const startStr = dayjs(info.start).format('YYYY-MM-DD')
-				const endStr = dayjs(info.end).format('YYYY-MM-DD')
 				let seasonCheck = true
 				if (calendar.getEvents().length > 0) {
 					for (const event of calendar.getEvents()) {
 						if (event.groupId !== '') {
 							if (
-								dayjs(startStr).isBetween(event.startStr, dayjs(event.endStr).subtract(1, 'day')) ||
-								dayjs(endStr).isBetween(event.startStr, dayjs(event.endStr).subtract(1, 'day'))
+								dayjs(info.start).isBetween(event.startStr, event.endStr, 'day') ||
+								dayjs(info.end).isBetween(event.startStr, event.endStr, 'day')
 							) {
 								seasonCheck = false
 							}
@@ -243,6 +248,66 @@ function SeasonsCalendar({
 						},
 						false,
 					)
+			}}
+			eventChange={(info: EventChangeArg) => {
+				if (info.event.id == info.oldEvent.id) {
+					// @ts-ignore
+					const calendar = calendarRef.current.getApi()
+					let seasonCheck = true
+					if (calendar.getEvents().length > 0) {
+						for (const event of calendar.getEvents()) {
+							if (event.groupId !== '') {
+								if (
+									dayjs(info.event.start).isBetween(event.startStr, event.endStr, 'day') ||
+									dayjs(info.event.end).isBetween(event.startStr, event.endStr, 'day')
+								) {
+									seasonCheck = false
+								}
+							}
+						}
+					} else {
+						// console.log('Event Hiç Yok')
+					}
+					if (seasonCheck) {
+						axios
+							.put(route('hotel.seasons.update', info.event.id), {
+								uid: info.event.groupId,
+								start_date: info.event.startStr,
+								end_date: dayjs(info.event.endStr, 'YYYY-MM-DD').subtract(1, 'day').format('YYYY-MM-DD'),
+								name: info.event.title,
+								description: info.event.extendedProps.description,
+							})
+							.then(() => {})
+							.catch(() => {
+								info.revert()
+							})
+					} else {
+						info.revert()
+						Toast.fire({
+							icon: 'error',
+							title: 'Sezonlar çakışıyor!',
+						})
+					}
+				}
+			}}
+			eventRemove={(info) => {
+				// console.log('eventRemove', info.event)
+				// console.log(typeof info.event.id, info.event.id)
+				axios
+					.delete(route('hotel.seasons.destroy', info.event.id))
+					.then(() => {})
+					.catch(() => {
+						Toast.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Bir hata oluştu!',
+							toast: true,
+							position: 'top-end',
+							showConfirmButton: false,
+							timer: 3000,
+							timerProgressBar: true,
+						})
+					})
 			}}
 		/>
 	)

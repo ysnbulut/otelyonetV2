@@ -7,4 +7,5 @@ export interface SeasonCalendarComponentProps {
 	setCalendarValue: React.Dispatch<React.SetStateAction<string>>
 	seasons: SeasonDataProps[]
 	setSeasons: React.Dispatch<React.SetStateAction<SeasonDataProps[]>>
+	setSeasonsDays: React.Dispatch<React.SetStateAction<string[]>>
 }

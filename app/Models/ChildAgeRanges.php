@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\ChildAgeRanges
  *
- * @property-read \App\Models\PossibilitiesOfGuestsRoomType|null $possibility
- * @method static \Database\Factories\ChildAgeRangesFactory factory($count = null, $state = [])
+ * @property-read \App\Models\VariationsOfGuestsRoomType|null $possibility
  * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges onlyTrashed()
@@ -21,12 +20,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ChildAgeRanges extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
  protected $fillable = ['min_age', 'max_age'];
 
  public function possibility()
  {
-  return $this->belongsTo(PossibilitiesOfGuestsRoomType::class);
+  return $this->belongsTo(VariationsOfGuestsRoomType::class);
  }
 }

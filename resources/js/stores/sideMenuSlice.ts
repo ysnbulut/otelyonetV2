@@ -1,26 +1,27 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { RootState } from "./store";
-import { icons } from "@/Components/Lucide";
+import {createSlice} from '@reduxjs/toolkit'
+import {RootState} from './store'
+import {icons} from '@/Components/Lucide'
 
 export interface Menu {
-  icon: keyof typeof icons;
-  title: string;
-  pathname?: string;
-  subMenu?: Menu[];
-  ignore?: boolean;
-	permission?: string[];
+	icon: keyof typeof icons
+	title: string
+	pathname?: string
+	subMenu?: Menu[]
+	ignore?: boolean
+	permission?: string[]
 }
 
 export interface SideMenuState {
-  menu: Array<Menu | "divider">;
+	menu: Array<Menu | 'divider'>
 }
 
 const initialState: SideMenuState = {
-  menu: [
+	menu: [
 		{
 			icon: 'Home',
 			title: 'Dashboard',
-			pathname: route('hotel.dashboard.index'),},
+			pathname: route('hotel.dashboard.index'),
+		},
 		{
 			icon: 'CalendarSearch',
 			title: 'Rezervasyon Yön.',
@@ -44,7 +45,7 @@ const initialState: SideMenuState = {
 					pathname: route('hotel.bookings.calendar'),
 					permission: ['hotel.bookings.index'],
 				},
-			]
+			],
 		},
 		{
 			icon: 'Users2',
@@ -98,34 +99,27 @@ const initialState: SideMenuState = {
 					title: 'Oda Olanakları',
 					pathname: route('hotel.room_type_features.index'),
 					permission: ['hotel.room_type_features.index'],
-				}
-			]
-		},
-		{
-			icon: 'SlidersHorizontal',
-			title: 'Otel Ayarları',
-			pathname: route('hotel.settings.index'),
-			permission: ['hotel.settings.index'],
+				},
+			],
 		},
 		{
 			icon: 'CandlestickChart',
 			title: 'Fiyatlandırma',
-			permission: ['hotel.seasons.index'],
+			permission: ['hotel.seasons.index', 'hotel.unit_prices.index'],
 			subMenu: [
+				{
+					icon: 'Ungroup',
+					title: 'Ünite Fiyatları',
+					pathname: route('hotel.unit_prices.index'),
+					permission: ['hotel.unit_prices.index'],
+				},
 				{
 					icon: 'CalendarRange',
 					title: 'Sezon Yönetimi',
 					pathname: route('hotel.seasons.create'),
 					permission: ['hotel.seasons.index'],
 				},
-				{
-					icon: 'Ungroup',
-					title: 'Ünite Fiyatları',
-					pathname: route('hotel.unit_prices.index'),
-					permission: ['hotel.seasons.index'],
-				},
-
-			]
+			],
 		},
 		// {
 		// 	icon: 'AlignVerticalJustifyEnd',
@@ -150,17 +144,23 @@ const initialState: SideMenuState = {
 					pathname: route('hotel.roles.index'),
 					permission: ['hotel.roles.index'],
 				},
-			]
-		}
-	]
-};
+			],
+		},
+		{
+			icon: 'SlidersHorizontal',
+			title: 'Otel Ayarları',
+			pathname: route('hotel.settings.index'),
+			permission: ['hotel.settings.index'],
+		},
+	],
+}
 
 export const sideMenuSlice = createSlice({
-  name: "sideMenu",
-  initialState,
-  reducers: {},
-});
+	name: 'sideMenu',
+	initialState,
+	reducers: {},
+})
 
-export const selectSideMenu = (state: RootState) => state.sideMenu.menu;
+export const selectSideMenu = (state: RootState) => state.sideMenu.menu
 
-export default sideMenuSlice.reducer;
+export default sideMenuSlice.reducer
