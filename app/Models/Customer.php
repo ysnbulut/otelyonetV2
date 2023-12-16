@@ -18,17 +18,15 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property-read int|null $bookings_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerPayments> $payments
  * @property-read int|null $payments_count
- * @method static \Database\Factories\CustomerFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer filter(array $filters)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer query()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer remainingBalance()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer search($searchTerm)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer transactions()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withoutTrashed()
- * @method filter(array $only)
  * @mixin \Eloquent
  */
 class Customer extends Model

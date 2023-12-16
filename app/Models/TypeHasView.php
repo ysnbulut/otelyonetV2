@@ -20,13 +20,14 @@ use function number_format;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
  * @property-read int|null $unit_prices_count
  * @property-read \App\Models\RoomView|null $view
+ * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableRoomForTypeHasView($check_in, $check_out)
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableTypes()
+ * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView groupPriceCalculator($id, $checkIn, $checkOut)
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView singlePriceCalculator($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren)
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView groupriceCalculator($id, $checkIn, $checkOut)
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView singlePriceCalculator($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren)
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView withoutTrashed()
  * @mixin \Eloquent

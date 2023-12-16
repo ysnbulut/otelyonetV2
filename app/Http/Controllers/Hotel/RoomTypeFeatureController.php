@@ -1,13 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Hotel;
-
 use App\Http\Controllers\Controller;
 use App\Models\RoomTypeFeature;
 use App\Http\Requests\StoreRoomTypeFeatureRequest;
 use App\Http\Requests\UpdateRoomTypeFeatureRequest;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 
 class RoomTypeFeatureController extends Controller
 {
@@ -29,7 +27,7 @@ class RoomTypeFeatureController extends Controller
 	public function store(StoreRoomTypeFeatureRequest $request, RoomTypeFeature $roomTypeFeature)
 	{
 		$data = $request->validated();
-        $roomTypeFeature->create($data);
+        return $roomTypeFeature->create($data);
 	}
 
 

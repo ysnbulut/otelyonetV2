@@ -14,6 +14,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\Booking
+ *
+ * @property-read \App\Models\BookingAmounts|null $amount
+ * @property-read \App\Models\Customer|null $customer
+ * @property-read Collection<int, \App\Models\Guest> $guests
+ * @property-read int|null $guests_count
+ * @property-read Collection<int, \App\Models\CustomerPayments> $payments
+ * @property-read int|null $payments_count
+ * @property-read Collection<int, \App\Models\Room> $rooms
+ * @property-read int|null $rooms_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking remainingBalance()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking stayDurationDay()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking stayDurationNight()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking withoutTrashed()
+ * @mixin Eloquent
+ */
 class Booking extends Model
 {
 	use SoftDeletes;

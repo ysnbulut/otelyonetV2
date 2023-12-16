@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ChildAgeRanges> $childAgeRanges
  * @property-read int|null $child_age_ranges_count
- * @property-read \App\Models\VariationMultiplier|null $possibilitiesMultipliers
+ * @property-read \App\Models\VariationMultiplier|null $multiplier
  * @property-read \App\Models\RoomType|null $roomType
  * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType newQuery()

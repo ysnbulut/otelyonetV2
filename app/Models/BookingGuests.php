@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\BookingGuests
  *
- * @property-read Booking|null $booking
- * @property-read Guest|null $guest
- * @method static \Database\Factories\BookingGuestsFactory factory($count = null, $state = [])
+ * @property-read \App\Models\Booking|null $booking
+ * @property-read \App\Models\Guest|null $guest
  * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests onlyTrashed()

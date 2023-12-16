@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\VariationMultiplier
  *
- * @property-read \App\Models\VariationsOfGuestsRoomType|null $possibility
  * @property-read \App\Models\RoomType|null $roomType
+ * @property-read \App\Models\VariationsOfGuestsRoomType|null $variation
  * @method static \Illuminate\Database\Eloquent\Builder|VariationMultiplier newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|VariationMultiplier newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|VariationMultiplier onlyTrashed()

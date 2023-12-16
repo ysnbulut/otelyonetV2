@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\Booking|null $booking
  * @property-read \App\Models\CaseAndBanks|null $case
  * @property-read \App\Models\Customer|null $customer
- * @method static \Database\Factories\CustomerPaymentsFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments onlyTrashed()

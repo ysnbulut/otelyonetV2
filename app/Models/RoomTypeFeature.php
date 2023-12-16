@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature query()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature withoutTrashed()
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class RoomTypeFeature extends Model
 {
@@ -26,9 +27,9 @@ class RoomTypeFeature extends Model
 
     protected static function booted()
     {
-//        static::creating(function ($roomTypeFeature) {
-//            $roomTypeFeature->order_no = self::max('order_no') + 1;
-//        });
+        static::creating(function ($roomTypeFeature) {
+            $roomTypeFeature->order_no = self::max('order_no') + 1;
+        });
 
         static::updated(function ($roomTypeFeature) {
             if ($roomTypeFeature->isDirty('order_no')) {
@@ -66,7 +67,7 @@ class RoomTypeFeature extends Model
                 ->increment('order_no');
         });
 
-        static::deleted(function ($roomTypeFeature) {
+        static::softDeleted(function ($roomTypeFeature) {
             self::where('order_no', '>', $roomTypeFeature->order_no)
                 ->decrement('order_no');
             $roomTypeFeature->update(['order_no' => request()->order_no]);

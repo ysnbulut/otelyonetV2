@@ -53,7 +53,7 @@ function Feature(props: FeatureComponentProps) {
 		<div
 			data-id={props.feature.id}
 			id="featureItem"
-			className="intro-y box flex w-full select-none items-center px-2 py-2 text-base font-semibold">
+			className="box flex w-full select-none items-center px-2 py-2 text-base font-semibold">
 			<div
 				id="featureHandle"
 				className="me-2 rounded-lg bg-slate-300 p-2 shadow dark:bg-darkmode-900/20">

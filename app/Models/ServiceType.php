@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\ServiceType
  *
- * @method static \Database\Factories\ServiceTypeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceType onlyTrashed()

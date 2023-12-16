@@ -23,6 +23,7 @@ class StoreRoomTypeFeatureRequest extends FormRequest
 	{
 		return [
 			'name' => ['required', 'string', 'max:255', 'unique:room_type_features'],
+            'is_paid' => ['required', 'boolean'],
 		];
 	}
 }

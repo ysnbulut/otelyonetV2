@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
  * @property-read int|null $bookings_count
  * @property-read mixed $full_name
- * @method static \Database\Factories\GuestFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Guest filter(array $filters)
  * @method static \Illuminate\Database\Eloquent\Builder|Guest newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Guest newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Guest onlyTrashed()
@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Guest query()
  * @method static \Illuminate\Database\Eloquent\Builder|Guest withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Guest withoutTrashed()
- * @method filter(array $only)
  * @mixin \Eloquent
  */
 class Guest extends Model

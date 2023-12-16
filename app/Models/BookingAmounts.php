@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\BookingAmounts
  *
- * @method static \Database\Factories\BookingAmountsFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts onlyTrashed()

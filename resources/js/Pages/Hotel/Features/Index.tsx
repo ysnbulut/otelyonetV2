@@ -1,15 +1,20 @@
 import React, {useState} from 'react'
-import {Head} from '@inertiajs/react'
+import {Head, useForm} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {FeatureProps, PageProps} from './types'
-import {FormInput, FormLabel} from '@/Components/Form'
+import {FormInput, FormLabel, FormSwitch} from '@/Components/Form'
 import Feature from './components/Feature'
 import {ReactSortable} from 'react-sortablejs'
 import axios from 'axios'
 import Lucide from '@/Components/Lucide'
 import Fuse from 'fuse.js'
+import Button from '@/Components/Button'
 
 function Index(props: PageProps) {
+	const {data, setData, post, processing, errors, reset} = useForm({
+		name: '',
+		is_paid: false,
+	})
 	const [features, setFeatures] = useState<FeatureProps[]>(props.features)
 	const [deletedFeatures, setDeletedFeatures] = useState<FeatureProps[]>(props.deletedFeatures)
 	const fuseOptions: {keys: string[]} = {
@@ -32,6 +37,14 @@ function Index(props: PageProps) {
 	const fuseFeatures = new Fuse(features, fuseOptions)
 	const fuseDeletedFeatures = new Fuse(deletedFeatures, fuseOptions)
 
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		axios.post(route('hotel.room_type_features.store'), data).then((response) => {
+			setFeatures((prevState) => [...prevState, response.data])
+			reset()
+		})
+	}
+
 	return (
 		<AuthenticatedLayout
 			user={props.auth.user}
@@ -41,17 +54,45 @@ function Index(props: PageProps) {
 			<Head title="Oda Olanakları" />
 			<h2 className="intro-y mb-5 mt-10 text-lg font-medium">Oda Olanakları</h2>
 			<div className="box p-5">
-				<div>
-					<div>
+				<form
+					onSubmit={(e) => handleSubmit(e)}
+					className="flex w-full flex-col items-center justify-between gap-3 md:flex-row">
+					<div className="w-full flex-1">
 						<FormLabel htmlFor="features">Oda Olanağı Ekle</FormLabel>
 						<FormInput
 							id="features"
 							name="name"
+							value={data.name}
+							onChange={(event) => setData((data) => ({...data, name: event.target.value}))}
 							type="text"
 							placeholder="Oda Olanağı Adı"
 						/>
 					</div>
-				</div>
+					<div className="flex w-full justify-between gap-4 md:w-auto">
+						<FormSwitch className="mt-7 h-auto gap-2">
+							<FormSwitch.Label
+								htmlFor="is-paid"
+								className="font-bold">
+								Ücretli*
+							</FormSwitch.Label>
+							<FormSwitch.Input
+								id="is-paid"
+								type="checkbox"
+								className="dark: h-6 w-14 bg-slate-300 before:bg-white before:checked:ml-8"
+								name="is_paid"
+								value={data.is_paid.toString()}
+								checked={data.is_paid}
+								onChange={(event) => setData((data) => ({...data, is_paid: event.target.checked}))}
+							/>
+						</FormSwitch>
+						<Button
+							type="submit"
+							variant="primary"
+							className="mt-7 w-full px-10 md:w-44">
+							Ekle
+						</Button>
+					</div>
+				</form>
 				<div className="mt-10">
 					<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 						<div>

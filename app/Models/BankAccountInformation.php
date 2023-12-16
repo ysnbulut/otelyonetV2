@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * App\Models\BankAccountInformation
  *
- * @method static \Database\Factories\BankAccountInformationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|BankAccountInformation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankAccountInformation newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|BankAccountInformation query()

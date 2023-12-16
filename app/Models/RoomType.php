@@ -11,23 +11,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BedType> $beds
  * @property-read int|null $beds_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BedType> $bedsWithCount
+ * @property-read int|null $beds_with_count_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomTypeFeature> $features
  * @property-read int|null $features_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationMultiplier> $possibilitiesMultipliers
- * @property-read int|null $possibilities_multipliers_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationsOfGuestsRoomType> $possibilitiesOfGuests
- * @property-read int|null $possibilities_of_guests_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $rooms
  * @property-read int|null $rooms_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TypeHasView> $typeHasViews
  * @property-read int|null $type_has_views_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
  * @property-read int|null $unit_prices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationMultiplier> $variationMultipliers
+ * @property-read int|null $variation_multipliers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VariationsOfGuestsRoomType> $variationsOfGuests
+ * @property-read int|null $variations_of_guests_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomView> $views
  * @property-read int|null $views_count
- * @property mixed $adult_capacity
- * @property mixed $child_capacity
- * @property mixed $variationsOfGuests
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomType onlyTrashed()

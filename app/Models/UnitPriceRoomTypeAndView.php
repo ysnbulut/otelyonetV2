@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \App\Models\RoomView|null $roomView
  * @property-read \App\Models\Season|null $season
  * @property-read \App\Models\TypeHasView|null $typeHasView
- * @method static \Database\Factories\UnitPriceRoomTypeAndViewFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|UnitPriceRoomTypeAndView newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UnitPriceRoomTypeAndView newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|UnitPriceRoomTypeAndView onlyTrashed()

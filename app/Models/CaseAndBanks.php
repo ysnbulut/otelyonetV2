@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerPayments> $transactions
  * @property-read int|null $transactions_count
  * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks balance()
+ * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks filter(array $filters)
  * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks onlyTrashed()

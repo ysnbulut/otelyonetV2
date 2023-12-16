@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\Season
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
- * @property-read int|null $unit_prices_count
- * @property int $id
- * @property string $description
+ * @property-read mixed $season_name
+ * @property-write mixed $end_date
+ * @property-write mixed $start_date
  * @method static \Illuminate\Database\Eloquent\Builder|Season avilableSeasons()
  * @method static \Illuminate\Database\Eloquent\Builder|Season newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Season newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Season onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Season query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Season unitPrices()
  * @method static \Illuminate\Database\Eloquent\Builder|Season withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Season withoutTrashed()
  * @mixin \Eloquent
