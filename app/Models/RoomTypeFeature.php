@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,12 +13,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read Collection<int, RoomType> $roomTypes
  * @property-read int|null $room_types_count
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature query()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature withoutTrashed()
+ * @method static Builder|RoomTypeFeature newModelQuery()
+ * @method static Builder|RoomTypeFeature newQuery()
+ * @method static Builder|RoomTypeFeature onlyTrashed()
+ * @method static Builder|RoomTypeFeature query()
+ * @method static Builder|RoomTypeFeature withTrashed()
+ * @method static Builder|RoomTypeFeature withoutTrashed()
  * @mixin Eloquent
  */
 class RoomTypeFeature extends Model
@@ -26,7 +27,7 @@ class RoomTypeFeature extends Model
 
     protected $fillable = ['order_no', 'name', 'is_paid'];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function ($roomTypeFeature) {
             $roomTypeFeature->order_no = self::max('order_no') + 1;

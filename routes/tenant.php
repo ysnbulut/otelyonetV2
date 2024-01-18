@@ -160,6 +160,10 @@ Route::middleware([
         Route::put('/{season}', [SeasonController::class, 'update'])->name('hotel.seasons.update');
         Route::delete('/{season}', [SeasonController::class, 'destroy'])->name('hotel.seasons.destroy');
     });
+//Pos
+    Route::prefix('pos')->middleware('auth')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('hotel.pos.index');
+    });
     //bookings
     Route::prefix('bookings')->middleware('auth')->group(function () {
         Route::get('/', [BookingController::class, 'index'])->name('hotel.bookings.index');

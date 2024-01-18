@@ -2,23 +2,26 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\CaseAndBanks
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerPayments> $transactions
+ * @property-read Collection<int, CustomerPayments> $transactions
  * @property-read int|null $transactions_count
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks balance()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks filter(array $filters)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks query()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseAndBanks withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|CaseAndBanks balance()
+ * @method static Builder|CaseAndBanks filter(array $filters)
+ * @method static Builder|CaseAndBanks newModelQuery()
+ * @method static Builder|CaseAndBanks newQuery()
+ * @method static Builder|CaseAndBanks onlyTrashed()
+ * @method static Builder|CaseAndBanks query()
+ * @method static Builder|CaseAndBanks withTrashed()
+ * @method static Builder|CaseAndBanks withoutTrashed()
+ * @mixin Eloquent
  */
 class CaseAndBanks extends Model
 {

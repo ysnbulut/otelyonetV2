@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -11,15 +13,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $season_name
  * @property-write mixed $end_date
  * @property-write mixed $start_date
- * @method static \Illuminate\Database\Eloquent\Builder|Season avilableSeasons()
- * @method static \Illuminate\Database\Eloquent\Builder|Season newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Season newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Season onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Season query()
- * @method static \Illuminate\Database\Eloquent\Builder|Season unitPrices()
- * @method static \Illuminate\Database\Eloquent\Builder|Season withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Season withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|Season avilableSeasons()
+ * @method static Builder|Season newModelQuery()
+ * @method static Builder|Season newQuery()
+ * @method static Builder|Season onlyTrashed()
+ * @method static Builder|Season query()
+ * @method static Builder|Season unitPrices()
+ * @method static Builder|Season withTrashed()
+ * @method static Builder|Season withoutTrashed()
+ * @mixin Eloquent
  */
 class Season extends Model
 {
@@ -27,22 +29,22 @@ class Season extends Model
 
     protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
 
-    public function scopeUnitPrices()
+    public function scopeUnitPrices(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UnitPriceRoomTypeAndView::class)->select(['id', 'unit_price']);
     }
 
-    public function setStartDateAttribute($value)
+    public function setStartDateAttribute($value): void
     {
         $this->attributes['start_date'] = date('Y-m-d', strtotime($value));
     }
 
-    public function setEndDateAttribute($value)
+    public function setEndDateAttribute($value): void
     {
         $this->attributes['end_date'] = date('Y-m-d', strtotime($value));
     }
 
-    public function getSeasonNameAttribute()
+    public function getSeasonNameAttribute(): string
     {
         return $this->name .
             ' (' .

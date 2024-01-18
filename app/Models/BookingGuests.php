@@ -3,26 +3,26 @@
 namespace App\Models;
 
 use Eloquent;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\BookingGuests
  *
- * @property-read \App\Models\Booking|null $booking
- * @property-read \App\Models\Guest|null $guest
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests query()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingGuests withoutTrashed()
+ * @property-read Booking|null $booking
+ * @property-read Guest|null $guest
+ * @method static Builder|BookingGuests newModelQuery()
+ * @method static Builder|BookingGuests newQuery()
+ * @method static Builder|BookingGuests onlyTrashed()
+ * @method static Builder|BookingGuests query()
+ * @method static Builder|BookingGuests withTrashed()
+ * @method static Builder|BookingGuests withoutTrashed()
  * @mixin Eloquent
  */
 class BookingGuests extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
  protected $fillable = ['booking_id', 'guest_id'];
 

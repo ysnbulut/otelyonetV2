@@ -5,8 +5,8 @@ namespace App\Models;
 use App\Settings\GeneralSettings;
 use Carbon\Carbon;
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -17,23 +17,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\Booking
  *
- * @property-read \App\Models\BookingAmounts|null $amount
- * @property-read \App\Models\Customer|null $customer
- * @property-read Collection<int, \App\Models\Guest> $guests
+ * @property-read BookingAmounts|null $amount
+ * @property-read Customer|null $customer
+ * @property-read Collection<int, Guest> $guests
  * @property-read int|null $guests_count
- * @property-read Collection<int, \App\Models\CustomerPayments> $payments
+ * @property-read Collection<int, CustomerPayments> $payments
  * @property-read int|null $payments_count
- * @property-read Collection<int, \App\Models\Room> $rooms
+ * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
- * @method static \Illuminate\Database\Eloquent\Builder|Booking newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking query()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking remainingBalance()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking stayDurationDay()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking stayDurationNight()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Booking withoutTrashed()
+ * @method static Builder|Booking newModelQuery()
+ * @method static Builder|Booking newQuery()
+ * @method static Builder|Booking onlyTrashed()
+ * @method static Builder|Booking query()
+ * @method static Builder|Booking remainingBalance()
+ * @method static Builder|Booking stayDurationDay()
+ * @method static Builder|Booking stayDurationNight()
+ * @method static Builder|Booking withTrashed()
+ * @method static Builder|Booking withoutTrashed()
  * @mixin Eloquent
  */
 class Booking extends Model

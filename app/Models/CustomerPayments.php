@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,20 +11,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\CustomerPayments
  *
- * @property-read \App\Models\Booking|null $booking
- * @property-read \App\Models\CaseAndBanks|null $case
- * @property-read \App\Models\Customer|null $customer
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerPayments withoutTrashed()
- * @mixin \Eloquent
+ * @property-read Booking|null $booking
+ * @property-read CaseAndBanks|null $case
+ * @property-read Customer|null $customer
+ * @method static Builder|CustomerPayments newModelQuery()
+ * @method static Builder|CustomerPayments newQuery()
+ * @method static Builder|CustomerPayments onlyTrashed()
+ * @method static Builder|CustomerPayments query()
+ * @method static Builder|CustomerPayments withTrashed()
+ * @method static Builder|CustomerPayments withoutTrashed()
+ * @mixin Eloquent
  */
 class CustomerPayments extends Model
 {
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
 
 	protected $fillable = [
 		'customer_id',

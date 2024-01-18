@@ -2,25 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\Guest
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
+ * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
  * @property-read mixed $full_name
- * @method static \Illuminate\Database\Eloquent\Builder|Guest filter(array $filters)
- * @method static \Illuminate\Database\Eloquent\Builder|Guest newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest orderByFullName()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest query()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Guest withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|Guest filter(array $filters)
+ * @method static Builder|Guest newModelQuery()
+ * @method static Builder|Guest newQuery()
+ * @method static Builder|Guest onlyTrashed()
+ * @method static Builder|Guest orderByFullName()
+ * @method static Builder|Guest query()
+ * @method static Builder|Guest withTrashed()
+ * @method static Builder|Guest withoutTrashed()
+ * @mixin Eloquent
  */
 class Guest extends Model
 {
@@ -28,8 +30,8 @@ class Guest extends Model
 
 	protected $fillable = ['name', 'surname', 'nationality', 'identification_number', 'phone', 'email', 'gender'];
 
-	public function getFullNameAttribute()
- {
+	public function getFullNameAttribute(): string
+    {
   return $this->name . ' ' . $this->surname;
  }
 

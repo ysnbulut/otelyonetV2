@@ -2,36 +2,34 @@
 
 namespace App\Models;
 
-use App\Settings\GeneralSettings;
-use Carbon\Carbon;
-use DB;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * App\Models\Customer
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
+ * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerPayments> $payments
+ * @property-read Collection<int, CustomerPayments> $payments
  * @property-read int|null $payments_count
- * @method static \Illuminate\Database\Eloquent\Builder|Customer filter(array $filters)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer query()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer remainingBalance()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer search($searchTerm)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|Customer filter(array $filters)
+ * @method static Builder|Customer newModelQuery()
+ * @method static Builder|Customer newQuery()
+ * @method static Builder|Customer onlyTrashed()
+ * @method static Builder|Customer query()
+ * @method static Builder|Customer remainingBalance()
+ * @method static Builder|Customer search($searchTerm)
+ * @method static Builder|Customer withTrashed()
+ * @method static Builder|Customer withoutTrashed()
+ * @mixin Eloquent
  */
 class Customer extends Model
 {
-  use HasFactory, SoftDeletes;
+  use SoftDeletes;
 
   protected $fillable = ['title', 'type', 'tax_number', 'city', 'country', 'address', 'phone', 'email'];
 

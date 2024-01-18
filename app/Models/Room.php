@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,13 +18,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read RoomType|null $roomType
  * @property-read RoomView|null $roomView
  * @property-read TypeHasView|null $typeHasView
- * @method static \Illuminate\Database\Eloquent\Builder|Room newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Room newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Room onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Room query()
- * @method static \Illuminate\Database\Eloquent\Builder|Room withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Room withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|Room newModelQuery()
+ * @method static Builder|Room newQuery()
+ * @method static Builder|Room onlyTrashed()
+ * @method static Builder|Room query()
+ * @method static Builder|Room withTrashed()
+ * @method static Builder|Room withoutTrashed()
+ * @mixin Eloquent
  */
 class Room extends Model
 {
@@ -39,42 +40,42 @@ class Room extends Model
   'status',
  ];
 
- public function building()
+ public function building(): \Illuminate\Database\Eloquent\Relations\BelongsTo
  {
   return $this->belongsTo(Building::class);
  }
 
- public function floor()
+ public function floor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
  {
   return $this->belongsTo(Floor::class);
  }
 
- public function typeHasView()
+ public function typeHasView(): \Illuminate\Database\Eloquent\Relations\BelongsTo
  {
 	return $this->belongsTo(TypeHasView::class);
  }
 
- public function roomType()
+ public function roomType(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
  {
   return $this->hasOneThrough(RoomType::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'type_id');
  }
 
- public function roomView()
+ public function roomView(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
  {
   return $this->hasOneThrough(RoomView::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'view_id');
  }
 
- public function bookings()
+ public function bookings(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
  {
   return $this->hasManyThrough(Booking::class, BookingRooms::class, 'room_id', 'id', 'id', 'booking_id');
  }
 
     /**
      * @param $query
-     * @param $searchTerm
-     * @return mixed
+     * @param array $filters
+     * @return void
      */
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): void
     {
         $query
             ->when($filters['search'] ?? null, function ($query, $search) {

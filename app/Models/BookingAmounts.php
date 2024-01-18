@@ -2,24 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\BookingAmounts
  *
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts query()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingAmounts withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|BookingAmounts newModelQuery()
+ * @method static Builder|BookingAmounts newQuery()
+ * @method static Builder|BookingAmounts onlyTrashed()
+ * @method static Builder|BookingAmounts query()
+ * @method static Builder|BookingAmounts withTrashed()
+ * @method static Builder|BookingAmounts withoutTrashed()
+ * @mixin Eloquent
  */
 class BookingAmounts extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
  protected $fillable = ['booking_id', 'price', 'campaign', 'discount', 'total_price', 'tax', 'grand_total'];
 }

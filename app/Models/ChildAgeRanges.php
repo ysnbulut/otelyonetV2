@@ -2,21 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\ChildAgeRanges
  *
- * @property-read \App\Models\VariationsOfGuestsRoomType|null $possibility
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges query()
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ChildAgeRanges withoutTrashed()
- * @mixin \Eloquent
+ * @property-read VariationsOfGuestsRoomType|null $possibility
+ * @method static Builder|ChildAgeRanges newModelQuery()
+ * @method static Builder|ChildAgeRanges newQuery()
+ * @method static Builder|ChildAgeRanges onlyTrashed()
+ * @method static Builder|ChildAgeRanges query()
+ * @method static Builder|ChildAgeRanges withTrashed()
+ * @method static Builder|ChildAgeRanges withoutTrashed()
+ * @mixin Eloquent
  */
 class ChildAgeRanges extends Model
 {

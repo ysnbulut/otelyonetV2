@@ -2,24 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\VariationsOfGuestsRoomType
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ChildAgeRanges> $childAgeRanges
+ * @property-read Collection<int, ChildAgeRanges> $childAgeRanges
  * @property-read int|null $child_age_ranges_count
- * @property-read \App\Models\VariationMultiplier|null $multiplier
- * @property-read \App\Models\RoomType|null $roomType
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType query()
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|VariationsOfGuestsRoomType withoutTrashed()
- * @mixin \Eloquent
+ * @property-read VariationMultiplier|null $multiplier
+ * @property-read RoomType|null $roomType
+ * @method static Builder|VariationsOfGuestsRoomType newModelQuery()
+ * @method static Builder|VariationsOfGuestsRoomType newQuery()
+ * @method static Builder|VariationsOfGuestsRoomType onlyTrashed()
+ * @method static Builder|VariationsOfGuestsRoomType query()
+ * @method static Builder|VariationsOfGuestsRoomType withTrashed()
+ * @method static Builder|VariationsOfGuestsRoomType withoutTrashed()
+ * @mixin Eloquent
  */
 class VariationsOfGuestsRoomType extends Model
 {
@@ -27,17 +29,17 @@ class VariationsOfGuestsRoomType extends Model
 
  protected $fillable = ['room_type_id', 'number_of_adults', 'number_of_children'];
 
- public function roomType()
+ public function roomType(): \Illuminate\Database\Eloquent\Relations\BelongsTo
  {
   return $this->belongsTo(RoomType::class);
  }
 
- public function multiplier()
+ public function multiplier(): \Illuminate\Database\Eloquent\Relations\HasOne
  {
   return $this->hasOne(VariationMultiplier::class, 'variation_id', 'id');
  }
 
- public function childAgeRanges()
+ public function childAgeRanges(): \Illuminate\Database\Eloquent\Relations\HasMany
  {
   return $this->hasMany(ChildAgeRanges::class, 'variation_id', 'id');
  }

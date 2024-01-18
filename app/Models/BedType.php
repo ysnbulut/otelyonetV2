@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\BedType
  *
- * @method static \Illuminate\Database\Eloquent\Builder|BedType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BedType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BedType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BedType query()
- * @method static \Illuminate\Database\Eloquent\Builder|BedType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BedType withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|BedType newModelQuery()
+ * @method static Builder|BedType newQuery()
+ * @method static Builder|BedType onlyTrashed()
+ * @method static Builder|BedType query()
+ * @method static Builder|BedType withTrashed()
+ * @method static Builder|BedType withoutTrashed()
+ * @mixin Eloquent
  */
 class BedType extends Model
 {

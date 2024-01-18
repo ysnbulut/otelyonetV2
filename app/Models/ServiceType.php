@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\ServiceType
  *
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType query()
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ServiceType withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|ServiceType newModelQuery()
+ * @method static Builder|ServiceType newQuery()
+ * @method static Builder|ServiceType onlyTrashed()
+ * @method static Builder|ServiceType query()
+ * @method static Builder|ServiceType withTrashed()
+ * @method static Builder|ServiceType withoutTrashed()
+ * @mixin Eloquent
  */
 class ServiceType extends Model
 {
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
 }

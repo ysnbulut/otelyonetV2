@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,12 +31,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read int|null $variations_of_guests_count
  * @property-read Collection<int, RoomView> $views
  * @property-read int|null $views_count
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType query()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoomType withoutTrashed()
+ * @method static Builder|RoomType newModelQuery()
+ * @method static Builder|RoomType newQuery()
+ * @method static Builder|RoomType onlyTrashed()
+ * @method static Builder|RoomType query()
+ * @method static Builder|RoomType withTrashed()
+ * @method static Builder|RoomType withoutTrashed()
  * @mixin Eloquent
  */
 class RoomType extends Model implements HasMedia

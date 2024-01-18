@@ -47,6 +47,51 @@ const initialState: SideMenuState = {
 				},
 			],
 		},
+
+		{
+			icon: 'Store',
+			title: 'POS',
+			pathname: route('hotel.pos.index'),
+			permission: ['hotel.customers.index'],
+			subMenu: [
+				{
+					icon: 'ScanBarcode',
+					title: 'Ürünler',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.create.*'],
+				},
+				{
+					icon: 'Group',
+					title: 'Ürün Gurupları',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'ShowerHead',
+					title: 'Hizmetler',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Boxes',
+					title: 'Hizmet Grupları',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Split',
+					title: 'Satış Kanalları',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Combine',
+					title: 'Satış Üniteleri',
+					pathname: route('hotel.pos.index'),
+					permission: ['hotel.bookings.index'],
+				},
+			],
+		},
 		{
 			icon: 'Users2',
 			title: 'Müşteriler',

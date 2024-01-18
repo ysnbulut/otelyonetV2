@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\BookingRooms
  *
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms query()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|BookingRooms withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|BookingRooms newModelQuery()
+ * @method static Builder|BookingRooms newQuery()
+ * @method static Builder|BookingRooms onlyTrashed()
+ * @method static Builder|BookingRooms query()
+ * @method static Builder|BookingRooms withTrashed()
+ * @method static Builder|BookingRooms withoutTrashed()
+ * @mixin Eloquent
  */
 class BookingRooms extends Model
 {
 	protected $fillable = ['booking_id', 'room_id', 'number_of_adults', 'number_of_children'];
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
 }

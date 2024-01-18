@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Settings\GeneralSettings;
 use Carbon\Carbon;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,17 +22,17 @@ use function number_format;
  * @property-read Collection<int, UnitPriceRoomTypeAndView> $unitPrices
  * @property-read int|null $unit_prices_count
  * @property-read RoomView|null $view
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableRoomForTypeHasView($check_in, $check_out)
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableTypes()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView groupPriceCalculator($id, $checkIn, $checkOut)
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView query()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView singlePriceCalculator($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren)
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|TypeHasView availableRoomForTypeHasView($check_in, $check_out)
+ * @method static Builder|TypeHasView availableTypes()
+ * @method static Builder|TypeHasView groupPriceCalculator($id, $checkIn, $checkOut)
+ * @method static Builder|TypeHasView newModelQuery()
+ * @method static Builder|TypeHasView newQuery()
+ * @method static Builder|TypeHasView onlyTrashed()
+ * @method static Builder|TypeHasView query()
+ * @method static Builder|TypeHasView singlePriceCalculator($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren)
+ * @method static Builder|TypeHasView withTrashed()
+ * @method static Builder|TypeHasView withoutTrashed()
+ * @mixin Eloquent
  */
 class TypeHasView extends Model
 {
@@ -40,28 +42,28 @@ class TypeHasView extends Model
 
 	protected $fillable = ['type_id', 'view_id'];
 
-	public function rooms()
-	{
+	public function rooms(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
 		return $this->hasMany(Room::class, 'type_has_view_id', 'id');
 	}
 
-	public function type()
-	{
+	public function type(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
 		return $this->belongsTo(RoomType::class, 'type_id', 'id', 'type_has_view_id');
 	}
 
-	public function view()
-	{
+	public function view(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
 		return $this->belongsTo(RoomView::class, 'view_id');
 	}
 
-	public function getTypeAndViewNameAttribute()
-	{
+	public function getTypeAndViewNameAttribute(): string
+    {
 		return $this->type->name . ' ' . $this->view->name;
 	}
 
-	public function unitPrices()
-	{
+	public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
 		return $this->hasMany(UnitPriceRoomTypeAndView::class);
 	}
 
