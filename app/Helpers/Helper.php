@@ -4,11 +4,10 @@ namespace App\Helpers;
 
 class Helper
 {
-	public function guestVariations($maxAdultCount, $maxChildrenCount)
+	public function guestVariations($maxAdultCount, $maxChildrenCount): array
 	{
 		$variations = [];
 		for ($adultCount = 1; $adultCount <= $maxAdultCount; $adultCount++) {
-			// Yetişkin sayısı 2'den fazla ise maksimum çocuk sayısından 1 eksilterek ayarla
 			$maxChildren = ($adultCount > 2) ? $maxChildrenCount - ($adultCount - 2) : $maxChildrenCount;
 
 			for ($childrenCount = 0; $childrenCount <= $maxChildren; $childrenCount++) {

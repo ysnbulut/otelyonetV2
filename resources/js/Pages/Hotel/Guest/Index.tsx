@@ -7,6 +7,7 @@ import Lucide from '@/Components/Lucide'
 import {FormInput, FormSelect} from '@/Components/Form'
 import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
+import Button from '@/Components/Button'
 
 function Index({...props}: PageProps) {
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
@@ -48,35 +49,23 @@ function Index({...props}: PageProps) {
 			user={props.auth.user}
 			role={props.auth.role}
 			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}>
+			pricingPolicy={props.auth.pricing_policy}
+			breadcrumb={[
+				{
+					title: 'Dashboard',
+					href: route('hotel.dashboard.index'),
+				},
+				{
+					title: 'Misafirler',
+					href: route('hotel.guests.index'),
+				},
+			]}>
 			<Head title="Misafirler" />
-			<h2 className="intro-y mt-10 text-lg font-medium">Misafirler</h2>
-			<div className="mt-5 grid grid-cols-12 gap-6">
-				<div className="intro-y col-span-12 mt-2 flex flex-wrap items-center justify-between px-5 sm:flex-nowrap">
-					{/*<Button variant='primary' className='mr-2 shadow-md'>*/}
-					{/*    Yeni Misafir Ekle*/}
-					{/*</Button>*/}
-					{/*<Menu>*/}
-					{/*    <Menu.Button as={Button} className="px-2 !box">*/}
-					{/*      <span className="flex items-center justify-center w-5 h-5">*/}
-					{/*        <Lucide icon="Plus" className="w-4 h-4" />*/}
-					{/*      </span>*/}
-					{/*    </Menu.Button>*/}
-					{/*    <Menu.Items className="w-40">*/}
-					{/*        <Menu.Item>*/}
-					{/*            <Lucide icon="Users" className="w-4 h-4 mr-2" /> Add Group*/}
-					{/*        </Menu.Item>*/}
-					{/*        <Menu.Item>*/}
-					{/*            <Lucide icon="MessageCircle" className="w-4 h-4 mr-2" /> Send*/}
-					{/*            Message*/}
-					{/*        </Menu.Item>*/}
-					{/*    </Menu.Items>*/}
-					{/*</Menu>*/}
-					<div className="hidden text-slate-500 md:block">
-						{`${props.guests.total} kayıttan ${props.guests.from} ile ${props.guests.to} arası gösteriliyor`}
-					</div>
-					<div className="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
-						<div className="relative w-56 text-slate-500">
+			<div className="my-2 grid grid-cols-12 gap-6">
+				<div className="intro-y col-span-12 mt-2 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-between">
+					<h2 className="intro-y text-lg font-medium">Misafirler</h2>
+					<div className="flex justify-end gap-2">
+						<div className="relative text-slate-500">
 							<FormInput
 								type="text"
 								className="!box w-56 pr-10"
@@ -93,48 +82,87 @@ function Index({...props}: PageProps) {
 						</div>
 					</div>
 				</div>
-				<div className="intro-y col-span-12 overflow-auto lg:overflow-visible">
-					<Table className="border-separate border-spacing-y-[10px] sm:mt-2">
-						<Table.Thead>
-							<Table.Tr>
-								<Table.Th className="whitespace-nowrap border-b-0">AD SOYAD</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0">UYRUK</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0 text-center">TELEFON</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0 text-center">E-POSTA</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0 text-center">AKSİYONLAR</Table.Th>
-							</Table.Tr>
-						</Table.Thead>
-						<Table.Tbody>
-							{props.guests.data.map((guest) => (
-								<Table.Tr
-									key={guest.id}
-									className="intro-y">
-									<Table.Td
-										data-label="AD SOYAD"
-										className="w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-										<Link
-											href={route('hotel.guests.edit', guest.id)}
-											className="flex items-center gap-3 whitespace-nowrap font-medium">
-											<span className="text-base font-semibold">{guest.full_name}</span>
-										</Link>
-									</Table.Td>
-									<Table.Td className="border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-										{guest.nationality}
-									</Table.Td>
-									<Table.Td className="border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-										{guest.phone}
-									</Table.Td>
-									<Table.Td className="border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-										{guest.email}
-									</Table.Td>
-									<Table.Td className="w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-										asdasd
-									</Table.Td>
+				{props.guests.data.length > 0 ? (
+					<div className="intro-y col-span-12 overflow-auto lg:overflow-visible">
+						<Table
+							id="responsive-table"
+							className="border-separate border-spacing-y-[10px] sm:mt-2">
+							<Table.Thead>
+								<Table.Tr>
+									<Table.Th className="whitespace-nowrap border-b-0">AD SOYAD</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">UYRUK</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">TELEFON</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">E-POSTA</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0 text-center">AKSİYONLAR</Table.Th>
 								</Table.Tr>
-							))}
-						</Table.Tbody>
-					</Table>
-				</div>
+							</Table.Thead>
+							<Table.Tbody className="divide-y-[0.7rem] divide-transparent">
+								{props.guests.data.map((guest) => (
+									<Table.Tr
+										key={guest.id}
+										className="intro-y w-full">
+										<Table.Td
+											dataLabel="Ad Soyad"
+											className="w-full rounded-t-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											<Link
+												href={route('hotel.guests.edit', guest.id)}
+												className="flex items-center gap-3 whitespace-nowrap font-medium">
+												<span className="text-base font-semibold">{guest.full_name}</span>
+											</Link>
+										</Table.Td>
+										<Table.Td
+											dataLabel="Uyruk"
+											className="bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											{guest.nationality}
+										</Table.Td>
+										<Table.Td
+											dataLabel="Telefon"
+											className="bg-white text-center lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											{guest.phone}
+										</Table.Td>
+										<Table.Td
+											dataLabel="Email"
+											className="bg-white text-center lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											{guest.email}
+										</Table.Td>
+										<Table.Td
+											dataLabel="Aksiyon"
+											className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
+											<div className="flex items-center justify-center gap-2">
+												<Link
+													className="border-none p-1 shadow-none focus:ring-0"
+													href={route('hotel.guests.edit', guest.id)}>
+													<Lucide
+														icon="PencilLine"
+														className="h-5 w-5 text-primary"
+													/>
+												</Link>
+												<Link
+													className="border-none p-1 shadow-none focus:ring-0"
+													href={route('hotel.guests.index')}>
+													<Lucide
+														icon="MousePointerSquareDashed"
+														className="h-5 w-5 text-dark dark:text-white"
+													/>
+												</Link>
+											</div>
+										</Table.Td>
+									</Table.Tr>
+								))}
+							</Table.Tbody>
+						</Table>
+					</div>
+				) : (
+					<div className="box col-span-12 flex min-h-96 flex-col items-center justify-center text-slate-700 text-opacity-30 dark:text-slate-500 dark:text-opacity-30">
+						<div className="flex items-center justify-center gap-5">
+							<Lucide
+								icon="AlertTriangle"
+								className="h-12 w-12"
+							/>
+							<span className="text-3xl font-semibold">Henüz hiç misafir girişi yapılmamış.</span>
+						</div>
+					</div>
+				)}
 				<div className="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
 					<Pagination className="w-full sm:mr-auto sm:w-auto">
 						<Pagination.Link href={props.guests.first_page_url}>
@@ -182,7 +210,7 @@ function Index({...props}: PageProps) {
 					</Pagination>
 					<FormSelect
 						onChange={handlePerPage}
-						className="!box mt-3 w-20 sm:mt-0">
+						className="!box ml-auto mt-2 w-20 lg:mt-0">
 						{[10, 20, 25, 30, 40, 50, 100].map((item, key) => (
 							<option
 								key={key}
@@ -191,6 +219,9 @@ function Index({...props}: PageProps) {
 							</option>
 						))}
 					</FormSelect>
+				</div>
+				<div className="col-span-12 -mt-3 flex items-center justify-center text-slate-300 dark:text-darkmode-300">
+					{`${props.guests.total} kayıttan ${props.guests.from} ile ${props.guests.to} arası gösteriliyor`}
 				</div>
 			</div>
 		</AuthenticatedLayout>

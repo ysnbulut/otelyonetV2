@@ -33,17 +33,17 @@ const index = (props: Props) => {
 						<span className="ml-auto font-medium">{props.bookedRoomsPercent}</span>
 					</div>
 					<div className="mt-4 flex items-center">
-						<div className="mr-3 h-2 w-2 rounded-full bg-pending"></div>
+						<div className="mr-3 h-2 w-2 rounded-full bg-secondary"></div>
 						<span className="truncate">Boş Oda</span>
 						<span className="ml-auto font-medium">{props.availableRoomsPercent}</span>
 					</div>
 					<div className="mt-4 flex items-center">
-						<div className="mr-3 h-2 w-2 rounded-full bg-danger"></div>
+						<div className="mr-3 h-2 w-2 rounded-full bg-pending"></div>
 						<span className="truncate">Kirli Oda</span>
 						<span className="ml-auto font-medium">{props.dirtyRoomsPercent}</span>
 					</div>
 					<div className="mt-4 flex items-center">
-						<div className="mr-3 h-2 w-2 rounded-full bg-dark"></div>
+						<div className="mr-3 h-2 w-2 rounded-full bg-danger"></div>
 						<span className="truncate">Satışa Kapalı Oda</span>
 						<span className="ml-auto font-medium">{props.outOfOrderRoomsPercent}</span>
 					</div>

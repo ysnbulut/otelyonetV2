@@ -22,6 +22,7 @@ class UnitPriceRoomTypeAndViewController extends Controller
         $settings = new GeneralSettings();
         return Inertia::render('Hotel/UnitPrice/Index', [
             'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
+                //TODO: Oda eklendiğinde burası görünecek oyuzden eventi notifiyi oda eklendiğinde tetikle
                 ->whereHas('rooms')
                 ->get()->map(function ($typeHasView) {
                     $warning = false;

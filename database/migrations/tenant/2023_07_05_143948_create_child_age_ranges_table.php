@@ -13,8 +13,8 @@ return new class extends Migration {
   Schema::create('child_age_ranges', function (Blueprint $table) {
    $table->id();
    $table
-    ->foreignId('possibility_id')
-    ->constrained('possibilities_of_guests_room_types')
+    ->foreignId('variation_id')
+    ->constrained('variations_of_guests_room_types')
     ->cascadeOnDelete();
    $table->integer('min_age');
    $table->integer('max_age');

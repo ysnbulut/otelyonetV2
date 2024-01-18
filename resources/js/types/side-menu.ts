@@ -1,5 +1,5 @@
 import {Menu} from '@/stores/sideMenuSlice'
-import {slideUp, slideDown} from '@/utils/helper'
+import {slideDown, slideUp} from '@/utils/helper'
 import {router} from '@inertiajs/react'
 import _ from 'lodash'
 
@@ -11,27 +11,35 @@ export interface FormattedMenu extends Menu {
 }
 
 // Setup side menu
-const findActiveMenu = (subMenu: Menu[], location: string | undefined): boolean => {
+const findActiveMenu = (subMenu: Menu[] | Menu, location: string | undefined): boolean => {
 	let match = false
-	subMenu.forEach((item) => {
-		if (location !== undefined && item.pathname?.endsWith(location) && !item.ignore) {
-			match = true
-		} else if (!match && item.subMenu) {
-			match = findActiveMenu(item.subMenu, location)
+	if (Array.isArray(subMenu)) {
+		let matches: boolean[] = []
+		subMenu.forEach((sub) => {
+			if (sub.pathname && location !== undefined) {
+				matches.push(sub.pathname.search(location.split('/')[1]) !== -1)
+			} else {
+				matches.push(false)
+			}
+		})
+		match = matches.includes(true)
+	} else {
+		if (subMenu.pathname && location !== undefined) {
+			match = subMenu.pathname.search(location.split('/')[1]) !== -1
 		}
-	})
+	}
 	return match
 }
 
 const nestedMenu = (
-	menu: Array<Menu | 'divider'>,
+	menu: Array<FormattedMenu | 'divider'>,
 	location: string | undefined,
 	role: string,
 	permissions: string[],
 	pricingPolicy: string,
 ) => {
 	const formattedMenu: Array<FormattedMenu | 'divider'> = []
-	menu.forEach((item) => {
+	menu.forEach((item, key) => {
 		if (typeof item !== 'string') {
 			const menuItem: FormattedMenu = {
 				icon: item.icon,
@@ -41,14 +49,18 @@ const nestedMenu = (
 				ignore: item.ignore,
 				permission: item.permission,
 			}
+
 			menuItem.active =
 				location !== undefined &&
-				(menuItem.pathname?.endsWith(location) || (menuItem.subMenu && findActiveMenu(menuItem.subMenu, location))) &&
+				(menuItem.subMenu !== undefined
+					? (menuItem.pathname !== undefined && menuItem.pathname.endsWith(location)) ||
+					  findActiveMenu(menuItem.subMenu, location)
+					: findActiveMenu(menuItem, location)) &&
 				!menuItem.ignore
 
 			if (menuItem.subMenu) {
-				menuItem.activeDropdown = findActiveMenu(menuItem.subMenu, location)
-
+				menuItem.activeDropdown =
+					location !== undefined && findActiveMenu(menuItem.subMenu, location) && !menuItem.ignore
 				// Nested menu
 				const subMenu: Array<FormattedMenu> = []
 				if (pricingPolicy === 'person_based' && menuItem.title === 'Fiyatlandırma') {
@@ -63,6 +75,8 @@ const nestedMenu = (
 					(menu) => typeof menu !== 'string' && subMenu.push(menu),
 				)
 				menuItem.subMenu = subMenu.reverse()
+			} else {
+				menuItem.activeDropdown = false
 			}
 			if (role !== 'Super Admin') {
 				if (permissions && permissions.find((permission) => _.includes(menuItem.permission, permission))) {

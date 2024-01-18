@@ -47,7 +47,17 @@ function Index(props: PageProps) {
 			user={props.auth.user}
 			role={props.auth.role}
 			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}>
+			pricingPolicy={props.auth.pricing_policy}
+			breadcrumb={[
+				{
+					title: 'Dashboard',
+					href: route('hotel.dashboard.index'),
+				},
+				{
+					title: 'Kasa ve Bankalar',
+					href: route('hotel.case_and_banks.index'),
+				},
+			]}>
 			<Head title="Kasa ve Bankalar" />
 			<h2 className="intro-y mt-10 text-lg font-medium">Kasa ve Banka Hesapları</h2>
 			<div className="mt-5 grid grid-cols-12 gap-6">
@@ -64,13 +74,13 @@ function Index(props: PageProps) {
 					{/*    </span>*/}
 					{/*  </Menu.Button>*/}
 					{/*  <Menu.Items className="w-40">*/}
-					{/*    <Menu.Item>*/}
+					{/*    <Menu.BedAndViewItem>*/}
 					{/*      <Lucide icon="Users" className="w-4 h-4 mr-2" /> Add Group*/}
-					{/*    </Menu.Item>*/}
-					{/*    <Menu.Item>*/}
+					{/*    </Menu.BedAndViewItem>*/}
+					{/*    <Menu.BedAndViewItem>*/}
 					{/*      <Lucide icon="MessageCircle" className="w-4 h-4 mr-2" /> Send*/}
 					{/*      Message*/}
-					{/*    </Menu.Item>*/}
+					{/*    </Menu.BedAndViewItem>*/}
 					{/*  </Menu.Items>*/}
 					{/*</Menu>*/}
 					<div className="mx-auto hidden text-slate-500 md:block">
@@ -95,40 +105,52 @@ function Index(props: PageProps) {
 					</div>
 				</div>
 				{/* BEGIN: Users Layout */}
-				{props.banks.data.map((bank, index) => (
-					<div
-						key={bank.id}
-						className="intro-y col-span-12 md:col-span-6">
-						<div className="box">
-							<div className="flex flex-col items-center p-5 lg:flex-row">
-								<div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:mt-0 lg:text-left">
-									<Link
-										href={route('hotel.case_and_banks.edit', bank.id)}
-										className="text-3xl font-normal">
-										{bank.name} ({bank.currency})
-									</Link>
-									<div className="mt-0.5 text-2xl text-slate-500">{bank.balance}</div>
-								</div>
-								<div className="mt-4 flex lg:mt-0">
-									<Button
-										as="a"
-										href={route('hotel.case_and_banks.edit', bank.id)}
-										className="mr-2 px-2 py-1"
-										variant="primary">
-										Detay
-									</Button>
-									<Button
-										as="a"
-										href={route('hotel.case_and_banks.edit', bank.id)}
-										variant="outline-secondary"
-										className="px-2 py-1">
-										Düzenle
-									</Button>
+				{props.banks.data.length > 0 ? (
+					props.banks.data.map((bank, index) => (
+						<div
+							key={bank.id}
+							className="intro-y col-span-12 md:col-span-6">
+							<div className="box">
+								<div className="flex flex-col items-center p-5 lg:flex-row">
+									<div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:mt-0 lg:text-left">
+										<Link
+											href={route('hotel.case_and_banks.edit', bank.id)}
+											className="text-3xl font-normal">
+											{bank.name} ({bank.currency})
+										</Link>
+										<div className="mt-0.5 text-2xl text-slate-500">{bank.balance}</div>
+									</div>
+									<div className="mt-4 flex lg:mt-0">
+										<Button
+											as="a"
+											href={route('hotel.case_and_banks.edit', bank.id)}
+											className="mr-2 px-2 py-1"
+											variant="primary">
+											Detay
+										</Button>
+										<Button
+											as="a"
+											href={route('hotel.case_and_banks.edit', bank.id)}
+											variant="outline-secondary"
+											className="px-2 py-1">
+											Düzenle
+										</Button>
+									</div>
 								</div>
 							</div>
 						</div>
+					))
+				) : (
+					<div className="box col-span-12 flex min-h-96 flex-col items-center justify-center text-slate-700 text-opacity-30 dark:text-slate-500 dark:text-opacity-30">
+						<div className="flex items-center justify-center gap-5">
+							<Lucide
+								icon="AlertTriangle"
+								className="h-12 w-12"
+							/>
+							<span className="text-3xl font-semibold">Henüz bir kasa veya banka hesabı oluşturulmamış.</span>
+						</div>
 					</div>
-				))}
+				)}
 				{/* BEGIN: Users Layout */}
 				{/* END: Pagination */}
 				<div className="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">

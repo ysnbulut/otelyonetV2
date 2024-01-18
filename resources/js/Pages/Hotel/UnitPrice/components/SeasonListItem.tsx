@@ -11,6 +11,7 @@ import withReactContent from 'sweetalert2-react-content'
 export function SeasonListItem(props: SeasonListItemProps) {
 	const [submitClick, setSubmitClick] = useState<boolean>(false)
 	const MySwall = withReactContent(Swal)
+	const [editable, setEditable] = useState(false)
 	const {data, setData, post, processing, errors} = useForm({
 		type_has_view_id: props.roomTypeAndViewId,
 		season_id: props.season.id,
@@ -29,6 +30,12 @@ export function SeasonListItem(props: SeasonListItemProps) {
 				data.unit_price === '0' || data.unit_price === '0,00' ? true : props.setableSubmitClick ? !submitClick : false,
 		}))
 	}, [data.unit_price, submitClick])
+
+	useEffect(() => {
+		if (data.unit_price === '0' || data.unit_price === '0,00') {
+			setEditable(true)
+		}
+	}, [data.unit_price])
 
 	const Toast = MySwall.mixin({
 		toast: true,
@@ -54,6 +61,7 @@ export function SeasonListItem(props: SeasonListItemProps) {
 						icon: 'success',
 						title: 'Ünite Fiyatı Güncellendi!',
 					})
+					setEditable(false)
 				})
 				.catch((error) => {
 					Toast.fire({
@@ -62,20 +70,27 @@ export function SeasonListItem(props: SeasonListItemProps) {
 					})
 				})
 		} else {
-			axios
-				.post(route('hotel.unit_prices.store'), data)
-				.then((response) => {
-					Toast.fire({
-						icon: 'success',
-						title: 'Ünite Fiyatı Eklendi!',
-					})
+			if (data.unit_price === '0' || data.unit_price === '0,00') {
+				Toast.fire({
+					icon: 'error',
+					title: 'Ünite Fiyatı 0 Olamaz!',
 				})
-				.catch((error) => {
-					Toast.fire({
-						icon: 'error',
-						title: error.response.data.message,
+			} else {
+				axios
+					.post(route('hotel.unit_prices.store'), data)
+					.then((response) => {
+						Toast.fire({
+							icon: 'success',
+							title: 'Ünite Fiyatı Eklendi!',
+						})
 					})
-				})
+					.catch((error) => {
+						Toast.fire({
+							icon: 'error',
+							title: error.response.data.message,
+						})
+					})
+			}
 		}
 	}
 
@@ -83,7 +98,7 @@ export function SeasonListItem(props: SeasonListItemProps) {
 		<form
 			onSubmit={(e) => handleSubmit(e)}
 			className="intro-x grid grid-cols-1 items-center gap-2 rounded p-3 lg:grid-cols-3">
-			<div className="col-span-2 flex items-center justify-center border-b border-slate-300 dark:border-slate-700 lg:justify-start lg:border-b-0">
+			<div className="col-span-2 flex items-center justify-center border-b border-slate-100 lg:justify-start lg:border-b-0">
 				<h3
 					className={twMerge(
 						'text-base font-semibold',
@@ -108,6 +123,7 @@ export function SeasonListItem(props: SeasonListItemProps) {
 					value={data.unit_price}
 					decimalsLimit={2}
 					required={true}
+					disabled={!editable}
 					onValueChange={(value) =>
 						setData((data) => ({
 							...data,
@@ -126,12 +142,36 @@ export function SeasonListItem(props: SeasonListItemProps) {
 						data.unit_price === '0' || data.unit_price === '0,00' ? 'border-danger text-danger' : '',
 					)}
 				/>
-				<Button
-					type="submit"
-					variant="outline-primary"
-					className={twMerge('ml-2', processing ? 'btn-loading' : '')}>
-					Kaydet
-				</Button>
+				{!editable ? (
+					<Button
+						type="button"
+						onClick={(e: any) => {
+							e.preventDefault()
+							setEditable(true)
+						}}
+						variant="soft-secondary"
+						className={twMerge(
+							'ml-2',
+							processing ? 'btn-loading' : '',
+							data.unit_price === '0' || data.unit_price === '0,00' ? 'text-danger' : 'text-primary',
+						)}>
+						Düzenle
+					</Button>
+				) : data.unit_price === '0' || data.unit_price === '0,00' ? (
+					<Button
+						type="submit"
+						variant="soft-secondary"
+						className="ml-2 text-danger">
+						Kaydet
+					</Button>
+				) : (
+					<Button
+						type="submit"
+						variant="soft-secondary"
+						className="ml-2 text-primary">
+						Güncelle
+					</Button>
+				)}
 			</div>
 		</form>
 	)

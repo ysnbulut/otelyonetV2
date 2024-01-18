@@ -24,7 +24,7 @@ class VariationMultiplier extends Model
  use SoftDeletes;
 
  protected $fillable = ['room_type_id', 'variation_id', 'multiplier'];
- // protected $table = 'possibilities_multipliers';
+ protected $table = 'variation_multipliers';
 
  public function variation()
  {

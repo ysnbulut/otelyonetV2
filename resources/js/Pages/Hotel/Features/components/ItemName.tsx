@@ -1,7 +1,7 @@
 import React from 'react'
 import {FormInput, FormSwitch} from '@/Components/Form'
 import {FeatureNameComponentProps} from '../types/feature-name'
-function FeatureName(props: FeatureNameComponentProps) {
+function ItemName(props: FeatureNameComponentProps) {
 	return props.edit ? (
 		props.deleted ? (
 			<span className="text-danger">Silmek istediğine emin misin ?</span>
@@ -37,4 +37,4 @@ function FeatureName(props: FeatureNameComponentProps) {
 	)
 }
 
-export default FeatureName
+export default ItemName

@@ -1,5 +1,4 @@
 import {roomTypesAndViews} from './index'
-import {boolean} from 'yup'
 
 export interface SeasonListProps {
 	pricingPolicy: string

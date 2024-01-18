@@ -2,15 +2,16 @@ import React, {useState} from 'react'
 import Lucide from '@/Components/Lucide'
 import {FeatureComponentProps} from '../types/feature'
 import axios from 'axios'
-import FeatureName from '@/Pages/Hotel/Features/components/FeatureName'
+import ItemName from '@/Pages/Hotel/Features/components/ItemName'
+import {twMerge} from 'tailwind-merge'
 
-function Feature(props: FeatureComponentProps) {
+function Item(props: FeatureComponentProps) {
 	const [edit, setEdit] = useState<boolean>(false)
 	const [featureName, setFeatureName] = useState<string>(props.feature.name)
 	const [isPaid, setIsPaid] = useState<boolean>(props.feature.is_paid)
-
+	const [canBeDeleted, setCanBeDeleted] = useState(props.deleted)
 	const handleFeatureSubmit = () => {
-		if (!props.deleted) {
+		if (!canBeDeleted) {
 			axios
 				.post(route('hotel.room_type_features.update', props.feature.id), {
 					name: featureName,
@@ -35,12 +36,21 @@ function Feature(props: FeatureComponentProps) {
 			axios
 				.delete(route('hotel.room_type_features.delete', props.feature.id))
 				.then(() => {
-					props.setDeletedFeatures((prevState) => {
-						const newState = [...prevState]
-						const index = newState.findIndex((feature) => feature.id === props.feature.id)
-						newState.splice(index, 1)
-						return newState
-					})
+					if (!props.deleted && canBeDeleted) {
+						props.setFeatures((prevState) => {
+							const newState = [...prevState]
+							const index = newState.findIndex((feature) => feature.id === props.feature.id)
+							newState.splice(index, 1)
+							return newState
+						})
+					} else {
+						props.setDeletedFeatures((prevState) => {
+							const newState = [...prevState]
+							const index = newState.findIndex((feature) => feature.id === props.feature.id)
+							newState.splice(index, 1)
+							return newState
+						})
+					}
 				})
 				.catch((error) => {
 					console.log(error)
@@ -62,21 +72,49 @@ function Feature(props: FeatureComponentProps) {
 					className="h-4 w-4"
 				/>
 			</div>
-			<FeatureName
+			<ItemName
 				edit={edit}
 				featureName={featureName}
 				setFeatureName={setFeatureName}
 				isPaid={isPaid}
 				setIsPaid={setIsPaid}
-				deleted={props.deleted}
+				deleted={canBeDeleted}
 			/>
-			<Lucide
-				icon={edit ? 'Check' : props.deleted ? 'Trash2' : 'Pen'}
-				onClick={() => (edit ? handleFeatureSubmit() : setEdit(!edit))}
-				className="ml-auto mr-2 h-5 w-5"
-			/>
+			{!edit && (
+				<>
+					{!props.deleted && (
+						<Lucide
+							icon="PenLine"
+							onClick={() => setEdit(true)}
+							className="ml-auto mr-2 h-5 w-5 text-primary"
+						/>
+					)}
+					<Lucide
+						icon="Trash2"
+						onClick={() => {
+							!props.deleted && setCanBeDeleted(true)
+							setEdit(true)
+						}}
+						className={twMerge('mr-2 h-5 w-5 text-danger', props.deleted && 'ml-auto')}
+					/>
+				</>
+			)}
+			{edit && (
+				<>
+					<Lucide
+						icon="Check"
+						onClick={() => handleFeatureSubmit()}
+						className="ml-auto mr-2 h-5 w-5 text-success"
+					/>
+					<Lucide
+						icon="X"
+						onClick={() => setEdit(false)}
+						className="mr-2 h-5 w-5 text-danger"
+					/>
+				</>
+			)}
 		</div>
 	)
 }
 
-export default Feature
+export default Item

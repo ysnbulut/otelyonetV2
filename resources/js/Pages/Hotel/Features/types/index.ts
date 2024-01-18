@@ -11,8 +11,4 @@ export interface FeatureProps {
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
 	features: FeatureProps[]
 	deletedFeatures: FeatureProps[]
-	filters: {
-		search: string
-		trashed: boolean
-	}
 }

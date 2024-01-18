@@ -42,6 +42,7 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
                 'pricing_policy' => $tenant ? $settings->pricing_policy : null,
             ],
+            'csrf_token' => csrf_token(),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'message' => $request->session()->get('message'),

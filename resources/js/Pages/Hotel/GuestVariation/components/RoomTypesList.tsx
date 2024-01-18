@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import RoomTypesListItem from './RoomTypesListItem'
 import {RoomTypesListProps} from '../types/room-types-list'
+import emptyImg from '../../../../../images/empty.png'
 
 function RoomTypesList(props: RoomTypesListProps) {
 	const [setableSubmitClick, setSetableSubmitClick] = useState<boolean>(false)

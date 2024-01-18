@@ -19,7 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BedType extends Model
 {
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
 
 	protected $fillable = ['name', 'person_num', 'description'];
+
+    public function roomTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(RoomType::class, 'type_has_beds', 'bed_type_id', 'type_id');
+    }
 }

@@ -118,7 +118,7 @@ class RoleController extends Controller
         ->withErrors('Super Admin değiştirilemez!');
     }
     $rolePermissions = $role->permissions->pluck('name')->toArray();
-    return Inertia::render( 'Role/Edit',[
+    return Inertia::render( 'Hotel/Role/Edit',[
       'role' => $role->only(['id', 'name', 'guard_name']),
       'rolePermissions' => $rolePermissions,
       'permissions' => Permission::orderBy('name', 'asc')

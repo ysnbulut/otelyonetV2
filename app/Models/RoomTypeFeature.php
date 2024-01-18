@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Eloquent;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\RoomTypeFeature
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomType> $roomTypes
+ * @property-read Collection<int, RoomType> $roomTypes
  * @property-read int|null $room_types_count
  * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoomTypeFeature newQuery()
@@ -81,8 +82,13 @@ class RoomTypeFeature extends Model
         });
     }
 
-    public function roomTypes()
+    public function roomTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(RoomType::class, 'type_has_features', 'feature_id', 'type_id');
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('order_no');
     }
 }

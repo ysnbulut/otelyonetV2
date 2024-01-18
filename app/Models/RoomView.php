@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,7 +18,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class RoomView extends Model
 {
-	use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
-	protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description'];
+
+    public function rooms(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(Room::class,   TypeHasView::class,
+            'view_id',
+            'type_has_view_id',
+            'id',
+            'id');
+    }
+
+    public function roomTypes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(RoomType::class, 'type_has_views', 'view_id', 'type_id');
+    }
+
+    public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(
+            UnitPriceRoomTypeAndView::class,
+            TypeHasView::class,
+            'view_id',
+            'type_has_view_id',
+            'id',
+            'id'
+        );
+    }
 }

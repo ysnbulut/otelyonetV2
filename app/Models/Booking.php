@@ -100,7 +100,7 @@ class Booking extends Model
 			->orWhere(function ($query) use ($check_in, $check_out) {
 				$query->where('check_in', '<=', $check_in)
 					->where('check_out', '>=', $check_out)->orWhereNull('check_out');
-			})->with('rooms')->get()->pluck('rooms')->flatten()->pluck('id')->unique();
+			})->with('rooms')->get()->pluck('rooms')->flatten()->pluck('id')->unique()->toArray();
 	}
 
 	public function rooms(): BelongsToMany

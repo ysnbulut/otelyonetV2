@@ -82,8 +82,8 @@ class GuestController extends Controller
 		$guest->fill($request->validated());
 		$guest->update($guest->getDirty());
 		return redirect()
-			->route('hotel.guests.index')
-			->with('success', 'Guest updated.');
+            ->back()
+            ->with('success', 'Misafir başarıyla güncellendi.');
 	}
 
   /**

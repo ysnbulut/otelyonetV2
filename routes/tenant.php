@@ -21,11 +21,10 @@ use App\Http\Controllers\Hotel\RoomViewController;
 use App\Http\Controllers\Hotel\SeasonController;
 use App\Http\Controllers\Hotel\UnitPriceRoomTypeAndViewController;
 use App\Http\Controllers\Hotel\UserController;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
-use Illuminate\Foundation\Application;
 
 
 /*
@@ -98,10 +97,23 @@ Route::middleware([
     });
     //room_types
     Route::prefix('room_types')->middleware('auth')->group(function () {
+        Route::get('/test', [RoomTypeController::class, 'test'])->name('hotel.room_types.test');
         Route::get('/', [RoomTypeController::class, 'index'])->name('hotel.room_types.index');
         Route::get('/create', [RoomTypeController::class, 'create'])->name('hotel.room_types.create');
-        Route::post('/', [RoomTypeController::class, 'store'])->name('hotel.room_types.store');
-        //Route::get('/{room_type}', [RoomTypeController::class, 'show'])->name('hotel.room_types.show');
+        Route::post('/', [RoomTypeController::class, 'store'])->middleware('precognitive')->name('hotel.room_types.store');
+        Route::post('/{room_type}', [RoomTypeController::class, 'photoAdd'])->name('hotel.room_types.photo_add');
+        Route::delete('/{room_type}/photo/{photo_id}/delete', [RoomTypeController::class, 'photoDelete'])->name('hotel.room_types.photo_delete');
+        Route::post('/{room_type}/beds/add', [RoomTypeController::class, 'roomTypeBedAdd'])->name
+        ('hotel.room_types.bed_add');
+        Route::put('/{room_type}/beds/{bed_id}', [RoomTypeController::class, 'roomTypeBedEdit'])->name
+        ('hotel.room_types.bed_edit');
+        Route::delete('/{room_type}/beds/{bed_id}/delete', [RoomTypeController::class, 'roomTypeBedDelete'])->name
+        ('hotel.room_types.bed_delete');
+        Route::post('/{room_type}/views/add', [RoomTypeController::class, 'roomTypeViewAdd'])->name
+        ('hotel.room_types.view_add');
+        Route::delete('/{room_type}/views/{view_id}/delete', [RoomTypeController::class, 'roomTypeViewDelete'])->name
+        ('hotel.room_types.view_delete');
+        Route::post('/{room_type}/photos', [RoomTypeController::class, 'photosOrdersUpdate'])->name('hotel.room_type_features.photos_orders_update');
         Route::get('/{room_type}/edit', [RoomTypeController::class, 'edit'])->name('hotel.room_types.edit');
         Route::put('/{room_type}', [RoomTypeController::class, 'update'])->name('hotel.room_types.update');
         Route::delete('/{room_type}', [RoomTypeController::class, 'destroy'])->name('hotel.room_types.destroy');
@@ -158,40 +170,43 @@ Route::middleware([
             ->middleware('booking_request')
             ->name('hotel.bookings.create');
 
-        Route::get('/create/step/1')
-            ->middleware('booking_request')
+        Route::post('/create/step/1', [BookingController::class, 'stepOne'])
             ->name('hotel.bookings.create.step.one');
 
-        Route::get('/create/single/step/1', [BookingController::class, 'createSingleStepOne'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.one');
-        Route::get('/create/group/step/1', [BookingController::class, 'createGroupStepOne'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.group.step.one');
-        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.two');
-        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.group.step.two');
-        Route::get('/create/step/3', [BookingController::class, 'createStepThreeCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.three.create');
-        Route::post('/create/step/3', [BookingController::class, 'createStepThreeStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.three.store');
-        Route::get('/create/step/4', [BookingController::class, 'createStepFourCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.four.create');
-        Route::post('/create/step/4', [BookingController::class, 'createStepFourStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.four.store');
-        Route::get('/create/step/5', [BookingController::class, 'createStepFiveCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.five.create');
-        Route::post('/create/step/5', [BookingController::class, 'createStepFiveStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.five.store');
+//        Route::get('/create/step/1')
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.step.one');
+//
+//        Route::get('/create/single/step/1', [BookingController::class, 'createSingleStepOne'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.one');
+//        Route::get('/create/group/step/1', [BookingController::class, 'createGroupStepOne'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.group.step.one');
+//        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.two');
+//        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.group.step.two');
+//        Route::get('/create/step/3', [BookingController::class, 'createStepThreeCreate'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.three.create');
+//        Route::post('/create/step/3', [BookingController::class, 'createStepThreeStore'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.three.store');
+//        Route::get('/create/step/4', [BookingController::class, 'createStepFourCreate'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.four.create');
+//        Route::post('/create/step/4', [BookingController::class, 'createStepFourStore'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.four.store');
+//        Route::get('/create/step/5', [BookingController::class, 'createStepFiveCreate'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.five.create');
+//        Route::post('/create/step/5', [BookingController::class, 'createStepFiveStore'])
+//            ->middleware('booking_request')
+//            ->name('hotel.bookings.create.single.step.five.store');
         Route::post('/', [BookingController::class, 'store'])->name('hotel.bookings.store');
         Route::get('/{booking}', [BookingController::class, 'show'])->name('hotel.bookings.show');
         Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.bookings.edit');

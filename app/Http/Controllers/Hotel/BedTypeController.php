@@ -3,89 +3,58 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
-use App\Models\BedType;
 use App\Http\Requests\StoreBedTypeRequest;
 use App\Http\Requests\UpdateBedTypeRequest;
+use App\Models\BedType;
+use Inertia\Inertia;
 
 class BedTypeController extends Controller
 {
-	/**
-	 * Display a listing of the resource.
-	 */
-	public function index()
-	{
-		return view('hotel.pages.bed_types.index', [
-			'bedTypes' => BedType::orderBy('id')
-				->select(['id', 'name', 'person_num'])
-				->paginate(10)
-				->withQueryString()
-				->through(function ($bedType) {
-					return [
-						'id' => $bedType->id,
-						'name' => $bedType->name,
-						'person_num' => $bedType->person_num,
-					];
-				}),
-		]);
-	}
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        return Inertia::render('Hotel/BedType/Index', [
+            'bedTypes' => BedType::orderBy('id')->with(['roomTypes' => function ($query) {
+                $query->select(['name']);
+            }])->get(['id', 'name', 'person_num', 'description'])->map(fn($bedType) => [
+                'id' => $bedType->id,
+                'name' => $bedType->name,
+                'person_num' => $bedType->person_num,
+                'description' => $bedType->description,
+                'warning_message' => $bedType->roomTypes->count() > 0 ?
+                    $bedType->name . ' adlı yatak tipini sildiğinizde, oda manzarasını tanımlandığı  <b>' .
+                    $bedType->roomTypes->pluck('name')->join(', ') . '</b> oda tiplerinden kaldırmış olursunuz. Bunun sonucunda da <b>' . $bedType->roomTypes->pluck('name')->join(', ') . ' </b> oda tiplerinde tanımlı odalarınızdan <b>' . $bedType->name . '</b> yatakları kaldırılmış olur.' : null,
+            ])
+        ]);
+    }
 
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create()
-	{
-		return view('hotel.pages.bed_types.create');
-	}
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreBedTypeRequest $request, BedType $bedType)
+    {
+        $createdBedType = $bedType->create($request->validated());
+        $createdBedType['roomTypesNames'] = null;
+        return $createdBedType;
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 */
-	public function store(StoreBedTypeRequest $request)
-	{
-		BedType::create($request->validated());
-		return redirect()
-			->route('hotel.bed_types.index')
-			->with('success', 'Yatak tipi ekleme başarılı.');
-	}
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateBedTypeRequest $request, BedType $bedType)
+    {
+        $bedType->fill($request->validated());
+        $bedType->update($bedType->getDirty());
+    }
 
-	/**
-	 * Display the specified resource.
-	 */
-	public function show(BedType $BedType)
-	{
-		//
-	}
-
-	/**
-	 * Show the form for editing the specified resource.
-	 */
-	public function edit(BedType $BedType)
-	{
-		return view('hotel.pages.bed_types.edit', [
-			'bedType' => $BedType,
-		]);
-	}
-
-	/**
-	 * Update the specified resource in storage.
-	 */
-	public function update(UpdateBedTypeRequest $request, BedType $BedType)
-	{
-		$BedType->fill($request->validated());
-		$BedType->update($BedType->getDirty());
-		return redirect()
-			->route('hotel.bed_types.index')
-			->with('success', 'Yatak tipi güncelleme başarılı.');
-	}
-
-	/**
-	 * Remove the specified resource from storage.
-	 */
-	public function destroy(BedType $BedType)
-	{
-		$BedType->delete();
-		return redirect()
-			->route('hotel.bed_types.index')
-			->with('success', 'Yatak tipi silme başarılı.');
-	}
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(BedType $bedType)
+    {
+        $bedType->roomTypes()->detach();
+        $bedType->delete();
+    }
 }

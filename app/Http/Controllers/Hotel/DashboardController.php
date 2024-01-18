@@ -113,13 +113,14 @@ class DashboardController extends Controller
 		return Inertia::render('Hotel/Dashboard/Index', [
 			'room_count' => $rooms->count(),
 			'booked_rooms' => $booked_rooms->count(),
-			'booked_rooms_percent' => '%' . ($rooms->count() > 0 ? ($booked_rooms->count() / $rooms->count() * 100) : 0),
+			'booked_rooms_percent' => '%' . round($rooms->count() > 0 ? ($booked_rooms->count() / $rooms->count() *
+                    100) : 0),
 			'available_rooms' => $available_rooms->count(),
-			'available_rooms_percent' => '%' . ($rooms->count() > 0 ? ($available_rooms->count() / $rooms->count() * 100) : 0),
+			'available_rooms_percent' => '%' . round($rooms->count() > 0 ? ($available_rooms->count() / $rooms->count() * 100) : 0),
 			'dirty_rooms' => $dirty_rooms->count(),
-			'dirty_rooms_percent' => '%' . ($rooms->count() > 0 ? ($dirty_rooms->count() / $rooms->count() * 100) : 0),
+			'dirty_rooms_percent' => '%' . round($rooms->count() > 0 ? ($dirty_rooms->count() / $rooms->count() * 100) : 0),
 			'out_of_order_rooms' => $rooms->where('status', '=', false)->count(),
-			'out_of_order_rooms_percent' => '%' . ($rooms->count() > 0 ? ($rooms->where('status', '=', false)->count() / $rooms->count() * 100) : 0),
+			'out_of_order_rooms_percent' => '%' . round($rooms->count() > 0 ? ($rooms->where('status', '=', false)->count() / $rooms->count() * 100) : 0),
 			'guest_count' => Guest::whereHas('bookings', function ($query) use ($now) {
 				$query->where('check_out', '>=', $now)
 					->where('check_in', '<=', $now)

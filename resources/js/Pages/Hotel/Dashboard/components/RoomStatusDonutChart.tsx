@@ -1,42 +1,42 @@
-import Chart from "@/Components/Chart";
-import { ChartData, ChartOptions } from "chart.js/auto";
-import { getColor } from "@/utils/colors";
-import { selectColorScheme } from "@/stores/colorSchemeSlice";
-import { selectDarkMode } from "@/stores/darkModeSlice";
-import { useAppSelector } from "@/stores/hooks";
-import { useMemo } from "react";
+import Chart from '@/Components/Chart'
+import {ChartData, ChartOptions} from 'chart.js/auto'
+import {getColor} from '@/utils/colors'
+import {selectColorScheme} from '@/stores/colorSchemeSlice'
+import {selectDarkMode} from '@/stores/darkModeSlice'
+import {useAppSelector} from '@/stores/hooks'
+import {useMemo} from 'react'
 
-interface MainProps extends React.ComponentPropsWithoutRef<"canvas"> {
-	width?: number;
-	height: number;
-	dataSet: Array<string>;
+interface MainProps extends React.ComponentPropsWithoutRef<'canvas'> {
+	width?: number
+	height: number
+	dataSet: Array<string>
 }
 
 function Main(props: MainProps) {
-	const colorScheme = useAppSelector(selectColorScheme);
-	const darkMode = useAppSelector(selectDarkMode);
+	const colorScheme = useAppSelector(selectColorScheme)
+	const darkMode = useAppSelector(selectDarkMode)
 
-	const dataSet = props.dataSet.map((item) => parseFloat(item.replace("%", "")));
+	const dataSet = props.dataSet.map((item) => parseFloat(item.replace('%', '')))
 	const chartColors = () => [
-		getColor("pending", 0.9),
-		getColor("warning", 0.9),
-		getColor("primary", 0.9),
-		getColor("dark", 0.9),
-	];
+		getColor('pending', 0.9),
+		getColor('secondary', 0.9),
+		getColor('pending', 0.9),
+		getColor('danger', 0.9),
+	]
 	const data: ChartData = useMemo(() => {
 		return {
-			labels: ["Dolu", "Boş", "Kirli", "Kapalı"],
+			labels: ['Dolu', 'Boş', 'Kirli', 'Kapalı'],
 			datasets: [
 				{
 					data: dataSet,
-					backgroundColor: colorScheme ? chartColors() : "",
-					hoverBackgroundColor: colorScheme ? chartColors() : "",
+					backgroundColor: colorScheme ? chartColors() : '',
+					hoverBackgroundColor: colorScheme ? chartColors() : '',
 					borderWidth: 5,
-					borderColor: darkMode ? getColor("darkmode.700") : getColor("white"),
+					borderColor: darkMode ? getColor('darkmode.700') : getColor('white'),
 				},
 			],
-		};
-	}, [colorScheme, darkMode, dataSet]);
+		}
+	}, [colorScheme, darkMode, dataSet])
 
 	const options: ChartOptions = useMemo(() => {
 		return {
@@ -46,9 +46,9 @@ function Main(props: MainProps) {
 					display: false,
 				},
 			},
-			cutout: "80%",
-		};
-	}, []);
+			cutout: '80%',
+		}
+	}, [])
 
 	return (
 		<Chart
@@ -59,13 +59,13 @@ function Main(props: MainProps) {
 			options={options}
 			className={props.className}
 		/>
-	);
+	)
 }
 
 Main.defaultProps = {
-	width: "auto",
-	height: "auto",
-	className: "",
-};
+	width: 'auto',
+	height: 'auto',
+	className: '',
+}
 
-export default Main;
+export default Main

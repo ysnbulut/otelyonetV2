@@ -53,6 +53,7 @@ class RoomTypeFeatureController extends Controller
 	 */
 	public function destroy(RoomTypeFeature $roomTypeFeature)
 	{
+        $roomTypeFeature->roomTypes()->detach();
 		$roomTypeFeature->delete();
 	}
 
@@ -69,6 +70,12 @@ class RoomTypeFeatureController extends Controller
      */
     public function forceDelete(int $feature_id)
     {
-        RoomTypeFeature::onlyTrashed()->findOrFail($feature_id)->forceDelete();
+        $roomTypeFeature = RoomTypeFeature::find($feature_id);
+        if($roomTypeFeature !== null) {
+            $roomTypeFeature->roomTypes()->detach();
+            $roomTypeFeature->forceDelete();
+        } else {
+            RoomTypeFeature::onlyTrashed()->findOrFail($feature_id)->forceDelete();
+        }
     }
 }

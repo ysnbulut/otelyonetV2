@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class UnitPriceRoomTypeAndView extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
  protected $fillable = ['type_has_view_id', 'season_id', 'unit_price'];
 

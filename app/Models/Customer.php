@@ -75,16 +75,4 @@ class Customer extends Model
 //                }
 //            });
   }
-
-  /**
-   * @param $query
-   * @param $searchTerm
-   * @return mixed
-   */
-  public function scopeSearch($query, $searchTerm)
-  {
-    return $query
-      ->where('title', 'LIKE', '%' . $searchTerm . '%')
-      ->orWhere('tax_number', 'LIKE', '%' . $searchTerm . '%');
-  }
 }

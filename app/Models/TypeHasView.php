@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Settings\GeneralSettings;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Teknomavi\Tcmb\Doviz;
@@ -14,12 +14,12 @@ use function number_format;
  * App\Models\TypeHasView
  *
  * @property-read mixed $type_and_view_name
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $rooms
+ * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
- * @property-read \App\Models\RoomType|null $type
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
+ * @property-read RoomType|null $type
+ * @property-read Collection<int, UnitPriceRoomTypeAndView> $unitPrices
  * @property-read int|null $unit_prices_count
- * @property-read \App\Models\RoomView|null $view
+ * @property-read RoomView|null $view
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableRoomForTypeHasView($check_in, $check_out)
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView availableTypes()
  * @method static \Illuminate\Database\Eloquent\Builder|TypeHasView groupPriceCalculator($id, $checkIn, $checkOut)
@@ -34,7 +34,9 @@ use function number_format;
  */
 class TypeHasView extends Model
 {
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
+
+    protected $table = 'type_has_views';
 
 	protected $fillable = ['type_id', 'view_id'];
 
@@ -101,10 +103,11 @@ class TypeHasView extends Model
 							},
 						]);
 					$query->with([
-						'roomType.possibilitiesOfGuests' => function ($query) use ($numberOfAdults, $numberOfChildren) {
+						'typeHasView.type.variationsOfGuests' => function ($query) use ($numberOfAdults,
+                            $numberOfChildren) {
 							$query
 								->select('id', 'room_type_id', 'number_of_adults', 'number_of_children')
-								->with(['possibilitiesMultipliers'])
+								->with(['multiplier'])
 								->where('number_of_adults', $numberOfAdults)
 								->where('number_of_children', $numberOfChildren);
 						},
@@ -133,12 +136,12 @@ class TypeHasView extends Model
 					} else {
 						$offSeasonPrice = $unitPrice->unit_price;
 					}
-					if ($unitPrice->roomType != null && count($unitPrice->roomType->possibilitiesOfGuests) > 0) {
+					if ($unitPrice->typeHasView->type != null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0) {
 						if ($settings->pricing_policy == 'person_based') {
-							$multiplier = ($unitPrice->roomType->possibilitiesOfGuests->first() === null
+							$multiplier = ($unitPrice->typeHasView->type->variationsOfGuests->first() === null
 								? 1
-								: $unitPrice->roomType->possibilitiesOfGuests->first()->possibilitiesMultipliers !== null)
-								? $unitPrice->roomType->possibilitiesOfGuests->first()->possibilitiesMultipliers->multiplier
+								: $unitPrice->typeHasView->type->variationsOfGuests->first()->multiplier !== null)
+								? $unitPrice->typeHasView->type->variationsOfGuests->first()->multiplier->multiplier
 								: 1;
 						} else {
 							$multiplier = 1;
@@ -157,7 +160,6 @@ class TypeHasView extends Model
 						$unit->totalPrice = number_format($unit->totalPrice * $kur, 2, '.', '');
 					}
 				}
-
 				return [
 					'id' => $unit->id,
 					'type_id' => $unit->type_id,
@@ -200,10 +202,10 @@ class TypeHasView extends Model
 							},
 						]);
 					$query->with([
-						'roomType.possibilitiesOfGuests' => function ($query) {
+						'typeHasView.type.variationsOfGuests' => function ($query) {
 							$query
 								->select('id', 'room_type_id', 'number_of_adults', 'number_of_children')
-								->with(['possibilitiesMultipliers']);
+								->with(['multiplier']);
 						},
 					]);
 					$query->orWhere('season_id', null);
@@ -230,16 +232,17 @@ class TypeHasView extends Model
 					} else {
 						$offSeasonPrice = $unitPrice->unit_price;
 					}
-					if ($unitPrice->roomType != null && count($unitPrice->roomType->possibilitiesOfGuests) > 0) {
+					if ($unitPrice->typeHasView->type != null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0) {
 						if ($settings->pricing_policy == 'person_based') {
-							foreach ($unitPrice->roomType->possibilitiesOfGuests as $possibilityOfGuest) {
-								if($possibilityOfGuest === null) {
+							foreach ($unitPrice->typeHasView->type->variationsOfGuests as $variationsOfGuest) {
+								if($variationsOfGuest === null) {
 									$multipliers[] = ['text' => 'Varyasyonsuz oda fiyatı', 'multiplier' => 1];
 								} else {
-									if($possibilityOfGuest->possibilitiesMultipliers === null) {
+									if($variationsOfGuest->multiplier ===
+                                        null) {
 										$multipliers[] = ['text' => 'Varyasyon için çarpan girilmemiş oda fiyatı', 'multiplier' => 1];
 									} else {
-										$multipliers[] = ['text' => $possibilityOfGuest->number_of_adults . ' Yetişkin ' . $possibilityOfGuest->number_of_children . ' Çocuk', 'multiplier' => $possibilityOfGuest->possibilitiesMultipliers->multiplier];
+										$multipliers[] = ['text' => $variationsOfGuest->number_of_adults . ' Yetişkin ' . $variationsOfGuest->number_of_children . ' Çocuk', 'multiplier' => $variationsOfGuest->multiplier->multiplier];
 									}
 								}
 							}

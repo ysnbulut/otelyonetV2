@@ -27,4 +27,23 @@ class UpdateBedTypeRequest extends FormRequest
 			'description' => ['nullable', 'string', 'max:255'],
 		];
 	}
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Yatak tipi adı gereklidir',
+            'name.string' => 'Yatak tipi adı metin olmalıdır',
+            'name.max' => 'Yatak tipi adı en fazla 255 karakter olmalıdır',
+            'person_num.required' => 'Kişi sayısı gereklidir',
+            'person_num.integer' => 'Kişi sayısı tam sayı olmalıdır',
+            'person_num.min' => 'Kişi sayısı en az 1 olmalıdır',
+            'description.string' => 'Açıklama metin olmalıdır',
+            'description.max' => 'Açıklama en fazla 255 karakter olmalıdır',
+        ];
+    }
 }

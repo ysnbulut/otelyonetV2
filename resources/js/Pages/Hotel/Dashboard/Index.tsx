@@ -46,7 +46,12 @@ export default function Index({
 			pricingPolicy={auth.pricing_policy}
 			//todo burda bir header var ama kullanılmıyor. Ayrıca buraya breadcumb için bir dizi obje gönder topbarın içinde düzenle
 			// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Show</h2>}
-		>
+			breadcrumb={[
+				{
+					title: 'Dashboard',
+					href: route('hotel.dashboard.index'),
+				},
+			]}>
 			<Head title="Dashboard" />
 			<div className="py-12">
 				<div className="grid grid-cols-12 gap-6">

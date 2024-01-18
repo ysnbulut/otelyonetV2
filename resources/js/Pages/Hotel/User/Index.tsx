@@ -2,12 +2,13 @@ import React, {useEffect, useRef, useState} from 'react'
 import {PageProps} from './types'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {Inertia} from '@inertiajs/inertia'
-import {Head, Link} from '@inertiajs/react'
+import {Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import {FormInput, FormSelect} from '@/Components/Form'
 import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
+import Tippy from '@/Components/Tippy'
 
 function Index({...props}: PageProps) {
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
@@ -49,42 +50,26 @@ function Index({...props}: PageProps) {
 			user={props.auth.user}
 			role={props.auth.role}
 			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}>
+			pricingPolicy={props.auth.pricing_policy}
+			breadcrumb={[
+				{
+					title: 'Dashboard',
+					href: route('hotel.dashboard.index'),
+				},
+				{
+					title: 'Kullanıcılar',
+					href: route('hotel.users.index'),
+				},
+			]}>
 			<Head title="Kullanıcılar" />
-			<h2 className="intro-y mb-5 mt-10 text-lg font-medium">Kullanıcılar</h2>
-			<div className="mt-5 grid grid-cols-12 gap-6">
-				<div className="intro-y col-span-12 mt-2 flex flex-wrap items-center justify-between px-5 sm:flex-nowrap">
-					<Button
-						as={Link}
-						href={route('hotel.users.create')}
-						variant="primary"
-						className="mr-2 shadow-md">
-						Yeni Kullanıcı Ekle
-					</Button>
-					{/*<Menu>*/}
-					{/*    <Menu.Button as={Button} className="px-2 !box">*/}
-					{/*      <span className="flex items-center justify-center w-5 h-5">*/}
-					{/*        <Lucide icon="Plus" className="w-4 h-4" />*/}
-					{/*      </span>*/}
-					{/*    </Menu.Button>*/}
-					{/*    <Menu.Items className="w-40">*/}
-					{/*        <Menu.Item>*/}
-					{/*            <Lucide icon="Users" className="w-4 h-4 mr-2" /> Add Group*/}
-					{/*        </Menu.Item>*/}
-					{/*        <Menu.Item>*/}
-					{/*            <Lucide icon="MessageCircle" className="w-4 h-4 mr-2" /> Send*/}
-					{/*            Message*/}
-					{/*        </Menu.Item>*/}
-					{/*    </Menu.Items>*/}
-					{/*</Menu>*/}
-					<div className="hidden text-slate-500 md:block">
-						{`${props.users.total} kayıttan ${props.users.from} ile ${props.users.to} arası gösteriliyor`}
-					</div>
-					<div className="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
-						<div className="relative w-56 text-slate-500">
+			<div className="my-2 grid grid-cols-12 gap-6">
+				<div className="intro-y col-span-12 mt-2 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-between">
+					<h2 className="intro-y text-lg font-medium">Kullanıcılar</h2>
+					<div className="flex justify-end gap-2">
+						<div className="relative text-slate-500">
 							<FormInput
 								type="text"
-								className="!box w-56 pr-10"
+								className="!box pr-10"
 								placeholder="Search..."
 								onChange={(e) => handleSearch(e)}
 								onKeyDown={handleKeyDown}
@@ -96,69 +81,80 @@ function Index({...props}: PageProps) {
 								className="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4"
 							/>
 						</div>
+						<Tippy
+							as={Button}
+							onClick={() => router.visit(route('hotel.users.create'))}
+							variant="soft-primary"
+							className="intro-x"
+							content="Yeni Kullanıcı Ekle">
+							<Lucide
+								icon="Plus"
+								className="h-5 w-5"
+							/>
+						</Tippy>
 					</div>
 				</div>
-				<div className="intro-y col-span-12 overflow-auto lg:overflow-visible">
-					<Table className="border-separate border-spacing-y-[10px] sm:mt-2">
+				<div className="intro-y col-span-12">
+					<Table
+						id="responsive-table"
+						className="border-separate border-spacing-y-[10px] sm:mt-2">
 						<Table.Thead>
 							<Table.Tr>
 								<Table.Th className="whitespace-nowrap border-b-0">KULLANICI</Table.Th>
 								<Table.Th className="whitespace-nowrap border-b-0">KULLANICI ROLÜ</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0 text-center">E-POSTA</Table.Th>
+								<Table.Th className="whitespace-nowrap border-b-0">E-POSTA</Table.Th>
 								<Table.Th className="whitespace-nowrap border-b-0 text-center">AKSİYONLAR</Table.Th>
 							</Table.Tr>
 						</Table.Thead>
-						<Table.Tbody>
+						<Table.Tbody className="divide-y-[0.7rem] divide-transparent">
 							{props.users.data.map((user) => (
 								<Table.Tr
 									key={user.id}
 									className="intro-y">
 									<Table.Td
-										dataLabel="KULLANICI"
-										className="border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+										dataLabel="Ad Soyad"
+										className="rounded-t-md bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:first:rounded-tr-none lg:last:rounded-r-md dark:bg-darkmode-600">
 										{user.name}
 									</Table.Td>
 									<Table.Td
-										dataLabel="KULLANICI"
-										className="border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+										dataLabel="Rol"
+										className="bg-white text-center first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
 										{user.role}
 									</Table.Td>
 									<Table.Td
-										dataLabel="KULLANICI"
-										className="border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+										dataLabel="Email"
+										className="bg-white text-center first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
 										{user.email}
 									</Table.Td>
 									<Table.Td
-										dataLabel="KULLANICI"
-										className="relative w-56 border-b-0 bg-white py-0 shadow-[20px_3px_20px_#0000000b] before:absolute before:inset-y-0 before:left-0 before:my-auto before:block before:h-8 before:w-px before:bg-slate-200 first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600 before:dark:bg-darkmode-400">
+										dataLabel="Aksiyon"
+										className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
 										<div className="flex items-center justify-center gap-2">
 											<Button
 												as={Link}
-												variant="outline-primary"
 												href={route('hotel.users.edit', user.id)}
-												className="px-2">
+												className="border-none p-1 shadow-none focus:ring-0">
 												<Lucide
-													icon="Pencil"
-													className="text-theme-9 h-4 w-4"
+													icon="PencilLine"
+													className="h-5 w-5 text-primary"
 												/>
 											</Button>
 											<Button
-												onClick={() => console.log('tık sil')}
-												variant="outline-danger"
-												className="px-2">
+												className="border-none p-1 shadow-none focus:ring-0"
+												onClick={() => console.log(true)}>
 												<Lucide
-													icon="Trash"
-													className="text-theme-9 h-4 w-4 cursor-pointer"
+													icon="Trash2"
+													className="h-5 w-5 text-danger"
 												/>
 											</Button>
-											<Button
-												variant="outline-dark"
+											<Link
+												href="#"
 												className="px-2">
 												<Lucide
 													icon="ArrowUpRight"
-													className="text-theme-9 h-4 w-4"
+													className="h-5 w-5"
 												/>
-											</Button>
+											</Link>
 										</div>
 									</Table.Td>
 								</Table.Tr>
@@ -166,8 +162,8 @@ function Index({...props}: PageProps) {
 						</Table.Tbody>
 					</Table>
 				</div>
-				<div className="intro-y col-span-12 flex flex-wrap items-center sm:flex-row sm:flex-nowrap">
-					<Pagination className="w-full sm:mr-auto sm:w-auto">
+				<div className="intro-y col-span-12 flex flex-col lg:flex-row">
+					<Pagination className="w-full flex-shrink">
 						<Pagination.Link href={props.users.first_page_url}>
 							<Lucide
 								icon="ChevronsLeft"
@@ -213,7 +209,7 @@ function Index({...props}: PageProps) {
 					</Pagination>
 					<FormSelect
 						onChange={handlePerPage}
-						className="!box mt-3 w-20 sm:mt-0">
+						className="!box ml-auto mt-2 w-20 lg:mt-0">
 						{[10, 20, 25, 30, 40, 50, 100].map((item, key) => (
 							<option
 								key={key}
@@ -222,6 +218,9 @@ function Index({...props}: PageProps) {
 							</option>
 						))}
 					</FormSelect>
+				</div>
+				<div className="col-span-12 -mt-3 flex items-center justify-center text-slate-300 dark:text-darkmode-300">
+					{`${props.users.total} kayıttan ${props.users.from} ile ${props.users.to} arası gösteriliyor`}
 				</div>
 			</div>
 		</AuthenticatedLayout>

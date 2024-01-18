@@ -34,7 +34,7 @@ class VariationsOfGuestsRoomType extends Model
 
  public function multiplier()
  {
-  return $this->hasOne(VariationMultiplier::class, 'variation_id', 'id')->select(['id', 'multiplier']);
+  return $this->hasOne(VariationMultiplier::class, 'variation_id', 'id');
  }
 
  public function childAgeRanges()

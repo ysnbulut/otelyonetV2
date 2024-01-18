@@ -1,49 +1,37 @@
-import Chart from "@/Components/Chart";
-import { ChartData, ChartOptions } from "chart.js/auto";
-import { getColor } from "@/utils/colors";
-import { selectColorScheme } from "@/stores/colorSchemeSlice";
-import { selectDarkMode } from "@/stores/darkModeSlice";
-import { useAppSelector } from "@/stores/hooks";
-import { useMemo } from "react";
+import Chart from '@/Components/Chart'
+import {ChartData, ChartOptions} from 'chart.js/auto'
+import {getColor} from '@/utils/colors'
+import {selectColorScheme} from '@/stores/colorSchemeSlice'
+import {selectDarkMode} from '@/stores/darkModeSlice'
+import {useAppSelector} from '@/stores/hooks'
+import {useMemo} from 'react'
 
-interface MainProps extends React.ComponentPropsWithoutRef<"canvas"> {
-	width?: number;
-	height: number;
-	dataSet: Array<number>;
-	max_room: number;
+interface MainProps extends React.ComponentPropsWithoutRef<'canvas'> {
+	width?: number
+	height: number
+	dataSet: Array<number>
+	max_room: number
 }
 
 function Main(props: MainProps) {
-	const colorScheme = useAppSelector(selectColorScheme);
-	const darkMode = useAppSelector(selectDarkMode);
-	const dataSet = props.dataSet;
+	const darkMode = useAppSelector(selectDarkMode)
 
 	const data: ChartData = useMemo(() => {
 		return {
-			labels: [
-				"Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"
-			],
+			labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
 			datasets: [
 				{
-					label: "Dolu Oda",
+					label: 'Dolu Oda',
 					data: props.dataSet,
 					borderWidth: 0,
 					borderColor: 'transparent',
-					backgroundColor: [
-						'#293462',
-						'#0CECDD',
-						'#FF5403',
-						'#5D3891',
-						'#F7C04A',
-						'#083AA9',
-						'#00FFAB',
-					],
-					pointBorderColor: "transparent",
+					backgroundColor: ['#293462', '#0CECDD', '#FF5403', '#5D3891', '#F7C04A', '#083AA9', '#00FFAB'],
+					pointBorderColor: 'transparent',
 					tension: 0.5,
 				},
 			],
-		};
-	}, [props.dataSet]);
+		}
+	}, [props.dataSet])
 
 	const options: ChartOptions = useMemo(() => {
 		return {
@@ -59,7 +47,7 @@ function Main(props: MainProps) {
 						font: {
 							size: 12,
 						},
-						color: getColor("slate.500", 0.8),
+						color: getColor('slate.500', 0.8),
 					},
 					grid: {
 						display: true,
@@ -71,23 +59,21 @@ function Main(props: MainProps) {
 						font: {
 							size: 12,
 						},
-						color: getColor("slate.500", 0.8),
+						color: getColor('slate.500', 0.8),
 						callback: function (value) {
-							return value;
+							return value
 						},
 					},
 					grid: {
-						color: darkMode
-							? getColor("slate.500", 0.3)
-							: getColor("slate.300"),
+						color: darkMode ? getColor('slate.500', 0.3) : getColor('slate.300'),
 						borderDash: [2, 2],
 						drawBorder: false,
 					},
-					max_room: props.max_room,
+					max: props.max_room,
 				},
 			},
-		};
-	}, [darkMode, props.max_room]);
+		}
+	}, [darkMode, props.max_room])
 
 	return (
 		<Chart
@@ -98,14 +84,14 @@ function Main(props: MainProps) {
 			options={options}
 			className={props.className}
 		/>
-	);
+	)
 }
 
 Main.defaultProps = {
-	width: "auto",
-	height: "auto",
-	lineColor: "",
-	className: "",
-};
+	width: 'auto',
+	height: 'auto',
+	lineColor: '',
+	className: '',
+}
 
-export default Main;
+export default Main

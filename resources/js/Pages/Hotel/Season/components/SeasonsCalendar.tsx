@@ -9,6 +9,7 @@ import googleCalendarPlugin from '@fullcalendar/google-calendar'
 import dayjs from 'dayjs'
 import {DateSelectArg, EventAddArg, EventChangeArg} from '@fullcalendar/core'
 import moment from 'moment'
+import {SeasonDataProps} from '../types/'
 import {SeasonCalendarComponentProps} from '../types/season-calendar'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
@@ -26,6 +27,7 @@ dayjs.extend(tz)
 dayjs.extend(customFormat)
 dayjs.tz.setDefault('Europe/Istanbul')
 dayjs.extend(isBetween)
+
 function SeasonsCalendar({
 	data,
 	setData,
@@ -33,6 +35,7 @@ function SeasonsCalendar({
 	setSlideOver,
 	setCalendarValue,
 	seasons,
+	setSeasons,
 	setSeasonsDays,
 }: SeasonCalendarComponentProps) {
 	const hashids = new sqids()
@@ -90,9 +93,9 @@ function SeasonsCalendar({
 				name: info.event.title,
 				description: info.event.extendedProps.description,
 			})
-			.then(() => {
+			.then((response) => {
 				setSlideOver(false)
-				// setSeasons(response.data.filter((season: SeasonDataProps) => season.uid !== info.event.id))
+				info.event.setProp('id', response.data.filter((season: SeasonDataProps) => season.uid === info.event.id)[0].id)
 				let currentDate = dayjs(info.event.startStr, 'YYYY-MM-DD')
 				let endDate = dayjs(info.event.endStr, 'YYYY-MM-DD').subtract(1, 'day')
 				let days: string[] = []
@@ -208,8 +211,16 @@ function SeasonsCalendar({
 					'contextmenu',
 					(ev) => {
 						ev.preventDefault()
-						console.log('eventDidMount', info)
-						return false
+						return {
+							// @ts-ignore
+							title: info.event.title,
+							// @ts-ignore
+							start: info.event.startStr,
+							// @ts-ignore
+							end: info.event.endStr,
+							// @ts-ignore
+							description: info.event.extendedProps.description,
+						}
 					},
 					false,
 				)

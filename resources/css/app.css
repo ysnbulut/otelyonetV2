@@ -73,6 +73,7 @@
 @import "./components/_litepicker.css";
 @import "./components/_full-calendar.css";
 @import "./components/_tabulator.css";
+@import "sweetalert2/dist/sweetalert2.css";
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
@@ -103,3 +104,8 @@ input[type=number] {
 .sortable-ghost-deleted {
     @apply bg-red-300;
 }
+
+.dropzone {
+    @apply min-h-32 max-h-32;
+}
+

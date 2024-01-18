@@ -30,4 +30,30 @@ class UpdateRoomTypeFeatureRequest extends FormRequest
             'is_paid' => ['required_with:order_no', 'boolean'],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array {
+        return [
+            'old_order_no.integer' => 'Eski sıra numarası tam sayı olmalı.',
+            'old_order_no.min' => 'Eski sıra numarası en az 1 olmalı.',
+            'old_order_no.max' => 'Eski sıra numarası en fazla 255 olmalı.',
+            'new_order_no.required_with' => 'Yeni sıra numarası gerekli.',
+            'new_order_no.integer' => 'Yeni sıra numarası tam sayı olmalı.',
+            'new_order_no.min' => 'Yeni sıra numarası en az 1 olmalı.',
+            'new_order_no.max' => 'Yeni sıra numarası en fazla 255 olmalı.',
+            'order_no.integer' => 'Sıra numarası tam sayı olmalı.',
+            'order_no.min' => 'Sıra numarası en az 1 olmalı.',
+            'order_no.max' => 'Sıra numarası en fazla 255 olmalı.',
+            'name.required_with' => 'Olanak adı gerekli.',
+            'name.string' => 'Olanak adı metin olmalı.',
+            'name.max' => 'Olanak adı en fazla 255 karakter olmalı.',
+            'name.unique' => 'Olanak adı daha önce kullanılmış.',
+            'is_paid.required_with' => 'Ücretli olup olmadığı gerekli.',
+            'is_paid.boolean' => 'Ücretli olup olmadığı doğru formatta değil.',
+        ];
+    }
 }

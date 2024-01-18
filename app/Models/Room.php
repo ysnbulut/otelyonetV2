@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,13 +10,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\Room
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
+ * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read \App\Models\Building|null $building
- * @property-read \App\Models\Floor|null $floor
- * @property-read \App\Models\RoomType|null $roomType
- * @property-read \App\Models\RoomView|null $roomView
- * @property-read \App\Models\TypeHasView|null $typeHasView
+ * @property-read Building|null $building
+ * @property-read Floor|null $floor
+ * @property-read RoomType|null $roomType
+ * @property-read RoomView|null $roomView
+ * @property-read TypeHasView|null $typeHasView
  * @method static \Illuminate\Database\Eloquent\Builder|Room newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Room newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Room onlyTrashed()
@@ -26,14 +27,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Room extends Model
 {
- use HasFactory, SoftDeletes;
+ use SoftDeletes;
 
 	protected $fillable = [
   'building_id',
   'floor_id',
   'type_has_view_id',
   'name',
-  'description',
+//  'description',
   'is_clean',
   'status',
  ];
@@ -67,4 +68,33 @@ class Room extends Model
  {
   return $this->hasManyThrough(Booking::class, BookingRooms::class, 'room_id', 'id', 'id', 'booking_id');
  }
+
+    /**
+     * @param $query
+     * @param $searchTerm
+     * @return mixed
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('name', 'like', '%' . $search . '%');
+                });
+                $query->orWhereHas('roomType', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+                $query->orWhereHas('roomView', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+            });
+//            ->when($filters['trashed'] ?? null, function ($query, $trashed) {
+//                if ($trashed === 'with') {
+//                    $query->withTrashed();
+//                } elseif ($trashed === 'only') {
+//                    $query->onlyTrashed();
+//                }
+//            });
+    }
 }
