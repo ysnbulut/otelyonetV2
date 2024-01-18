@@ -21,6 +21,7 @@ use App\Http\Controllers\Hotel\RoomViewController;
 use App\Http\Controllers\Hotel\SeasonController;
 use App\Http\Controllers\Hotel\UnitPriceRoomTypeAndViewController;
 use App\Http\Controllers\Hotel\UserController;
+use App\Models\SalesUnit;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -44,7 +45,21 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
+
     require __DIR__.'/auth.php';
+
+
+
+    Route::get('/test', function () {
+        $salesUnit = SalesUnit::find(1);
+        return $salesUnit->products->map(function ($product) {
+            return $product->prices;
+        });
+    })->name('test.test');
+
+
+
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('hotel.dashboard.index');
     //users
     Route::prefix('users')->middleware('auth')->group(function () {

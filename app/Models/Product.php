@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Products extends Model implements HasMedia
+class Product extends Model implements HasMedia
 {
     use SoftDeletes, InteractsWithMedia;
 
@@ -28,8 +28,14 @@ class Products extends Model implements HasMedia
         $this->addMediaCollection('product_images');
     }
 
-    public function productCategory(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(ProductsCategory::class);
+        return $this->belongsTo(ProductCategory::class);
+    }
+
+    public function prices(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(SalesChannel::class, 'unit_channel_product_prices', 'product_id', 'sales_unit_channel_id')
+            ->withPivot('price');
     }
 }

@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->decimal('cost', 10, 2)->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('tax_rate');
-            $table->integer('preparation time')->default(0);
+            $table->integer('preparation_time')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

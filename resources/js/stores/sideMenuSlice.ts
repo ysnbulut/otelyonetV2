@@ -62,7 +62,7 @@ const initialState: SideMenuState = {
 				},
 				{
 					icon: 'Group',
-					title: 'Ürün Gurupları',
+					title: 'Ürün Kategorileri',
 					pathname: route('hotel.pos.index'),
 					permission: ['hotel.bookings.index'],
 				},
@@ -74,7 +74,7 @@ const initialState: SideMenuState = {
 				},
 				{
 					icon: 'Boxes',
-					title: 'Hizmet Grupları',
+					title: 'Hizmet Kategorileri',
 					pathname: route('hotel.pos.index'),
 					permission: ['hotel.bookings.index'],
 				},
