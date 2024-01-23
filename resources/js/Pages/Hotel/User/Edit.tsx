@@ -42,25 +42,7 @@ function Edit(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Kullanıcılar',
-					href: route('hotel.users.index'),
-				},
-				{
-					title: `${props.user.name} Kullanıcısını Düzenle`,
-					href: route('hotel.users.edit', props.user.id),
-				},
-			]}>
+		<>
 			<Head title="Misafirler" />
 			<div className="mt-10 flex items-center justify-between">
 				<h2 className="intro-y truncate text-lg font-medium">Düzenle {props.user.name}</h2>
@@ -242,8 +224,27 @@ function Edit(props: PageProps) {
 					</div>
 				</form>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
 
+Edit.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Kullanıcılar',
+				href: route('hotel.users.index'),
+			},
+			{
+				title: `${page.props.user.name} Kullanıcısını Düzenle`,
+				href: route('hotel.users.edit', page.props.user.id),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 export default Edit

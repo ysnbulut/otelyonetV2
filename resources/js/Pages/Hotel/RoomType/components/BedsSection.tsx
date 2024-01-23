@@ -21,7 +21,8 @@ function BedsSection(props: BedSectionProps) {
 		count: '1',
 	})
 
-	const handleAdd = () => {
+	const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
 		const bed = bedTypes.find((bed) => bed.value === bedSelect)
 		setBedSelect(null)
 		if (bed) {
@@ -105,11 +106,12 @@ function BedsSection(props: BedSectionProps) {
 				</div>
 				<Button
 					variant="soft-dark"
+					type="button"
 					className="mt-7 px-3"
 					disabled={
 						bedTypes.filter((bed) => !roomTypeBeds.find((roomTypeBed) => roomTypeBed.id === bed.value)).length === 0
 					}
-					onClick={() => handleAdd()}>
+					onClick={(e: any) => handleAdd(e)}>
 					Ekle
 				</Button>
 			</div>

@@ -82,26 +82,7 @@ function Create(props: PageProps) {
 			})
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>asdasdas</h2>}
-			breadcrumb={[
-				{
-					href: route('hotel.dashboard.index'),
-					title: 'Dashboard',
-				},
-				{
-					href: route('hotel.bookings.index'),
-					title: 'Rezervasyonlar',
-				},
-				{
-					href: route('hotel.bookings.create'),
-					title: 'Rezervasyon Oluştur',
-				},
-			]}>
+		<>
 			<Head title="Rezervasyon Oluştur" />
 			<h2 className="intro-y mt-10 text-lg font-medium">Rezervasyon Oluştur.</h2>
 			<form
@@ -298,8 +279,29 @@ function Create(props: PageProps) {
 						data={results.data}
 					/>
 				))}
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Create.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>asdasdas</h2>}
+		breadcrumb={[
+			{
+				href: route('hotel.dashboard.index'),
+				title: 'Dashboard',
+			},
+			{
+				href: route('hotel.bookings.index'),
+				title: 'Rezervasyonlar',
+			},
+			{
+				href: route('hotel.bookings.create'),
+				title: 'Rezervasyon Oluştur',
+			},
+		]}
+		children={page}
+	/>
+)
 
 export default Create

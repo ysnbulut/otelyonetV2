@@ -16,7 +16,8 @@ function ViewsSection(props: ViewSectionProps) {
 			.map((view) => ({value: view.id, label: view.name})),
 	)
 	const [roomTypeViews, setRoomTypeViews] = useState(props.roomTypeViews)
-	const handleAdd = () => {
+	const handleAdd = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
 		const view = views.find((view) => view.value === viewSelect)
 		setViewSelect(null)
 		if (view) {
@@ -85,7 +86,7 @@ function ViewsSection(props: ViewSectionProps) {
 					disabled={
 						views.filter((view) => !roomTypeViews.find((roomTypeView) => roomTypeView.id === view.value)).length === 0
 					}
-					onClick={() => handleAdd()}>
+					onClick={(e: any) => handleAdd(e)}>
 					Ekle
 				</Button>
 			</div>

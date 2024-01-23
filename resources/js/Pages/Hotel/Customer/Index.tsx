@@ -41,23 +41,7 @@ function Index({...props}: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Müşteriler',
-					href: route('hotel.customers.index'),
-				},
-			]}
-			// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>asdasdas</h2>}
-		>
+		<>
 			<Head title="Müşteriler" />
 			<div className="my-2 grid grid-cols-12 gap-6">
 				<div className="intro-y col-span-12 mt-2 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-between">
@@ -238,8 +222,26 @@ function Index({...props}: PageProps) {
 					} arası gösteriliyor`}
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Müşteriler',
+				href: route('hotel.customers.index'),
+			},
+		]}
+		// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>asdasdas</h2>}
+	>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

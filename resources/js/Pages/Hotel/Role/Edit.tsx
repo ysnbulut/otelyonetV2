@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react'
-import {FormInput, FormLabel, FormSwitch} from '@/Components/Form'
-import {Head, Link, router, useForm} from '@inertiajs/react'
+import React from 'react'
+import {FormInput, FormLabel} from '@/Components/Form'
+import {Head, router, useForm} from '@inertiajs/react'
 import {PageProps} from './types/edit'
 import TomSelect from '@/Components/TomSelect'
 import Button from '@/Components/Button'
@@ -53,25 +53,7 @@ function Edit(props: PageProps) {
 		})
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Roller',
-					href: route('hotel.roles.index'),
-				},
-				{
-					title: 'Rol Düzenle',
-					href: route('hotel.roles.edit', props.role.id),
-				},
-			]}>
+		<>
 			<Head title={`${props.role.name} Rolünü Düzenle`} />
 			<div className="my-5 flex items-center justify-between">
 				<h2 className="intro-y truncate text-lg font-medium">Düzenle {props.role.name}</h2>
@@ -160,8 +142,28 @@ function Edit(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Edit.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Roller',
+				href: route('hotel.roles.index'),
+			},
+			{
+				title: 'Rol Düzenle',
+				href: route('hotel.roles.edit', page.props.role.id),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Edit

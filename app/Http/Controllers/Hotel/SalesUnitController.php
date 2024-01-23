@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSalesUnitRequest;
 use App\Http\Requests\UpdateSalesUnitRequest;
+use App\Models\Product;
+use App\Models\SalesChannel;
 use App\Models\SalesUnit;
+use Inertia\Inertia;
 
 class SalesUnitController extends Controller
 {
@@ -14,7 +17,19 @@ class SalesUnitController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('Hotel/SalesUnit/Index',[
+            'salesUnits' => SalesUnit::with(['areas' => function($query) {
+                $query->select('id', 'name', 'sales_unit_id');
+            }])->orderBy('id', 'desc')->get(['id', 'name', 'description'])->map(fn($salesUnit) => [
+                'id' => $salesUnit->id,
+                'name' => $salesUnit->name,
+                'description' => $salesUnit->description,
+                'areas' => $salesUnit->areas->map(fn($area) => [
+                    'id' => $area->id,
+                    'name' => $area->name
+                ])
+            ])
+        ]);
     }
 
     /**
@@ -22,7 +37,10 @@ class SalesUnitController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Hotel/SalesUnit/Create', [
+            'channels' => SalesChannel::all(['id', 'name']),
+            'products' => Product::all(['id', 'name']),
+        ]);
     }
 
     /**

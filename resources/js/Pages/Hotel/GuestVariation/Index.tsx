@@ -10,21 +10,7 @@ import Lucide from '@/Components/Lucide'
 function Index(props: PageProps) {
 	const [warningBadge, setWarningBadge] = useState<{[key: number]: boolean}>({})
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Misafir Varyasyonları',
-					href: route('hotel.variations.index'),
-				},
-			]}>
+		<>
 			<Head title="Misafir Varyasyonları" />
 			<h2 className="intro-y my-2 text-lg font-medium lg:my-5">Varyasyon Çarpanları</h2>
 			<div className="box w-full p-5">
@@ -64,8 +50,24 @@ function Index(props: PageProps) {
 					</div>
 				)}
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Misafir Varyasyonları',
+				href: route('hotel.variations.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

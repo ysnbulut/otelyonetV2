@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 import {PageProps, RoomViewProps} from './types'
 import {Head, useForm} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {FormInput, FormLabel, FormSwitch, FormTextarea} from '@/Components/Form'
+import {FormInput, FormLabel, FormTextarea} from '@/Components/Form'
 import Button from '@/Components/Button'
 import Item from './components/Item'
 import axios from 'axios'
@@ -10,6 +10,7 @@ import Lucide from '@/Components/Lucide'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import Tippy from '@/Components/Tippy'
+
 function Index(props: PageProps) {
 	const MySwal = withReactContent(Swal)
 	const {data, setData, post, processing, errors, reset, setError, clearErrors} = useForm({
@@ -50,21 +51,7 @@ function Index(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Oda Manzaraları',
-					href: route('hotel.room_views.index'),
-				},
-			]}>
+		<>
 			<Head title="Oda Manzaraları" />
 			<div className="my-5 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">Oda Manzaraları</h2>
@@ -173,8 +160,24 @@ function Index(props: PageProps) {
 					</div>
 				</div>
 			)}
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Oda Manzaraları',
+				href: route('hotel.room_views.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

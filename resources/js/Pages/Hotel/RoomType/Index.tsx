@@ -10,21 +10,7 @@ import Tippy from '@/Components/Tippy'
 function Index(props: PageProps) {
 	const [roomTypes, setRoomTypes] = useState(props.roomTypes)
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Oda Türleri',
-					href: route('hotel.room_types.index'),
-				},
-			]}>
+		<>
 			<Head title="Oda Türleri" />
 			<div className="my-5 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">Oda Türleri</h2>
@@ -59,8 +45,23 @@ function Index(props: PageProps) {
 					</div>
 				</div>
 			)}
-		</AuthenticatedLayout>
+		</>
 	)
 }
 
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Oda Türleri',
+				href: route('hotel.room_types.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 export default Index

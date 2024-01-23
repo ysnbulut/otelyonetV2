@@ -57,6 +57,7 @@ export function RoomTypesListItem(props: RoomTypesListItemProps) {
 			axios
 				.put(route('hotel.variations.update', props.variation.multiplier.id), data)
 				.then(() => {
+					setEditable(false)
 					Toast.fire({
 						icon: 'success',
 						title: 'Ünite Fiyatı Güncellendi!',

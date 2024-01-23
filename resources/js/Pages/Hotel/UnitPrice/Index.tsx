@@ -9,21 +9,7 @@ import Lucide from '@/Components/Lucide'
 function Index(props: PageProps) {
 	const [warningBadge, setWarningBadge] = useState<{[key: number]: boolean}>({})
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Ünite Fiyatları',
-					href: route('hotel.unit_prices.index'),
-				},
-			]}>
+		<>
 			<Head title="Ünite Fiyatları" />
 			<h2 className="intro-y my-2 text-lg font-medium lg:my-5">Ünite Fiyatları</h2>
 			<div className="box w-full p-5">
@@ -64,8 +50,23 @@ function Index(props: PageProps) {
 					</div>
 				)}
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
 
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Ünite Fiyatları',
+				href: route('hotel.unit_prices.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 export default Index

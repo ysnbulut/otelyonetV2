@@ -10,22 +10,35 @@ export interface FormattedMenu extends Menu {
 	permission?: string[]
 }
 
+const checkPathname = (menuPathname: string | undefined, currentPathname: string | undefined) => {
+	const pathnameSplit = menuPathname?.split('.')
+	const currentSplit = currentPathname?.split('.')
+	return !!(
+		pathnameSplit &&
+		currentSplit &&
+		pathnameSplit[0] === currentSplit[0] &&
+		pathnameSplit[1] === currentSplit[1]
+	)
+}
+
 // Setup side menu
-const findActiveMenu = (subMenu: Menu[] | Menu, location: string | undefined): boolean => {
-	let match = false
+const findActiveMenu = (subMenu: Menu[] | Menu): boolean => {
+	let match: boolean
 	if (Array.isArray(subMenu)) {
 		let matches: boolean[] = []
 		subMenu.forEach((sub) => {
-			if (sub.pathname && location !== undefined) {
-				matches.push(sub.pathname.search(location.split('/')[1]) !== -1)
+			if (sub.pathname === route().current()) {
+				matches.push(true)
 			} else {
-				matches.push(false)
+				matches.push(checkPathname(sub.pathname, route().current()))
 			}
 		})
 		match = matches.includes(true)
 	} else {
-		if (subMenu.pathname && location !== undefined) {
-			match = subMenu.pathname.search(location.split('/')[1]) !== -1
+		if (subMenu.pathname === route().current()) {
+			match = true
+		} else {
+			match = checkPathname(subMenu.pathname, route().current())
 		}
 	}
 	return match
@@ -33,13 +46,12 @@ const findActiveMenu = (subMenu: Menu[] | Menu, location: string | undefined): b
 
 const nestedMenu = (
 	menu: Array<FormattedMenu | 'divider'>,
-	location: string | undefined,
-	role: string,
-	permissions: string[],
-	pricingPolicy: string,
+	role: string | undefined,
+	permissions: string[] | undefined,
+	pricingPolicy: string | undefined,
 ) => {
 	const formattedMenu: Array<FormattedMenu | 'divider'> = []
-	menu.forEach((item, key) => {
+	menu.forEach((item) => {
 		if (typeof item !== 'string') {
 			const menuItem: FormattedMenu = {
 				icon: item.icon,
@@ -51,30 +63,30 @@ const nestedMenu = (
 			}
 
 			menuItem.active =
-				location !== undefined &&
-				(menuItem.subMenu !== undefined
-					? (menuItem.pathname !== undefined && menuItem.pathname.endsWith(location)) ||
-					  findActiveMenu(menuItem.subMenu, location)
-					: findActiveMenu(menuItem, location)) &&
+				(menuItem.subMenu !== undefined ? findActiveMenu(menuItem.subMenu) : findActiveMenu(menuItem)) &&
 				!menuItem.ignore
 
 			if (menuItem.subMenu) {
-				menuItem.activeDropdown =
-					location !== undefined && findActiveMenu(menuItem.subMenu, location) && !menuItem.ignore
 				// Nested menu
 				const subMenu: Array<FormattedMenu> = []
-				if (pricingPolicy === 'person_based' && menuItem.title === 'Fiyatlandırma') {
+				if (pricingPolicy === 'person_based' && menuItem.title === 'Fiyatlar') {
 					subMenu.push({
 						icon: 'Percent',
 						title: 'Varyasyon Çarpanları',
-						pathname: route('hotel.variations.index'),
+						pathname: 'hotel.variations.index',
 						permission: ['hotel.variations.index'],
 					})
+					menuItem.subMenu = [...subMenu, ...menuItem.subMenu]
 				}
-				nestedMenu(menuItem.subMenu, location, role, permissions, pricingPolicy).map(
+				menuItem.activeDropdown = findActiveMenu(menuItem.subMenu) && !menuItem.ignore
+				nestedMenu(menuItem.subMenu, role, permissions, pricingPolicy).map(
 					(menu) => typeof menu !== 'string' && subMenu.push(menu),
 				)
-				menuItem.subMenu = subMenu.reverse()
+				if (pricingPolicy === 'person_based' && menuItem.title === 'Fiyatlar') {
+					menuItem.subMenu = subMenu.slice(1, 4).reverse()
+				} else {
+					menuItem.subMenu = subMenu.reverse()
+				}
 			} else {
 				menuItem.activeDropdown = false
 			}
@@ -97,7 +109,7 @@ const linkTo = (menu: FormattedMenu) => {
 		menu.activeDropdown = !menu.activeDropdown
 	} else {
 		if (menu.pathname !== undefined) {
-			router.visit(menu.pathname)
+			router.visit(route(menu.pathname))
 		}
 	}
 }

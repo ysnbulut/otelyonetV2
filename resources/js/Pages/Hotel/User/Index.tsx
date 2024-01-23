@@ -10,7 +10,7 @@ import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
 import Tippy from '@/Components/Tippy'
 
-function Index({...props}: PageProps) {
+function Index(props: PageProps) {
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
 	const [perPage, setPerPage] = useState(props.users.per_page || 10)
 
@@ -46,21 +46,7 @@ function Index({...props}: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Kullanıcılar',
-					href: route('hotel.users.index'),
-				},
-			]}>
+		<>
 			<Head title="Kullanıcılar" />
 			<div className="my-2 grid grid-cols-12 gap-6">
 				<div className="intro-y col-span-12 mt-2 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-between">
@@ -209,13 +195,10 @@ function Index({...props}: PageProps) {
 					</Pagination>
 					<FormSelect
 						onChange={handlePerPage}
+						defaultValue={perPage}
 						className="!box ml-auto mt-2 w-20 lg:mt-0">
 						{[10, 20, 25, 30, 40, 50, 100].map((item, key) => (
-							<option
-								key={key}
-								selected={perPage === item}>
-								{item}
-							</option>
+							<option key={key}>{item}</option>
 						))}
 					</FormSelect>
 				</div>
@@ -223,8 +206,24 @@ function Index({...props}: PageProps) {
 					{`${props.users.total} kayıttan ${props.users.from} ile ${props.users.to} arası gösteriliyor`}
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Kullanıcılar',
+				href: route('hotel.users.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

@@ -51,21 +51,7 @@ function Index(props: PageProps) {
 	})
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Yatak Tipleri',
-					href: route('hotel.bed_types.index'),
-				},
-			]}>
+		<>
 			<Head title="Yatak Tipleri" />
 			<div className="my-5 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">Yatak Tipleri</h2>
@@ -190,8 +176,24 @@ function Index(props: PageProps) {
 					</div>
 				</div>
 			)}
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Yatak Tipleri',
+				href: route('hotel.bed_types.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

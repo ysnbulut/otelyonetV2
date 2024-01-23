@@ -61,25 +61,7 @@ function Create(props: PageProps) {
 
 	console.log(props.roles)
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Kullanıcılar',
-					href: route('hotel.users.index'),
-				},
-				{
-					title: 'Yeni Kullanıcı',
-					href: route('hotel.users.create'),
-				},
-			]}>
+		<>
 			<Head title="Misafirler" />
 			<div className="my-5 flex items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">Kullanıcı Ekle</h2>
@@ -240,8 +222,28 @@ function Create(props: PageProps) {
 					</div>
 				</form>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Create.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Kullanıcılar',
+				href: route('hotel.users.index'),
+			},
+			{
+				title: 'Yeni Kullanıcı',
+				href: route('hotel.users.create'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Create

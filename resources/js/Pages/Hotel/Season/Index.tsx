@@ -48,21 +48,7 @@ function Index(props: PageProps) {
 	}, [seasons])
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Sezonlar',
-					href: route('hotel.seasons.index'),
-				},
-			]}>
+		<>
 			<Head title="Sezon Yönetimi" />
 			<h2 className="intro-y my-2 text-lg font-medium lg:my-5">Sezon Yönetimi</h2>
 			<SeasonsCalendar
@@ -87,8 +73,24 @@ function Index(props: PageProps) {
 				setSeasonsDays={setSeasonsDays}
 			/>
 			{/* END: Slide Over Content */}
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Sezonlar',
+				href: route('hotel.seasons.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

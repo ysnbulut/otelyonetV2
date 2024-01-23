@@ -30,12 +30,20 @@ class Product extends Model implements HasMedia
 
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(ProductCategory::class);
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
-    public function prices(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function units(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
-        return $this->belongsToMany(SalesChannel::class, 'unit_channel_product_prices', 'product_id', 'sales_unit_channel_id')
-            ->withPivot('price');
+        return $this->hasManyThrough(SalesUnit::class, SalesUnitProducts::class, 'product_id', 'id', 'id', 'sales_unit_id')->select('sales_units.*', 'sales_unit_products.id as product_unit_id');
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where('name', 'like', '%'.$search.'%')
+                ->orWhere('description', 'like', '%'.$search.'%');
+        });
+    }
+
 }

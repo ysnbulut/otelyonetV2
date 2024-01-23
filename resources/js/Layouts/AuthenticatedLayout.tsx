@@ -10,45 +10,36 @@ import TopBar from '@/Components/TopBar'
 import MobileMenu from '@/Components/MobileMenu'
 import SideMenuTooltip from '@/Components/SideMenuTooltip'
 import {Link, usePage} from '@inertiajs/react'
-import {User} from '@/types'
-
+import {PageProps, User} from '@/types'
+// @ts-ignore
+import {motion} from 'framer-motion'
 interface BreadcrumbItem {
 	title: string
 	href: string
 }
 function Authenticated({
-	user,
-	role,
-	permissions,
-	pricingPolicy,
 	header,
 	breadcrumb,
 	children,
 }: PropsWithChildren<{
-	user: User
-	role: string
-	permissions: string[]
-	pricingPolicy: string
 	header?: ReactNode
 	breadcrumb: BreadcrumbItem[]
 }>) {
-	const {url} = usePage()
-	const location = url
+	const {props} = usePage<PageProps>()
 	const [formattedMenu, setFormattedMenu] = useState<Array<FormattedMenu | 'divider'>>([])
 	const sideMenuStore = useAppSelector(selectSideMenu)
-	const sideMenu = () => nestedMenu(sideMenuStore, location, role, permissions, pricingPolicy)
-
+	const sideMenu = () => nestedMenu(sideMenuStore, props.auth.role, props.auth.permissions, props.auth.pricing_policy)
 	useEffect(() => {
 		setFormattedMenu(sideMenu())
-	}, [sideMenuStore])
+	}, [sideMenuStore, route().current()])
 	return (
 		<div className="py-2">
 			<MobileMenu
-				role={role}
-				permissions={permissions}
-				pricingPolicy={pricingPolicy}
+				role={props.auth.role}
+				permissions={props.auth.permissions}
+				pricingPolicy={props.auth.pricing_policy}
 			/>
-			<div className="mt-[4.7rem] flex md:mt-0">
+			<div className="relative mt-[4.7rem] flex md:mt-0">
 				{/* BEGIN: Side Menu */}
 				<nav className="hidden w-[85px] overflow-x-hidden pb-16 pr-5 md:block xl:w-[230px]">
 					<Link
@@ -70,25 +61,12 @@ function Authenticated({
 							menu == 'divider' ? (
 								<Divider
 									type="li"
-									className={clsx([
-										'my-6',
-
-										// Animation
-										`animate-[0.4s_ease-in-out_0.1s_intro-divider] opacity-0 animate-fill-mode-forwards animate-delay-${
-											(menuKey + 1) * 10
-										}`,
-									])}
+									className="my-6"
 									key={menuKey}
 								/>
 							) : (
 								<li key={menuKey}>
 									<Menu
-										className={clsx({
-											// Animation
-											[`translate-x-[50px] animate-[0.4s_ease-in-out_0.1s_intro-menu] opacity-0 animate-fill-mode-forwards animate-delay-${
-												(menuKey + 1) * 10
-											}`]: !menu.active,
-										})}
 										menu={menu}
 										formattedMenuState={[formattedMenu, setFormattedMenu]}
 										level="first"
@@ -109,12 +87,6 @@ function Authenticated({
 												{menu.subMenu.map((subMenu, subMenuKey) => (
 													<li key={subMenuKey}>
 														<Menu
-															className={clsx({
-																// Animation
-																[`translate-x-[50px] animate-[0.4s_ease-in-out_0.1s_intro-menu] opacity-0 animate-fill-mode-forwards animate-delay-${
-																	(subMenuKey + 1) * 10
-																}`]: !subMenu.active,
-															})}
 															menu={subMenu}
 															formattedMenuState={[formattedMenu, setFormattedMenu]}
 															level="second"
@@ -137,12 +109,6 @@ function Authenticated({
 																	{subMenu.subMenu.map((lastSubMenu, lastSubMenuKey) => (
 																		<li key={lastSubMenuKey}>
 																			<Menu
-																				className={clsx({
-																					// Animation
-																					[`translate-x-[50px] animate-[0.4s_ease-in-out_0.1s_intro-menu] opacity-0 animate-fill-mode-forwards animate-delay-${
-																						(lastSubMenuKey + 1) * 10
-																					}`]: !lastSubMenu.active,
-																				})}
 																				menu={lastSubMenu}
 																				formattedMenuState={[formattedMenu, setFormattedMenu]}
 																				level="third"
@@ -172,6 +138,15 @@ function Authenticated({
 					{children}
 				</div>
 				{/* END: Content */}
+				<motion.div
+					className="fixed bottom-9 left-[calc(50vw-1.5rem)] z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary"
+					whileHover={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}
+					whileTap={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}>
+					<Lucide
+						icon="Plus"
+						className="h-8 w-8 text-white"
+					/>
+				</motion.div>
 			</div>
 		</div>
 	)
@@ -184,7 +159,6 @@ function Menu(props: {
 	level: 'first' | 'second' | 'third'
 }) {
 	const [formattedMenu, setFormattedMenu] = props.formattedMenuState
-	// @ts-ignore
 	return (
 		<SideMenuTooltip
 			as="a"

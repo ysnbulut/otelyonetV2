@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {PageProps, SelectedFeatures, FormDataProps} from './types/create'
+import {PageProps, SelectedFeatures} from './types/create'
 import {Head, router, useForm} from '@inertiajs/react' //useForm
 import Button from '@/Components/Button'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
@@ -63,25 +63,7 @@ const Create = (props: PageProps) => {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Oda Türleri',
-					href: route('hotel.room_types.index'),
-				},
-				{
-					title: 'Oda Türü Oluştur',
-					href: route('hotel.room_types.create'),
-				},
-			]}>
+		<>
 			<Head title="Oda Türleri" />
 			<div className="mb-5 mt-10 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">
@@ -212,7 +194,27 @@ const Create = (props: PageProps) => {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Create.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Oda Türleri',
+				href: route('hotel.room_types.index'),
+			},
+			{
+				title: 'Oda Türü Oluştur',
+				href: route('hotel.room_types.create'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 export default Create

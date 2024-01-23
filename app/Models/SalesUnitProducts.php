@@ -15,4 +15,9 @@ class SalesUnitProducts extends Model
     {
         return $this->belongsTo(SalesUnit::class);
     }
+
+    public function prices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UnitChannelProductPrice::class);
+    }
 }

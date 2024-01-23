@@ -3,7 +3,7 @@ import {PageProps, SelectedFeatures} from './types/edit'
 import {Head, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {FormCheck, FormInput, FormLabel, FormTextarea, InputGroup} from '@/Components/Form'
+import {FormInput, FormLabel, FormTextarea, InputGroup} from '@/Components/Form'
 import BedsSection from '@/Pages/Hotel/RoomType/components/BedsSection'
 import ViewsSection from '@/Pages/Hotel/RoomType/components/ViewsSection'
 import Dropzone, {DropzoneElement} from '@/Components/Dropzone'
@@ -114,25 +114,7 @@ export default function Edit(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Oda Türleri',
-					href: route('hotel.room_types.index'),
-				},
-				{
-					title: props.roomType.name,
-					href: route('hotel.room_types.edit', props.roomType.id),
-				},
-			]}>
+		<>
 			<Head title="Oda Türleri" />
 			<div className="mb-5 mt-10 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">
@@ -376,6 +358,26 @@ export default function Edit(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Edit.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Oda Türleri',
+				href: route('hotel.room_types.index'),
+			},
+			{
+				title: `${page.props.roomType.name} Oda Türünü Düzenle`,
+				href: route('hotel.room_types.edit', page.props.roomType.id),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)

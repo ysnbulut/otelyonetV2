@@ -53,25 +53,7 @@ function Edit(props: PageProps) {
 		})
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Misafirler',
-					href: route('hotel.guests.index'),
-				},
-				{
-					title: 'Misafir Düzenle',
-					href: route('hotel.guests.edit', props.guest.id),
-				},
-			]}>
+		<>
 			<Head title="Müşteriler" />
 			<div className="flex items-center justify-between">
 				<h2 className="intro-y my-5 text-lg font-medium">
@@ -89,7 +71,6 @@ function Edit(props: PageProps) {
 					/>
 				</Tippy>
 			</div>
-
 			<form
 				onSubmit={(e) => handleSubmit(e)}
 				className="intro-y box col-span-12 p-5">
@@ -277,8 +258,28 @@ function Edit(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Edit.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Misafirler',
+				href: route('hotel.guests.index'),
+			},
+			{
+				title: 'Misafir Düzenle',
+				href: route('hotel.guests.edit', page.props.guest.id),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Edit

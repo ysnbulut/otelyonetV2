@@ -1,9 +1,11 @@
 import React from 'react'
 import {FormInput, FormLabel, FormSelect, FormTextarea} from '@/Components/Form'
-import {Head, Link, useForm} from '@inertiajs/react'
+import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {PageProps} from './types/create'
+import Tippy from '@/Components/Tippy'
+import Lucide from '@/Components/Lucide'
 
 function Create(props: PageProps) {
 	const {data, setData, post, processing, errors} = useForm({
@@ -17,13 +19,22 @@ function Create(props: PageProps) {
 		address: '',
 	})
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}>
-			<Head title="Müşteri Eekle" />
-			<h2 className="intro-y my-5 text-lg font-medium">Müşteri Ekle</h2>
+		<>
+			<Head title="Müşteri Ekle" />
+			<div className="flex items-center justify-between">
+				<h2 className="intro-y my-5 text-lg font-medium">Müşteri Ekle</h2>
+				<Tippy
+					as={Button}
+					onClick={() => router.visit(route('hotel.customers.index'))}
+					variant="soft-pending"
+					className="intro-x"
+					content="Geri">
+					<Lucide
+						icon="Undo2"
+						className="h-5 w-5"
+					/>
+				</Tippy>
+			</div>
 			<form
 				method="POST"
 				action={route('hotel.customers.store')}
@@ -197,8 +208,24 @@ function Create(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Create.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Müşteriler',
+				href: route('hotel.customers.index'),
+			},
+			{
+				title: 'Müşteri Ekle',
+				href: route('hotel.customers.create'),
+			},
+		]}
+		children={page}
+	/>
+)
 
 export default Create

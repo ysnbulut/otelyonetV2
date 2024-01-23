@@ -106,6 +106,25 @@ input[type=number] {
 }
 
 .dropzone {
-    @apply min-h-32 max-h-32;
+    @apply min-h-32 p-0.5;
 }
 
+.dropzone .dz-preview {
+    @apply mx-0 my-0 w-full max-w-fit flex items-center justify-center;
+}
+
+.dropzone .dz-preview .dz-image {
+    @apply rounded w-full min-w-full;
+}
+
+.dropzone .dz-preview .dz-details {
+    @apply flex flex-col p-0 h-full;
+}
+
+.dropzone .dz-preview .dz-details .dz-size {
+    @apply mt-5;
+}
+
+.dropzone .dz-preview .dz-details .dz-filename {
+    @apply text-wrap;
+}

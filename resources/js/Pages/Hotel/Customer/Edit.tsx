@@ -1,9 +1,13 @@
 import React from 'react'
 import {FormInput, FormLabel, FormSelect, FormTextarea} from '@/Components/Form'
-import {Head, Link, useForm} from '@inertiajs/react'
+import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {PageProps} from './types/edit'
+import {chain} from 'lodash'
+import * as child_process from 'child_process'
+import Lucide from '@/Components/Lucide'
+import Tippy from '@/Components/Tippy'
 
 function Edit(props: PageProps) {
 	const {data, setData, put, processing, errors} = useForm({
@@ -23,27 +27,22 @@ function Edit(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Müşteriler',
-					href: route('hotel.customers.index'),
-				},
-				{
-					title: 'Müşteri Düzenle',
-					href: route('hotel.customers.edit', props.customer.id),
-				},
-			]}>
+		<>
 			<Head title="Müşteri Düzenle" />
-			<h2 className="intro-y my-5 text-lg font-medium">Müşteri Düzenle</h2>
+			<div className="flex items-center justify-between">
+				<h2 className="intro-y my-5 text-lg font-medium">Müşteri Düzenle</h2>
+				<Tippy
+					as={Button}
+					onClick={() => router.visit(route('hotel.customers.index'))}
+					variant="soft-pending"
+					className="intro-x"
+					content="Geri">
+					<Lucide
+						icon="Undo2"
+						className="h-5 w-5"
+					/>
+				</Tippy>
+			</div>
 			<form
 				onSubmit={(e) => {
 					handleSubmit(e)
@@ -225,8 +224,28 @@ function Edit(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Edit.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Müşteriler',
+				href: route('hotel.customers.index'),
+			},
+			{
+				title: 'Müşteri Düzenle',
+				href: route('hotel.customers.edit', page.props.customer.id),
+			},
+		]}
+		children={page}
+	/>
+)
 
 export default Edit

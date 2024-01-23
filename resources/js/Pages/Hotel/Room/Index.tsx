@@ -5,13 +5,11 @@ import Alert from '@/Components/Alert'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import Pagination from '@/Components/Pagination'
-import {FormInput, FormLabel, FormSelect, FormTextarea} from '@/Components/Form'
+import {FormInput, FormLabel, FormSelect} from '@/Components/Form'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {Inertia} from '@inertiajs/inertia'
 import {pickBy} from 'lodash'
 import TomSelect from '@/Components/TomSelect'
-import InfiniteScroll from 'react-infinite-scroll-component'
-import {useClickAway} from 'react-use'
 
 function Index(props: PageProps) {
 	const [formVisible, setFormVisible] = useState<boolean>(true)
@@ -65,21 +63,7 @@ function Index(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Odalar',
-					href: route('hotel.rooms.index'),
-				},
-			]}>
+		<>
 			<Head title="Odalar" />
 			{props.flash.success && (
 				<Alert
@@ -279,8 +263,24 @@ function Index(props: PageProps) {
 					</FormSelect>
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Odalar',
+				href: route('hotel.rooms.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

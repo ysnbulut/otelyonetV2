@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('unit_channel_service_prices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sales_unit_channels_id')->constrained('sales_unit_channels');
-            $table->foreignId('service_id')->constrained('services');
+            $table->foreignId('sales_unit_service_id')->constrained('sales_unit_services');
             $table->decimal('price', 10, 2);
             $table->timestamps();
         });

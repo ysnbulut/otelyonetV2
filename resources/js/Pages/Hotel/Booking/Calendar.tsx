@@ -46,13 +46,7 @@ function Calendar(props: PageProps) {
 	})
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>asdasdas</h2>}
-		>
+		<>
 			<Head title="Müşteriler" />
 			<h2 className="intro-y mt-10 text-lg font-medium">Müşteriler</h2>
 			<div className="w-full">
@@ -219,8 +213,28 @@ function Calendar(props: PageProps) {
 					// }}
 				/>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Calendar.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Rezervasyonlar',
+				href: route('hotel.bookings.index'),
+			},
+			{
+				title: 'Rezervasyon Oluştur',
+				href: route('hotel.bookings.create'),
+			},
+		]}
+		children={page}
+	/>
+)
 
 export default Calendar

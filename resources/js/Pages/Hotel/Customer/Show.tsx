@@ -68,25 +68,7 @@ function Show({...props}: PageProps) {
 		})
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Müşteriler',
-					href: route('hotel.customers.index'),
-				},
-				{
-					title: props.customer.title,
-					href: route('hotel.customers.show', props.customer.id),
-				},
-			]}>
+		<>
 			<Head title="Müşterileri" />
 			<div className="flex grid-cols-12 flex-col-reverse gap-3 xl:flex-row">
 				<div className="w-full xl:w-2/3">
@@ -297,8 +279,28 @@ function Show({...props}: PageProps) {
 					</div>
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Show.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Müşteriler',
+				href: route('hotel.customers.index'),
+			},
+			{
+				title: page.props.customer.title,
+				href: route('hotel.customers.show', page.props.customer.id),
+			},
+		]}
+		children={page}
+	/>
+)
 
 export default Show

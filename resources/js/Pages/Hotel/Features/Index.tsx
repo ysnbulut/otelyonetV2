@@ -77,21 +77,7 @@ function Index(props: PageProps) {
 	}
 
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Oda Özellikleri Ve Olanakları',
-					href: route('hotel.room_type_features.index'),
-				},
-			]}>
+		<>
 			<Head title="Oda Özellikleri Ve Olanakları" />
 			<div className="my-5 flex w-full items-center justify-between">
 				<h2 className="intro-y truncate text-lg font-medium">Oda Özellikleri Ve Olanakları</h2>
@@ -335,8 +321,24 @@ function Index(props: PageProps) {
 					</ReactSortable>
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Oda Özellikleri Ve Olanakları',
+				href: route('hotel.room_type_features.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

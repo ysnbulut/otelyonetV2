@@ -14,18 +14,26 @@ class SalesChannel extends Model
         'description',
     ];
 
-    public function units(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function units(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
-        return $this->belongsToMany(SalesUnit::class, 'sales_unit_channels', 'sales_channel_id', 'sales_unit_id');
+        return $this->hasManyThrough(
+            SalesUnit::class,
+            SalesUnitChannels::class,
+            'sales_channel_id', // Foreign key on SalesUnitChannels table
+            'id', // Foreign key on SalesUnit table
+            'id', // Local key on SalesChannel table
+            'sales_unit_id'); // Local key on SalesUnitChannels table)
     }
 
-    public function products(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function unitPrices()
     {
-        return $this->belongsToMany(Product::class, 'sales_unit_products', 'sales_channel_id', 'product_id');
-    }
-
-    public function services(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(Service::class, 'sales_unit_services', 'sales_channel_id', 'service_id');
+        return $this->hasManyThrough(
+            UnitChannelProductPrice::class,
+            SalesUnitChannels::class,
+            'sales_channel_id', // Foreign key in SalesUnitChannel table
+            'sales_unit_channel_id', // Foreign key in UnitChannelProductPrice table
+            'id', // Local key on SalesChannel table
+            'id' // Local key on SalesUnitChannel table
+        );
     }
 }

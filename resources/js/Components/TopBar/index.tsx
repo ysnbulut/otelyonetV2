@@ -175,7 +175,7 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 				{/* END: Search  */}
 				<Button
 					onClick={switchMode}
-					className="dark-mode-switcher mr-5 flex h-10 w-10 cursor-pointer items-center justify-center border-none p-0 shadow-none ring-0 focus:ring-0">
+					className="intro-x dark-mode-switcher mr-5 flex h-10 w-10 cursor-pointer items-center justify-center border-none p-0 shadow-none ring-0 focus:ring-0">
 					{darkMode ? (
 						<Lucide
 							icon="Sun"

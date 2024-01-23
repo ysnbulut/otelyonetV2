@@ -43,21 +43,7 @@ function Index(props: PageProps) {
 		setPerPage(e.target.value)
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Kasa ve Bankalar',
-					href: route('hotel.case_and_banks.index'),
-				},
-			]}>
+		<>
 			<Head title="Kasa ve Bankalar" />
 			<h2 className="intro-y mt-10 text-lg font-medium">Kasa ve Banka Hesapları</h2>
 			<div className="mt-5 grid grid-cols-12 gap-6">
@@ -209,8 +195,24 @@ function Index(props: PageProps) {
 				</div>
 				{/* END: Pagination */}
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: any) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Kasa ve Bankalar',
+				href: route('hotel.case_and_banks.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Index

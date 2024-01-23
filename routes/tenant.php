@@ -13,16 +13,18 @@ use App\Http\Controllers\Hotel\FloorController;
 use App\Http\Controllers\Hotel\GeneralSettingsController;
 use App\Http\Controllers\Hotel\GuestController;
 use App\Http\Controllers\Hotel\GuestVariationMultiplierController;
+use App\Http\Controllers\Hotel\ProductsController;
 use App\Http\Controllers\Hotel\RoleController;
 use App\Http\Controllers\Hotel\RoomController;
 use App\Http\Controllers\Hotel\RoomTypeController;
 use App\Http\Controllers\Hotel\RoomTypeFeatureController;
 use App\Http\Controllers\Hotel\RoomViewController;
+use App\Http\Controllers\Hotel\SalesUnitController;
 use App\Http\Controllers\Hotel\SeasonController;
 use App\Http\Controllers\Hotel\UnitPriceRoomTypeAndViewController;
 use App\Http\Controllers\Hotel\UserController;
+use App\Http\Controllers\MediaController;
 use App\Models\SalesUnit;
-use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -47,9 +49,7 @@ Route::middleware([
 ])->group(function () {
 
     require __DIR__.'/auth.php';
-
-
-
+    Route::post('upload-media', MediaController::class)->middleware('auth:sanctum')->name('upload-media');
     Route::get('/test', function () {
         $salesUnit = SalesUnit::find(1);
         return $salesUnit->products->map(function ($product) {
@@ -175,9 +175,23 @@ Route::middleware([
         Route::put('/{season}', [SeasonController::class, 'update'])->name('hotel.seasons.update');
         Route::delete('/{season}', [SeasonController::class, 'destroy'])->name('hotel.seasons.destroy');
     });
-//Pos
+    //Pos
     Route::prefix('pos')->middleware('auth')->group(function () {
         Route::get('/', [BookingController::class, 'index'])->name('hotel.pos.index');
+    });
+    //sales_units
+    Route::prefix('sales_units')->middleware('auth')->group(function () {
+        Route::get('/', [SalesUnitController::class, 'index'])->name('hotel.sales_units.index');
+        Route::get('/create', [SalesUnitController::class, 'create'])->name('hotel.sales_units.create');
+        Route::post('/', [SalesUnitController::class, 'store'])->name('hotel.sales_units.store');
+        Route::get('/{sales_unit}/edit', [SalesUnitController::class, 'edit'])->name('hotel.sales_units.edit');
+        Route::put('/{sales_unit}', [SalesUnitController::class, 'update'])->name('hotel.sales_units.update');
+        Route::delete('/{sales_unit}', [SalesUnitController::class, 'destroy'])->name('hotel.sales_units.destroy');
+    });
+    //products
+    Route::prefix('products')->middleware('auth')->group(function () {
+        Route::get('/', [ProductsController::class, 'index'])->name('hotel.products.index');
+        Route::get('/create', [ProductsController::class, 'create'])->name('hotel.products.create');
     });
     //bookings
     Route::prefix('bookings')->middleware('auth')->group(function () {

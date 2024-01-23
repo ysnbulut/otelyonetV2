@@ -39,19 +39,7 @@ export default function Index({
 		importantNotesRef.current?.tns.goTo('next')
 	}
 	return (
-		<AuthenticatedLayout
-			user={auth.user}
-			role={auth.role}
-			permissions={auth.permissions}
-			pricingPolicy={auth.pricing_policy}
-			//todo burda bir header var ama kullanılmıyor. Ayrıca buraya breadcumb için bir dizi obje gönder topbarın içinde düzenle
-			// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Show</h2>}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-			]}>
+		<>
 			<Head title="Dashboard" />
 			<div className="py-12">
 				<div className="grid grid-cols-12 gap-6">
@@ -365,6 +353,20 @@ export default function Index({
 					</div>
 				</div>
 			</div>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Index.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		//todo burda bir header var ama kullanılmıyor. Ayrıca buraya breadcumb için bir dizi obje gönder topbarın içinde düzenle
+		// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Show</h2>}
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)

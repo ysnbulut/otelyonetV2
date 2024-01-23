@@ -21,25 +21,7 @@ function Create(props: PageProps) {
 		})
 	}
 	return (
-		<AuthenticatedLayout
-			user={props.auth.user}
-			role={props.auth.role}
-			permissions={props.auth.permissions}
-			pricingPolicy={props.auth.pricing_policy}
-			breadcrumb={[
-				{
-					title: 'Dashboard',
-					href: route('hotel.dashboard.index'),
-				},
-				{
-					title: 'Roller',
-					href: route('hotel.roles.index'),
-				},
-				{
-					title: 'Yeni Rol Ekle',
-					href: route('hotel.roles.create'),
-				},
-			]}>
+		<>
 			<Head title="Yeni Rol Ekle" />
 			<div className="my-5 flex items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">Yeni Rol Ekle</h2>
@@ -117,8 +99,28 @@ function Create(props: PageProps) {
 					</Button>
 				</div>
 			</form>
-		</AuthenticatedLayout>
+		</>
 	)
 }
+
+Create.layout = (page: React.ReactNode) => (
+	<AuthenticatedLayout
+		breadcrumb={[
+			{
+				title: 'Dashboard',
+				href: route('hotel.dashboard.index'),
+			},
+			{
+				title: 'Roller',
+				href: route('hotel.roles.index'),
+			},
+			{
+				title: 'Yeni Rol Ekle',
+				href: route('hotel.roles.create'),
+			},
+		]}>
+		{page}
+	</AuthenticatedLayout>
+)
 
 export default Create

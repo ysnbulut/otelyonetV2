@@ -115,8 +115,53 @@
     .my-select-container .my-select__input-container,
     .my-select-container .my-select__placeholder,
     .my-select-container .my-select__single-value {
-        @apply text-slate-600 dark:text-slate-200;
+        @apply text-slate-400 dark:text-slate-500 ;
     }
+
+    /*****************************************************/
+
+    .my-search-select-container .my-select__control {
+        @apply border disabled:bg-slate-100 disabled:cursor-not-allowed disabled:dark:bg-darkmode-800/50
+        [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50
+        transition duration-200 ease-in-out w-full text-sm border-slate-200 dark:border-none shadow-sm rounded-md
+        dark:bg-darkmode-600 dark:focus:ring-slate-700 dark:focus:ring-opacity-50;
+    }
+
+    .my-search-select-container .my-select__control--is-focused {
+        @apply border-slate-500 hover:border-slate-500 dark:border-slate-400 dark:hover:border-slate-400 shadow-none;
+    }
+
+    .my-search-select-container .my-select__menu {
+        @apply bg-slate-100 dark:bg-darkmode-700 dark:border-slate-600;
+    }
+
+    .my-search-select-container .my-select__option {
+        @apply text-slate-600 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-darkmode-700 dark:hover:bg-darkmode-800;
+    }
+
+    .my-search-select-container .my-select__indicator-separator {
+        @apply bg-slate-400;
+    }
+
+    .my-search-select-container .my-select__input-container,
+    .my-search-select-container .my-select__placeholder,
+    .my-search-select-container .my-select__single-value {
+        @apply text-slate-400 dark:text-slate-500 ;
+    }
+
+    .my-search-select-container .my-select__multi-value {
+        @apply bg-slate-200 dark:bg-darkmode-700 text-slate-400 dark:text-slate-500;
+    }
+
+    .my-search-select-container .my-select__multi-value .my-select__multi-value__label {
+        @apply text-slate-600 dark:text-slate-500;
+    }
+
+    .my-search-select-container .my-select__multi-value .my-select__multi-value__remove {
+        @apply hover:bg-danger/20;
+    }
+
+
 }
 
 .my-select__menu-list::-webkit-scrollbar-track {
