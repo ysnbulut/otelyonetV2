@@ -1,13 +1,12 @@
 import React, {useState} from 'react'
 import {PageProps} from './types'
-import {Head, Link, useForm} from '@inertiajs/react'
+import {Head, Link, router, useForm} from '@inertiajs/react'
 import Alert from '@/Components/Alert'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import Pagination from '@/Components/Pagination'
 import {FormInput, FormLabel, FormSelect} from '@/Components/Form'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Inertia} from '@inertiajs/inertia'
 import {pickBy} from 'lodash'
 import TomSelect from '@/Components/TomSelect'
 
@@ -26,7 +25,7 @@ function Index(props: PageProps) {
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
 			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-			Inertia.get(route('hotel.rooms.index'), query, {
+			router.get(route('hotel.rooms.index'), query, {
 				replace: false,
 				preserveState: true,
 				only: ['customers'],
@@ -36,7 +35,7 @@ function Index(props: PageProps) {
 
 	const handlePerPage = (e: any): void => {
 		const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-		Inertia.get(route('hotel.customers.index'), query, {
+		router.get(route('hotel.customers.index'), query, {
 			replace: true,
 			preserveState: false,
 		})
@@ -44,7 +43,7 @@ function Index(props: PageProps) {
 	}
 
 	const handleDestroy = (id: number) => {
-		Inertia.delete(route('hotel.rooms.destroy', id), {
+		router.delete(route('hotel.rooms.destroy', id), {
 			preserveState: false,
 			onSuccess: () => {
 				console.log('silindi')
@@ -54,7 +53,7 @@ function Index(props: PageProps) {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		Inertia.post(route('hotel.rooms.store'), data, {
+		router.post(route('hotel.rooms.store'), data, {
 			preserveState: true,
 			onSuccess: () => {
 				setFormVisible(false)

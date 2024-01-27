@@ -157,7 +157,7 @@ function Create(props: PageProps) {
 								className="flex w-full flex-nowrap justify-between whitespace-nowrap">
 								Şifre tekrarı
 								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, bir önceki şifrenin aynısı yazılmalı.
+									Gerekli, şifreler birbiri ile uyuşmalı.
 								</span>
 							</FormLabel>
 							<FormInput

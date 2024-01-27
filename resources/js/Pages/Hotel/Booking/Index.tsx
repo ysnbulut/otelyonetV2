@@ -7,7 +7,6 @@ import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import {PageProps} from '@/Pages/Hotel/Booking/types'
-import {Inertia} from '@inertiajs/inertia'
 import {twMerge} from 'tailwind-merge'
 import Tippy from '@/Components/Tippy'
 
@@ -22,7 +21,7 @@ function Index(props: PageProps) {
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			Inertia.get(
+			router.get(
 				route('hotel.bookings.index'),
 				{search: searchValue},
 				{
@@ -35,7 +34,7 @@ function Index(props: PageProps) {
 	}
 
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
+		router.get(
 			route('hotel.bookings.index'),
 			{per_page: e.target.value},
 			{

@@ -163,7 +163,7 @@ function Menu(props: {
 		<SideMenuTooltip
 			as="a"
 			content={props.menu.title}
-			href={props.menu.subMenu ? '#' : props.menu.pathname}
+			href={props.menu.subMenu ? '#' : route(props.menu.pathname || '#')}
 			className={clsx([
 				'relative mb-1 flex h-[50px] items-center rounded-full pl-5 text-white',
 				{

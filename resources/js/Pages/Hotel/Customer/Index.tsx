@@ -1,7 +1,6 @@
 import React, {useState} from 'react'
 import {PageProps} from './types'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Inertia} from '@inertiajs/inertia'
 import {Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
@@ -20,7 +19,7 @@ function Index({...props}: PageProps) {
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
 			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-			Inertia.get(route('hotel.customers.index'), query, {
+			router.get(route('hotel.customers.index'), query, {
 				replace: false,
 				preserveState: true,
 				only: ['customers'],
@@ -29,7 +28,7 @@ function Index({...props}: PageProps) {
 	}
 
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
+		router.get(
 			route('hotel.customers.index'),
 			{per_page: e.target.value},
 			{

@@ -6,8 +6,8 @@ import {FormInput} from '@/Components/Form'
 import {PageProps} from './types/index'
 import Pagination from '@/Components/Pagination'
 import {FormSelect} from '@/Components/Form'
-import {Head, Link} from '@inertiajs/react'
-import {Inertia} from '@inertiajs/inertia'
+import {Head, Link, router} from '@inertiajs/react'
+
 function Index(props: PageProps) {
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
 	const [perPage, setPerPage] = useState(props.banks.per_page || 10)
@@ -19,7 +19,7 @@ function Index(props: PageProps) {
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			Inertia.get(
+			router.get(
 				route('hotel.case_and_banks.index'),
 				{search: searchValue},
 				{
@@ -32,7 +32,7 @@ function Index(props: PageProps) {
 	}
 
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
+		router.get(
 			route('hotel.case_and_banks.index'),
 			{per_page: e.target.value},
 			{

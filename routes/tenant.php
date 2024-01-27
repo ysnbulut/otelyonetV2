@@ -192,6 +192,7 @@ Route::middleware([
     Route::prefix('products')->middleware('auth')->group(function () {
         Route::get('/', [ProductsController::class, 'index'])->name('hotel.products.index');
         Route::get('/create', [ProductsController::class, 'create'])->name('hotel.products.create');
+        Route::post('/', [ProductsController::class, 'store'])->name('hotel.products.store');
     });
     //bookings
     Route::prefix('bookings')->middleware('auth')->group(function () {

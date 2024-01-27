@@ -1,13 +1,11 @@
 import React, {useState} from 'react'
 import {PageProps} from './types'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Inertia} from '@inertiajs/inertia'
-import {Head, Link} from '@inertiajs/react'
+import {Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import {FormInput, FormSelect} from '@/Components/Form'
 import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
-import Button from '@/Components/Button'
 
 function Index({...props}: PageProps) {
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
@@ -20,7 +18,7 @@ function Index({...props}: PageProps) {
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			Inertia.get(
+			router.get(
 				route('hotel.guests.index'),
 				{search: searchValue},
 				{
@@ -33,7 +31,7 @@ function Index({...props}: PageProps) {
 	}
 
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
+		router.get(
 			route('hotel.guests.index'),
 			{per_page: e.target.value},
 			{

@@ -1,5 +1,5 @@
 import React, {useRef, useState} from 'react'
-import {Head, router} from '@inertiajs/react'
+import {Head, router, useForm} from '@inertiajs/react'
 import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
@@ -10,12 +10,41 @@ import {FormInput, FormLabel} from '@/Components/Form'
 import FormTextarea from '@/Components/Form/FormTextarea'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
+import Toastify from 'toastify-js'
+import Select from 'react-select'
 
 function Create(props: PageProps) {
 	const productImageDropzoneRef = useRef<DropzoneElement>()
-	const [productPhoto, setProductPhoto] = useState<string | null>(null)
+	const {data, setData, errors, setError, clearErrors} = useForm({
+		name: '',
+		description: '',
+		sku: '',
+		cost: '',
+		price: '',
+		tax_rate: '',
+		preparation_time: '',
+		photo: '',
+	})
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
+		router.post(route('hotel.products.store'), data, {
+			onSuccess: () => {
+				Toastify({
+					text: 'Ürün başarıyla oluşturuldu.',
+					duration: 3000,
+					gravity: 'bottom',
+					position: 'right',
+					backgroundColor: 'linear-gradient(to right, #00b09b, #96c93d)',
+				}).showToast()
+			},
+			onFinish: () => {
+				clearErrors()
+			},
+			onError: (errors) => {
+				setError('name', errors.name)
+			},
+		})
+		clearErrors()
 	}
 	return (
 		<>
@@ -41,11 +70,11 @@ function Create(props: PageProps) {
 				className="box grid grid-cols-12 gap-4 p-5">
 				<div className="col-span-12 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
 					<div className="flex w-full items-center justify-center rounded md:h-44 md:w-44">
-						{productPhoto ? (
+						{data.photo !== '' ? (
 							<>
 								<Zoom>
 									<img
-										src={productPhoto}
+										src={data.photo}
 										alt="Product Photo"
 										className="h-auto w-full rounded object-cover md:h-44 md:w-44"
 									/>
@@ -53,7 +82,7 @@ function Create(props: PageProps) {
 								<FormInput
 									type="hidden"
 									name="photo"
-									value={productPhoto}
+									value={data.photo}
 								/>
 							</>
 						) : (
@@ -70,8 +99,8 @@ function Create(props: PageProps) {
 									maxFiles: 1,
 									init() {
 										this.on('success', (file, response: {name: string; original_name: string; url: string}) => {
-											setProductPhoto(response.url)
-											// this.removeFile(file)
+											setData((data) => ({...data, photo: response.url}))
+											this.removeFile(file)
 										})
 									},
 								}}
@@ -102,6 +131,10 @@ function Create(props: PageProps) {
 							<FormTextarea
 								id="description"
 								name="description"
+								value={data.description}
+								onChange={(e) => {
+									setData((data) => ({...data, description: e.target.value}))
+								}}
 							/>
 						</div>
 					</div>
@@ -116,6 +149,10 @@ function Create(props: PageProps) {
 						<FormInput
 							id="sku"
 							name="sku"
+							value={data.sku}
+							onChange={(e) => {
+								setData((data) => ({...data, sku: e.target.value}))
+							}}
 						/>
 					</div>
 					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
@@ -127,6 +164,10 @@ function Create(props: PageProps) {
 						<FormInput
 							id="cost"
 							name="cost"
+							value={data.cost}
+							onChange={(e) => {
+								setData((data) => ({...data, cost: e.target.value}))
+							}}
 						/>
 					</div>
 					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
@@ -138,6 +179,10 @@ function Create(props: PageProps) {
 						<FormInput
 							id="price"
 							name="price"
+							value={data.price}
+							onChange={(e) => {
+								setData((data) => ({...data, price: e.target.value}))
+							}}
 						/>
 					</div>
 					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
@@ -149,6 +194,10 @@ function Create(props: PageProps) {
 						<FormInput
 							id="tax_rate"
 							name="tax_rate"
+							value={data.tax_rate}
+							onChange={(e) => {
+								setData((data) => ({...data, tax_rate: e.target.value}))
+							}}
 						/>
 					</div>
 					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
@@ -160,8 +209,52 @@ function Create(props: PageProps) {
 						<FormInput
 							id="preparation_time"
 							name="preparation_time"
+							value={data.preparation_time}
+							onChange={(e) => {
+								setData((data) => ({...data, preparation_time: e.target.value}))
+							}}
 						/>
 					</div>
+					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
+						<FormLabel
+							htmlFor="preparation_time"
+							className="font-medium">
+							Kategori
+						</FormLabel>
+						<Select
+							id="preparation_time"
+							name="preparation_time"
+							className="remove-all my-select-container"
+							classNamePrefix="my-select"
+							styles={{
+								input: (base) => ({
+									...base,
+									'input:focus': {
+										boxShadow: 'none',
+									},
+								}),
+							}}
+							options={props.categories.map((category) => ({
+								label: category.name,
+								value: category.id,
+							}))}
+							onChange={(e) => {
+								e && setData((data) => ({...data, preparation_time: e.value.toString()}))
+							}}
+						/>
+					</div>
+				</div>
+				<div className="col-span-12 flex justify-end">
+					<Button
+						type="submit"
+						className="px-5"
+						variant="soft-secondary">
+						Kaydet
+						<Lucide
+							icon="CheckCheck"
+							className="ml-2 h-5 w-5 text-success"
+						/>
+					</Button>
 				</div>
 			</form>
 		</>

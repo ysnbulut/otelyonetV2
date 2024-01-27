@@ -90,14 +90,16 @@
     /* .my-select-container {
     } */
     .my-select-container .my-select__control {
-        @apply border disabled:bg-slate-100 disabled:cursor-not-allowed disabled:dark:bg-darkmode-800/50
+        @apply disabled:bg-slate-100 disabled:cursor-not-allowed disabled:dark:bg-darkmode-800/50
         [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50
         transition duration-200 ease-in-out w-full text-sm border-slate-200 dark:border-none shadow-sm rounded-md
-        dark:bg-darkmode-800 dark:focus:ring-slate-700 dark:focus:ring-opacity-50;
+        dark:bg-darkmode-800 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 focus:ring-4 focus:ring-slate-500 focus:outline-none;
     }
 
     .my-select-container .my-select__control--is-focused {
-        @apply border-slate-500 hover:border-slate-500 dark:border-slate-400 dark:hover:border-slate-400 shadow-none;
+        @apply dark:border-slate-400 dark:hover:border-slate-400 shadow ring-4 ring-primary
+        ring-opacity-20 border-primary border-opacity-40 dark:bg-darkmode-800 dark:border-transparent
+        dark:ring-slate-700 dark:ring-opacity-50;
     }
 
     .my-select-container .my-select__menu {
@@ -115,7 +117,7 @@
     .my-select-container .my-select__input-container,
     .my-select-container .my-select__placeholder,
     .my-select-container .my-select__single-value {
-        @apply text-slate-400 dark:text-slate-500 ;
+        @apply text-slate-900 dark:text-slate-100 ;
     }
 
     /*****************************************************/

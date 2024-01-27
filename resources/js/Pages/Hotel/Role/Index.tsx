@@ -6,9 +6,6 @@ import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import Pagination from '@/Components/Pagination'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Inertia} from '@inertiajs/inertia'
-import Alert from '@/Components/Alert'
-import {twMerge} from 'tailwind-merge'
 import Tippy from '@/Components/Tippy'
 
 function Index(props: PageProps) {
@@ -16,7 +13,7 @@ function Index(props: PageProps) {
 	const [perPage, setPerPage] = useState(props.roles.per_page || 10)
 
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
+		router.get(
 			route('hotel.roles.index'),
 			{per_page: e.target.value},
 			{
@@ -28,7 +25,7 @@ function Index(props: PageProps) {
 	}
 
 	const handleDestroy = (id: number) => {
-		Inertia.delete(route('hotel.roles.destroy', id), {
+		router.delete(route('hotel.roles.destroy', id), {
 			preserveState: false,
 			onSuccess: () => {
 				console.log('silindi')

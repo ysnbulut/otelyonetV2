@@ -21,14 +21,16 @@ class ProductsController extends Controller
     public function index()
     {
         return Inertia::render('Hotel/Product/Index',[
-            'filters' => Request::all('search', 'trashed'),
+            'filters' => Request::all('search', 'trashed', 'categories', 'sales_units', 'sales_channels'),
             'products' => Product::with(['units' => function ($query) {
                     $query->with(['channels' => function ($query) {
                         $query->with(['unitPrices' => function ($query) {
                             $query->select('unit_channel_product_prices.id', 'unit_channel_product_prices.sales_unit_channel_id', 'unit_channel_product_prices.sales_unit_product_id', 'unit_channel_product_prices.price');
                         }])->select('sales_channels.id', 'sales_channels.name');
                     }])->select('sales_units.id', 'sales_units.name', 'sales_unit_products.id as product_unit_id');
-                }])->filter(Request::only('search', 'trashed'))->paginate(Request::get('per_page') ?? 12)
+                }])->filter(Request::only('search', 'trashed', 'categories', 'sales_units', 'sales_channels'))->paginate(Request::get
+            ('per_page') ??
+                12)
                     ->withQueryString()
                     ->through(function ($product) {
                         return [
@@ -71,34 +73,11 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Hotel/Product/Create', [
-            'categories' => \App\Models\ProductCategory::all(),
-            'units' => \App\Models\SalesUnit::all(),
-            'channels' => \App\Models\SalesChannel::all(),
+        return Inertia::render('Hotel/Product/Create',[
+            'categories' => ProductCategory::all(['id', 'name']),
+            'units' => SalesUnit::all(['id', 'name']),
+            'channels' => SalesChannel::all(['id', 'name']),
         ]);
-    }
-
-    public function photoAdd(Product $product)
-    {
-//        try {
-//            $photo = Request::file('file');
-//            $roomType
-//                ->addMedia($photo)
-//                ->usingFileName(Strings::webalize(str_replace($photo->getClientOriginalExtension(), '', $photo->getClientOriginalName())))
-//                ->toMediaCollection('room_type_photos');
-//            $uploadedPhoto = $roomType->getMedia('room_type_photos')->last();
-//            return response()->json([
-//                'message' => 'Fotoğraf başarıyla eklendi.',
-//                'photo' => [
-//                    'id' => $uploadedPhoto->id,
-//                    'url' => $uploadedPhoto->original_url,
-//                ],
-//            ], 200);
-//        } catch (\Exception $e) {
-//            return response()->json([
-//                'message' => $e->getMessage()
-//            ], 500);
-//        }
     }
 
     /**

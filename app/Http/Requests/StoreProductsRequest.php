@@ -22,7 +22,18 @@ class StoreProductsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'max:255'],
+            'category_id' => ['required', 'exists:product_categories,id'],
+            'sku' => ['required', 'max:255'],
+            'price' => ['required', 'numeric'],
+            'description' => ['required', 'max:255'],
+            'units' => ['required', 'array'],
+            'units.*.id' => ['required', 'exists:sales_units,id'],
+            'units.*.channels' => ['required', 'array'],
+            'units.*.channels.*.id' => ['required', 'exists:sales_channels,id'],
+            'units.*.channels.*.prices' => ['required', 'array'],
+            'units.*.channels.*.prices.*.id' => ['required', 'exists:unit_channel_product_prices,id'],
+            'units.*.channels.*.prices.*.price' => ['required', 'numeric'],
         ];
     }
 }

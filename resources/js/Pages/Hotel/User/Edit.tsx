@@ -139,7 +139,7 @@ function Edit(props: PageProps) {
 								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
 								Şifre tekrarı
 								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, Bir önceki şifrenin aynısı yazılmalı.
+									Gerekli, şifreler birbiri ile uyuşmalı.
 								</span>
 							</FormLabel>
 							<FormInput

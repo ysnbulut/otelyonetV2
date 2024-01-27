@@ -1,28 +1,24 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {PageProps} from './types'
 import {Head, router} from '@inertiajs/react'
 import {FormCheck, FormInput, FormSelect} from '@/Components/Form'
 import Lucide from '@/Components/Lucide'
-import {Inertia} from '@inertiajs/inertia'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import ProductCard from '@/Pages/Hotel/Product/components/ProductCard'
 import Button from '@/Components/Button'
 import Tippy from '@/Components/Tippy'
 import Pagination from '@/Components/Pagination'
 import {pickBy} from 'lodash'
-import Select, {SelectInstance} from 'react-select'
-import {Disclosure, Transition} from '@headlessui/react'
-import {twMerge} from 'tailwind-merge'
+import {Transition} from '@headlessui/react'
 
 function Index(props: PageProps) {
-	const ref = useRef<SelectInstance>(null)
+	const [filterShow, setFilterShow] = useState<boolean>(false)
 	const [filter, setFilter] = useState({
 		search: props.filters.search || '',
 		trashed: props.filters.trashed || false,
-		with_trashed: props.filters.with_trashed || false,
-		categories: props.filters.categories || '',
-		sales_units: props.filters.sales_units || '',
-		sales_channels: props.filters.sales_channels || '',
+		categories: props.filters.categories || [],
+		sales_units: props.filters.sales_units || [],
+		sales_channels: props.filters.sales_channels || [],
 		per_page: props.products.per_page || 12,
 	})
 
@@ -33,25 +29,29 @@ function Index(props: PageProps) {
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-			Inertia.get(route('hotel.products.index'), query, {
-				replace: false,
+			router.get(route('hotel.products.index'), pickBy(filter), {
+				replace: true,
 				preserveState: true,
-				only: ['products'],
 			})
 		}
 	}
 
+	const handleFilterSubmit = (e: any): void => {
+		e.preventDefault()
+		router.get(route('hotel.products.index'), pickBy(filter), {
+			replace: true,
+			preserveState: true,
+		})
+		// setFilterShow(false)
+	}
+
 	const handlePerPage = (e: any): void => {
-		Inertia.get(
-			route('hotel.products.index'),
-			{per_page: e.target.value},
-			{
-				replace: true,
-				preserveState: false,
-			},
-		)
+		e.preventDefault()
 		setFilter((filter) => ({...filter, per_page: e.target.value}))
+		router.get(route('hotel.products.index'), pickBy({...filter, per_page: e.target.value}), {
+			replace: true,
+			preserveState: true,
+		})
 	}
 
 	return (
@@ -68,7 +68,7 @@ function Index(props: PageProps) {
 									className="!box w-full pr-10 lg:w-56"
 									placeholder="Search..."
 									onChange={(e) => handleSearch(e)}
-									onKeyDown={handleKeyDown}
+									onKeyDown={(e) => handleKeyDown(e)}
 									name={'search'}
 									value={filter.search}
 								/>
@@ -77,6 +77,16 @@ function Index(props: PageProps) {
 									className="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4"
 								/>
 							</div>
+							<Tippy
+								as={Button}
+								onClick={() => setFilterShow(!filterShow)}
+								className="intro-x border-slate-300 bg-slate-200 text-black/60 dark:border-darkmode-600 dark:bg-darkmode-400 dark:text-white/30"
+								content="Filtrele">
+								<Lucide
+									icon="Filter"
+									className="h-5 w-5"
+								/>
+							</Tippy>
 							<Tippy
 								as={Button}
 								onClick={() => router.visit(route('hotel.products.create'))}
@@ -91,107 +101,115 @@ function Index(props: PageProps) {
 						</div>
 					</div>
 				</div>
-				<Disclosure>
-					{({open}) => (
-						<>
-							<Disclosure.Button className={twMerge('col-span-12 rounded-t border px-5 py-2', open && 'box')}>
-								Filtreler
-							</Disclosure.Button>
-							<Transition
-								show={open}
-								className="box col-span-12 -mt-3 bg-white p-5"
-								enter="transition duration-100 ease-out"
-								enterFrom="transform scale-95 opacity-0"
-								enterTo="transform scale-100 opacity-100"
-								leave="transition duration-75 ease-out"
-								leaveFrom="transform scale-100 opacity-100"
-								leaveTo="transform scale-95 opacity-0">
-								<Disclosure.Panel
-									static
-									className="col-span-12 grid grid-cols-12 gap-4">
-									<div className="col-span-12 grid grid-cols-1 gap-1 py-2 lg:grid-cols-3">
-										<div className="col-span-1 mb-3 border-b pb-3 text-center text-lg font-semibold lg:col-span-3">
-											Kategoriler
-										</div>
-										{props.categories.length > 0 &&
-											props.categories.map((category: any) => (
-												<FormCheck className="col-span-1">
-													<FormCheck.Input
-														type="checkbox"
-														name={`category[${category.id}]`}
-														value={category.id}
-														// checked={props.selectedFeatures.some((item) => item.feature_id === feature.id)}
-														// onChange={(e) => {
-														// 	props.setSelectedFeatures((selectedFeatures) => {
-														// 		if (e.target.checked) {
-														// 			return [...selectedFeatures, {feature_id: feature.id, order_no: key + 1}]
-														// 		} else {
-														// 			return selectedFeatures.filter((item) => item.feature_id !== feature.id)
-														// 		}
-														// 	})
-														// }}
-													/>
-													<FormCheck.Label>{category.name}</FormCheck.Label>
-												</FormCheck>
-											))}
-									</div>
-									<div className="col-span-12 grid grid-cols-1 gap-1 py-2 lg:grid-cols-3">
-										<div className="col-span-1 mb-3 border-b pb-3 text-center text-lg font-semibold lg:col-span-3">
-											Satış üniteleri
-										</div>
-										{props.sales_units.length > 0 &&
-											props.sales_units.map((unit: any) => (
-												<FormCheck className="col-span-1">
-													<FormCheck.Input
-														type="checkbox"
-														name={`units[${unit.id}]`}
-														value={unit.id}
-														// checked={props.selectedFeatures.some((item) => item.feature_id === feature.id)}
-														// onChange={(e) => {
-														// 	props.setSelectedFeatures((selectedFeatures) => {
-														// 		if (e.target.checked) {
-														// 			return [...selectedFeatures, {feature_id: feature.id, order_no: key + 1}]
-														// 		} else {
-														// 			return selectedFeatures.filter((item) => item.feature_id !== feature.id)
-														// 		}
-														// 	})
-														// }}
-													/>
-													<FormCheck.Label>{unit.name}</FormCheck.Label>
-												</FormCheck>
-											))}
-									</div>
-									<div className="col-span-12 grid grid-cols-1 gap-1 py-2 lg:grid-cols-3">
-										<div className="col-span-1 mb-3 border-b pb-3 text-center text-lg font-semibold lg:col-span-3">
-											Satış Kanalları
-										</div>
-										{props.sales_channels.length > 0 &&
-											props.sales_channels.map((channel: any) => (
-												<FormCheck className="col-span-1">
-													<FormCheck.Input
-														type="checkbox"
-														name={`channels[${channel.id}]`}
-														value={channel.id}
-														// checked={props.selectedFeatures.some((item) => item.feature_id === feature.id)}
-														// onChange={(e) => {
-														// 	props.setSelectedFeatures((selectedFeatures) => {
-														// 		if (e.target.checked) {
-														// 			return [...selectedFeatures, {feature_id: feature.id, order_no: key + 1}]
-														// 		} else {
-														// 			return selectedFeatures.filter((item) => item.feature_id !== feature.id)
-														// 		}
-														// 	})
-														// }}
-													/>
-													<FormCheck.Label>{channel.name}</FormCheck.Label>
-												</FormCheck>
-											))}
-									</div>
-								</Disclosure.Panel>
-							</Transition>
-						</>
-					)}
-				</Disclosure>
+				<Transition
+					show={filterShow}
+					className="box col-span-12 -mt-3 bg-white p-5"
+					enter="transition duration-[300ms] ease-out"
+					enterFrom="transform scale-95 -translate-y-10 opacity-0"
+					enterTo="transform scale-100 translate-y-0 opacity-100"
+					leave="transition duration-[500ms] ease-out"
+					leaveFrom="transform scale-100 translate-y-0 opacity-100"
+					leaveTo="transform scale-95 -translate-y-10 opacity-0">
+					<form
+						onSubmit={(e: any) => handleFilterSubmit(e)}
+						className="col-span-12 grid grid-cols-12 gap-2">
+						<div className="col-span-12 grid grid-cols-1 gap-1 border-b py-2 last:border-b-0 lg:grid-cols-3">
+							<div className="col-span-1 pb-2 text-left text-lg font-semibold lg:col-span-3">Kategoriler</div>
+							{props.categories.length > 0 &&
+								props.categories.map((category: any) => (
+									<FormCheck
+										key={category.id}
+										className="col-span-1">
+										<FormCheck.Input
+											type="checkbox"
+											name={`category[${category.id}]`}
+											value={category.id}
+											checked={filter.categories.some((item) => item === category.id.toString())}
+											onChange={(e) => {
+												setFilter((filter) => {
+													if (e.target.checked) {
+														return {...filter, categories: [...filter.categories, e.target.value]}
+													} else {
+														return {...filter, categories: filter.categories.filter((item) => item !== e.target.value)}
+													}
+												})
+											}}
+										/>
+										<FormCheck.Label>{category.name}</FormCheck.Label>
+									</FormCheck>
+								))}
+						</div>
+						<div className="col-span-12 grid grid-cols-1 gap-1 border-b py-2 last:border-b-0 lg:grid-cols-3">
+							<div className="col-span-1 pb-2 text-left text-lg font-semibold lg:col-span-3">Satış üniteleri</div>
+							{props.sales_units.length > 0 &&
+								props.sales_units.map((unit: any) => (
+									<FormCheck
+										key={unit.id}
+										className="col-span-1">
+										<FormCheck.Input
+											type="checkbox"
+											name={`units[${unit.id}]`}
+											value={unit.id}
+											checked={filter.sales_units.some((item) => item === unit.id.toString())}
+											onChange={(e) => {
+												setFilter((filter) => {
+													if (e.target.checked) {
+														return {...filter, sales_units: [...filter.sales_units, e.target.value]}
+													} else {
+														return {
+															...filter,
+															sales_units: filter.sales_units.filter((item) => item !== e.target.value),
+														}
+													}
+												})
+											}}
+										/>
+										<FormCheck.Label>{unit.name}</FormCheck.Label>
+									</FormCheck>
+								))}
+						</div>
+						<div className="col-span-12 grid grid-cols-1 gap-1 border-b py-2 last:border-b-0 lg:grid-cols-3">
+							<div className="col-span-1 pb-2 text-left text-lg font-semibold lg:col-span-3">Satış Kanalları</div>
+							{props.sales_channels.length > 0 &&
+								props.sales_channels.map((channel: any) => (
+									<FormCheck
+										key={channel.id}
+										className="col-span-1">
+										<FormCheck.Input
+											type="checkbox"
+											name={`channels[${channel.id}]`}
+											value={channel.id}
+											checked={filter.sales_channels.some((item) => item === channel.id.toString())}
+											onChange={(e) => {
+												setFilter((filter) => {
+													if (e.target.checked) {
+														return {...filter, sales_channels: [...filter.sales_channels, e.target.value]}
+													} else {
+														return {
+															...filter,
+															sales_channels: filter.sales_channels.filter((item) => item !== e.target.value),
+														}
+													}
+												})
+											}}
+										/>
+										<FormCheck.Label>{channel.name}</FormCheck.Label>
+									</FormCheck>
+								))}
+						</div>
+						<div className="col-span-12 flex w-full items-center justify-end gap-2">
+							<Button
+								variant="soft-secondary"
+								className="px-5">
+								Filtreleri Uygula
+								<Lucide
+									icon="CheckCheck"
+									className="ml-2 h-5 w-5 text-primary"
+								/>
+							</Button>
+						</div>
+					</form>
+				</Transition>
 				{props.products.data.map((product: any) => (
 					<ProductCard
 						key={product.id}
