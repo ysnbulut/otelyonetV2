@@ -25,13 +25,13 @@ const initialState: SideMenuState = {
 		{
 			icon: 'CalendarSearch',
 			title: 'Rezervasyon',
-			permission: ['hotel.bookings.create.*'],
+			permission: ['asdadasd'], //burayı düzelttttttt
 			subMenu: [
 				{
 					icon: 'CalendarPlus',
 					title: 'Rezervasyon Oluştur',
-					pathname: 'hotel.bookings.create',
-					permission: ['hotel.bookings.create.*'],
+					pathname: 'hotel.booking_create',
+					permission: ['hotel.booking_create'],
 				},
 				{
 					icon: 'CalendarCheck2',
@@ -42,56 +42,55 @@ const initialState: SideMenuState = {
 				{
 					icon: 'CalendarRange',
 					title: 'Rezervasyon Takvimi',
-					pathname: 'hotel.bookings.calendar',
+					pathname: 'hotel.booking_calendar',
 					permission: ['hotel.bookings.index'],
 				},
 			],
 		},
-
-		{
-			icon: 'Store',
-			title: 'POS',
-			pathname: 'hotel.pos.index',
-			permission: ['hotel.customers.index'],
-			subMenu: [
-				{
-					icon: 'ScanBarcode',
-					title: 'Ürünler',
-					pathname: 'hotel.products.index',
-					permission: ['hotel.bookings.create.*'],
-				},
-				{
-					icon: 'Group',
-					title: 'Ürün Kategorileri',
-					pathname: 'hotel.pos.index',
-					permission: ['hotel.bookings.index'],
-				},
-				{
-					icon: 'ShowerHead',
-					title: 'Hizmetler',
-					pathname: 'hotel.pos.index',
-					permission: ['hotel.bookings.index'],
-				},
-				{
-					icon: 'Boxes',
-					title: 'Hizmet Kategorileri',
-					pathname: 'hotel.pos.index',
-					permission: ['hotel.bookings.index'],
-				},
-				{
-					icon: 'Split',
-					title: 'Satış Kanalları',
-					pathname: 'hotel.pos.index',
-					permission: ['hotel.bookings.index'],
-				},
-				{
-					icon: 'Combine',
-					title: 'Satış Üniteleri',
-					pathname: 'hotel.pos.index',
-					permission: ['hotel.bookings.index'],
-				},
-			],
-		},
+		// {
+		// 	icon: 'Store',
+		// 	title: 'POS',
+		// 	pathname: 'hotel.pos.index',
+		// 	permission: ['hotel.customers.index'],
+		// 	subMenu: [
+		// 		{
+		// 			icon: 'ScanBarcode',
+		// 			title: 'Ürünler',
+		// 			pathname: 'hotel.products.index',
+		// 			permission: ['hotel.booking_create.*'],
+		// 		},
+		// 		{
+		// 			icon: 'Group',
+		// 			title: 'Ürün Kategorileri',
+		// 			pathname: 'hotel.pos.index',
+		// 			permission: ['hotel.bookings.index'],
+		// 		},
+		// 		{
+		// 			icon: 'ShowerHead',
+		// 			title: 'Hizmetler',
+		// 			pathname: 'hotel.pos.index',
+		// 			permission: ['hotel.bookings.index'],
+		// 		},
+		// 		{
+		// 			icon: 'Boxes',
+		// 			title: 'Hizmet Kategorileri',
+		// 			pathname: 'hotel.pos.index',
+		// 			permission: ['hotel.bookings.index'],
+		// 		},
+		// 		{
+		// 			icon: 'Combine',
+		// 			title: 'Satış Üniteleri',
+		// 			pathname: 'hotel.pos.index',
+		// 			permission: ['hotel.bookings.index'],
+		// 		},
+		// 		{
+		// 			icon: 'Split',
+		// 			title: 'Satış Kanalları',
+		// 			pathname: 'hotel.pos.index',
+		// 			permission: ['hotel.bookings.index'],
+		// 		},
+		// 	],
+		// },
 		{
 			icon: 'Users2',
 			title: 'Müşteriler',
@@ -194,8 +193,22 @@ const initialState: SideMenuState = {
 		{
 			icon: 'SlidersHorizontal',
 			title: 'Ayarlar',
-			pathname: 'hotel.settings.index',
-			permission: ['hotel.settings.index'],
+			pathname: 'hotel.pricing_policy_settings.index',
+			permission: ['hotel.pricing_policy_settings.index'],
+		},
+		{
+			icon: 'ReplaceAll',
+			title: 'Kanal Yönetimi',
+			pathname: 'hotel.channel_managers.index',
+			permission: ['hotel.pricing_policy_settings.index'],
+			subMenu: [
+				{
+					icon: 'GitGraph',
+					title: 'HotelRunner API',
+					pathname: 'hotel.channel_managers.hotelrunner',
+					permission: ['hotel.users.index'],
+				},
+			],
 		},
 	],
 }

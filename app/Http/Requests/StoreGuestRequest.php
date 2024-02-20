@@ -24,11 +24,11 @@ class StoreGuestRequest extends FormRequest
   return [
    'name' => ['required', 'string', 'max:255'],
    'surname' => ['required', 'string', 'max:255'],
-   'nationality' => ['required', 'string', 'max:255'],
-   'identification_number' => ['required', 'string', 'max:255', 'unique:guests,identification_number'],
-   'phone' => ['required', 'string', 'max:255'],
-   'email' => ['required', 'string', 'email', 'max:255'],
-   'gender' => ['required', 'in:male,female,unspecified'],
+   'nationality' => ['sometimes', 'string', 'max:255'],
+   'identification_number' => ['required', 'string', 'max:255'], //, 'unique:guests,identification_number'
+   'phone' => ['nullable', 'string', 'max:255'],
+   'email' => ['nullable', 'string', 'email', 'max:255'],
+   'gender' => ['nullable', 'in:male,female,unspecified'],
   ];
  }
 }

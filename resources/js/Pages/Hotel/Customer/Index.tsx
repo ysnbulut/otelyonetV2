@@ -69,7 +69,7 @@ function Index({...props}: PageProps) {
 							onClick={() => router.visit(route('hotel.customers.create'))}
 							variant="soft-primary"
 							className="intro-x"
-							content="Yeni Kullanıcı Ekle">
+							content="Yeni Müşteri Ekle">
 							<Lucide
 								icon="Plus"
 								className="h-5 w-5"

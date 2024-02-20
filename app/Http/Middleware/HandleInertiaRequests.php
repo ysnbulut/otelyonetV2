@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Settings\GeneralSettings;
+use App\Settings\PricingPolicySettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Stancl\Tenancy\Facades\Tenancy;
@@ -33,14 +33,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $tenant = tenancy()->tenant !== null;
-        $settings = $tenant ? new GeneralSettings() : null;
+        $settings = $tenant ? new PricingPolicySettings() : null;
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
                 'role' => $request->user()?->roles->first()?->name ?? 'User',
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
-                'pricing_policy' => $tenant ? $settings->pricing_policy : null,
+                'pricing_policy' => $tenant ? $settings->pricing_policy['value'] : null,
             ],
             'csrf_token' => csrf_token(),
             'flash' => [

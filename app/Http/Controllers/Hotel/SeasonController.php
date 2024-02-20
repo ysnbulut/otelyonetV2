@@ -49,7 +49,6 @@ class SeasonController extends Controller
      */
     public function create()
     {
-
         return Inertia::render('Hotel/Season/Index', [
             'seasons' => $this->getSeasons(),
         ]);

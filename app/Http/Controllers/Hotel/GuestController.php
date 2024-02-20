@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
+use App\Models\BookingGuests;
+use App\Models\BookingRooms;
 use App\Models\Guest;
 use App\Http\Requests\StoreGuestRequest;
 use App\Http\Requests\UpdateGuestRequest;
@@ -15,6 +17,13 @@ class GuestController extends Controller
 	/**
 	 * Display a listing of the resource.
 	 */
+
+    public function test()
+    {
+       $bguest = BookingRooms::find(5);
+       return $bguest->guests;
+    }
+
 	public function index()
 	{
 		return Inertia::render('Hotel/Guest/Index', [

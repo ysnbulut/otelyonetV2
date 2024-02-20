@@ -14,8 +14,6 @@ return new class extends Migration {
 			$table->id();
 			$table->foreignId('booking_id')->constrained();
 			$table->foreignId('room_id')->constrained();
-			$table->integer('number_of_adults')->default(1);
-			$table->integer('number_of_children')->default(0);
 			$table->boolean('check_in')->default(false);
 			$table->timestamps();
 			$table->softDeletes();

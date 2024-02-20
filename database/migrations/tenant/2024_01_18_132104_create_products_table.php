@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('sku');
-            $table->decimal('cost', 10, 2)->nullable();
+//            $table->decimal('cost', 10, 2)->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('tax_rate');
             $table->integer('preparation_time')->default(0);

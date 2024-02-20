@@ -6,7 +6,7 @@ import Lucide from '@/Components/Lucide'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 
 function Create(props: any) {
-	const handleSubmit = (e: any) => {
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 	}
 

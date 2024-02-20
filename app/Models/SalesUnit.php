@@ -14,9 +14,9 @@ class SalesUnit extends Model
         'description'
     ];
 
-    public function channels(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function channels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasManyThrough(SalesChannel::class, SalesUnitChannels::class, 'sales_unit_id', 'id', 'id', 'sales_channel_id');
+        return $this->belongsToMany(SalesChannel::class, 'sales_unit_channels', 'sales_unit_id', 'sales_channel_id', 'id', 'id')->withPivot('id');
     }
 
     public function products(): \Illuminate\Database\Eloquent\Relations\HasManyThrough

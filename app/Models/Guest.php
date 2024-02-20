@@ -26,31 +26,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Guest extends Model
 {
- use SoftDeletes;
+    use SoftDeletes;
 
-	protected $fillable = ['name', 'surname', 'nationality', 'identification_number', 'phone', 'email', 'gender'];
+    protected $fillable = ['name', 'surname', 'is_foreign_national', 'nationality', 'identification_number', 'phone', 'email', 'gender'];
 
-	public function getFullNameAttribute(): string
+    public function getFullNameAttribute(): string
     {
-  return $this->name . ' ' . $this->surname;
- }
+        return $this->name . ' ' . $this->surname;
+    }
 
- public function scopeOrderByFullName($query)
- {
-  $query->orderBy('last_name')->orderBy('first_name');
- }
+    public function scopeOrderByFullName($query)
+    {
+        $query->orderBy('last_name')->orderBy('first_name');
+    }
 
     public function scopeFilter($query, array $filters)
     {
-        $query
-            ->when($filters['search'] ?? null, function ($query, $search) {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
-                    $query
-                        ->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('surname', 'like', '%' . $search . '%')
-                        ->orWhere('identification_number', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%');
+                    $query->where('name', 'like', '%' . $search . '%')->orWhere('surname', 'like', '%' . $search . '%')->orWhere('identification_number', 'like', '%' . $search . '%')->orWhere('phone', 'like', '%' . $search . '%')->orWhere('email', 'like', '%' . $search . '%');
                 });
             });
 //            ->when($filters['trashed'] ?? null, function ($query, $trashed) {
@@ -62,8 +56,8 @@ class Guest extends Model
 //            });
     }
 
- public function bookings()
- {
-  return $this->hasManyThrough(Booking::class, BookingGuests::class, 'guest_id', 'id', 'id', 'booking_id');
- }
+    public function booking_room()
+    {
+        return $this->belongsToMany(BookingRooms::class, 'booking_guests', 'guest_id', 'booking_room_id');
+    }
 }

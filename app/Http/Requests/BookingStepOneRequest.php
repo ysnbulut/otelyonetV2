@@ -11,7 +11,7 @@ class BookingStepOneRequest extends FormRequest
         return [
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
-            'booking_type' => 'required|string|in:normal,open,group',
+            'booking_type' => 'required|string|in:normal,open',
             'number_of_adults' => 'required_if:booking_type,normal,open|integer|min:1',
             'number_of_children' => 'required_if:booking_type,normal,open|integer|min:0',
             'children_ages' => [

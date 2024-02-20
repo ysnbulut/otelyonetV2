@@ -1,4 +1,5 @@
 import {SeasonDataProps, SeasonCalendarProps} from './index'
+
 export interface SeasonAddSlideComponentProps {
 	setDatas: React.Dispatch<React.SetStateAction<SeasonCalendarProps>>
 	slideOver: boolean

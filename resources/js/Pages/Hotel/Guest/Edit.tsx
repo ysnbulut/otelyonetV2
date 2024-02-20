@@ -34,7 +34,7 @@ function Edit(props: PageProps) {
 		},
 	})
 
-	const handleSubmit = (e: any) => {
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		put(route('hotel.guests.update', props.guest.id), {
 			preserveScroll: true,

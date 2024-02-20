@@ -11,7 +11,7 @@ class StoreProductsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,18 +22,17 @@ class StoreProductsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'exists:product_categories,id'],
-            'sku' => ['required', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'description' => ['required', 'max:255'],
-            'units' => ['required', 'array'],
-            'units.*.id' => ['required', 'exists:sales_units,id'],
-            'units.*.channels' => ['required', 'array'],
-            'units.*.channels.*.id' => ['required', 'exists:sales_channels,id'],
-            'units.*.channels.*.prices' => ['required', 'array'],
-            'units.*.channels.*.prices.*.id' => ['required', 'exists:unit_channel_product_prices,id'],
-            'units.*.channels.*.prices.*.price' => ['required', 'numeric'],
+            'sku' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'string'],
+            'tax_rate' => ['required', 'numeric'],
+            'description' => ['required', 'string', 'max:255'],
+            'photo_path' => ['nullable', 'string'],
+            'preparation_time' => ['nullable', 'string'],
+            'sales_units' => ['required', 'array', 'exists:sales_units,id'],
+            'unit_channel_product_prices' => ['required', 'array'],
+
         ];
     }
 }

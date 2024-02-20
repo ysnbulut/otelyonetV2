@@ -14,6 +14,7 @@ return new class extends Migration {
 			$table->id();
 			$table->string('name', 100);
 			$table->string('surname', 100);
+            $table->boolean('is_foreign_national')->default(false);
 			$table->string('nationality', 50);
 			$table->string('identification_number', 25);
 			$table->string('phone', 25)->nullable();

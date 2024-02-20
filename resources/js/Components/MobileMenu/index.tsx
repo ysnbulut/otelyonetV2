@@ -172,7 +172,7 @@ function Menu(props: {
 
 	return (
 		<a
-			href={props.menu.subMenu ? '#' : props.menu.pathname}
+			href={props.menu.subMenu ? '#' : route(props.menu.pathname || '#')}
 			className={clsx([
 				'flex h-[50px] items-center text-white',
 				props.level == 'first' && 'px-6',

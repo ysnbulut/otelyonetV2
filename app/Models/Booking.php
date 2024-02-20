@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Settings\GeneralSettings;
+use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Customer|null $customer
  * @property-read Collection<int, Guest> $guests
  * @property-read int|null $guests_count
- * @property-read Collection<int, CustomerPayments> $payments
+ * @property-read Collection<int, BookingPayments> $payments
  * @property-read int|null $payments_count
  * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
@@ -45,6 +45,7 @@ class Booking extends Model
 		'customer_id',
 		'check_in',
 		'check_out',
+        'number_of_rooms',
 		'number_of_adults',
 		'number_of_children',
 		'payment_status',
@@ -52,7 +53,7 @@ class Booking extends Model
 
     private static function bookingFormat($booking): array
     {
-        $settings = new GeneralSettings();
+        $settings = new PricingPolicySettings();
         return [
             'id' => $booking->id,
             'check_in' => Carbon::parse($booking->check_in)->format('d.m.Y'),
@@ -65,9 +66,10 @@ class Booking extends Model
             'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
             'number_of_children' => $booking->rooms->sum('pivot.number_of_children'),
             'amount' => $booking->amount ? $booking->amount->grand_total : null,
-            'amount_formatted' => $booking->amount ? number_format($booking->amount->grand_total, 2, '.', ',') . ' ' . $settings->currency : null,
+            'amount_formatted' => $booking->amount ? number_format($booking->amount->grand_total, 2, '.', ',') . ' '
+                . $settings->currency['value'] : null,
             'remaining_balance' => $booking->amount ? $booking->remainingBalance() : null,
-            'remaining_balance_formatted' => $booking->amount ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $settings->currency : null,
+            'remaining_balance_formatted' => $booking->amount ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $settings->currency['value'] : null,
         ];
     }
 
@@ -105,7 +107,7 @@ class Booking extends Model
 
 	public function rooms(): BelongsToMany
 	{
-		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->orderByDesc('name')->withPivot('number_of_adults', 'number_of_children');
+		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->orderByDesc('name');
 	}
 
 	public function guests(): BelongsToMany
@@ -126,7 +128,7 @@ class Booking extends Model
 
 	public function payments(): HasMany
 	{
-		return $this->hasMany(CustomerPayments::class, 'booking_id', 'id');
+		return $this->hasMany(BookingPayments::class, 'booking_id', 'id');
 	}
 
 	public function amount(): HasOne

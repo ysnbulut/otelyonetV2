@@ -12,7 +12,7 @@ return new class extends Migration {
 	{
 		Schema::create('booking_guests', function (Blueprint $table) {
 			$table->id();
-			$table->foreignId('booking_id')->constrained();
+			$table->foreignId('booking_room_id')->constrained();
 			$table->foreignId('guest_id')->constrained();
 			$table->timestamps();
 			$table->softDeletes();

@@ -10,8 +10,7 @@ import TopBar from '@/Components/TopBar'
 import MobileMenu from '@/Components/MobileMenu'
 import SideMenuTooltip from '@/Components/SideMenuTooltip'
 import {Link, usePage} from '@inertiajs/react'
-import {PageProps, User} from '@/types'
-// @ts-ignore
+import {PageProps} from '@/types'
 import {motion} from 'framer-motion'
 interface BreadcrumbItem {
 	title: string

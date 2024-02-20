@@ -12,7 +12,7 @@ function Index(props: PageProps) {
 	const aRef = useRef(null)
 	const [perPage, setPerPage] = useState(props.roles.per_page || 10)
 
-	const handlePerPage = (e: any): void => {
+	const handlePerPage = (e: React.FormEvent<HTMLFormElement>): void => {
 		router.get(
 			route('hotel.roles.index'),
 			{per_page: e.target.value},

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class UnitChannelProductPrice extends Model
 {
+    protected $fillable = [
+        'sales_unit_channel_id',
+        'sales_unit_product_id',
+        'price'
+    ];
     public function unit(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(SalesUnit::class);

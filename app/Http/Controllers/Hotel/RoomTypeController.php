@@ -265,8 +265,8 @@ class RoomTypeController extends Controller
         ]);
         if (in_array('adult_capacity', array_keys($roomType->getDirty())) || in_array('child_capacity', array_keys($roomType->getDirty()))) {
             $helper = new Helper();
-            $roomType->possibilitiesOfGuests()->delete();
-            $roomType->possibilitiesOfGuests()->createMany($helper->guestVariations($data['adult_capacity'], $data['child_capacity']));
+            $roomType->variationsOfGuests()->delete();
+            $roomType->variationsOfGuests()->createMany($helper->guestVariations($data['adult_capacity'], $data['child_capacity']));
         }
         $roomType->update($roomType->getDirty());
         $roomType->features()->sync($data['room_type_features']);

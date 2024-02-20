@@ -41,7 +41,7 @@ class RoomView extends Model
     public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
         return $this->hasManyThrough(
-            UnitPriceRoomTypeAndView::class,
+            UnitPrice::class,
             TypeHasView::class,
             'view_id',
             'type_has_view_id',

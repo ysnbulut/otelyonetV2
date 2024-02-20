@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * App\Models\Season
  *
  * @property-read mixed $season_name
- * @property-write mixed $end_date
- * @property-write mixed $start_date
+ * @property-read mixed $end_date
+ * @property-read mixed $start_date
  * @method static Builder|Season avilableSeasons()
  * @method static Builder|Season newModelQuery()
  * @method static Builder|Season newQuery()
@@ -29,9 +29,9 @@ class Season extends Model
 
     protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
 
-    public function scopeUnitPrices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function unitPrices() : \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(UnitPriceRoomTypeAndView::class)->select(['id', 'unit_price']);
+        return $this->hasMany(UnitPrice::class);
     }
 
     public function setStartDateAttribute($value): void

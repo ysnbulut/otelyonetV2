@@ -32,7 +32,8 @@
 
         td:before {
             content: attr(data-label);
-            @apply font-bold text-base pr-3 text-left lg:hidden whitespace-nowrap my-auto;
+            text-decoration: none !important;
+            @apply font-bold pr-3 text-left lg:hidden whitespace-nowrap my-auto dark:text-darkmode-100 no-underline;
         }
     }
 

@@ -49,7 +49,7 @@ function Show({...props}: PageProps) {
 		}
 	}, [data.currency])
 
-	const paymentFormSubmit = (e: any) => {
+	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		post(route('hotel.customer_payments.store'), {
 			onSuccess: () => {

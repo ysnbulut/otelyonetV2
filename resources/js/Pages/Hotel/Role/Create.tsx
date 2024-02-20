@@ -1,5 +1,5 @@
 import React from 'react'
-import {FormInput, FormLabel, FormSwitch} from '@/Components/Form'
+import {FormInput, FormLabel} from '@/Components/Form'
 import {Head, Link, router, useForm} from '@inertiajs/react'
 import {PageProps} from './types/create'
 import TomSelect from '@/Components/TomSelect'
@@ -14,7 +14,7 @@ function Create(props: PageProps) {
 		permissions: [],
 	})
 
-	const handleSubmit = (e: any): void => {
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
 		e.preventDefault()
 		router.post(route('hotel.roles.store'), data, {
 			preserveState: true,

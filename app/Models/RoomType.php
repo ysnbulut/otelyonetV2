@@ -23,7 +23,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property-read int|null $rooms_count
  * @property-read Collection<int, TypeHasView> $typeHasViews
  * @property-read int|null $type_has_views_count
- * @property-read Collection<int, UnitPriceRoomTypeAndView> $unitPrices
+ * @property-read Collection<int, UnitPrice > $unitPrices
  * @property-read int|null $unit_prices_count
  * @property-read Collection<int, VariationMultiplier> $variationMultipliers
  * @property-read int|null $variation_multipliers_count
@@ -75,7 +75,7 @@ class RoomType extends Model implements HasMedia
     public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
     {
         return $this->hasManyThrough(
-            UnitPriceRoomTypeAndView::class,
+            UnitPrice::class,
             TypeHasView::class,
             'type_id',
             'type_has_view_id',

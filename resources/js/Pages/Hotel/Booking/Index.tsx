@@ -69,7 +69,7 @@ function Index(props: PageProps) {
 						</div>
 						<Tippy
 							as={Button}
-							onClick={() => router.visit(route('hotel.bookings.create'))}
+							onClick={() => router.visit(route('hotel.booking_create'))}
 							variant="soft-primary"
 							className="intro-x"
 							content="Yeni Rezervasyon Ekle">

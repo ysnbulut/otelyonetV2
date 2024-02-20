@@ -1,284 +1,174 @@
 import React, {useEffect, useState} from 'react'
 import {Head} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {FirstStepProps, PageProps} from '@/Pages/Hotel/Booking/types/create'
-import {ResponseProps} from '@/Pages/Hotel/Booking/types/response'
-import Litepicker from '@/Components/Litepicker'
-import dayjs from 'dayjs'
-import {FormInput, FormLabel} from '@/Components/Form'
-import Select from 'react-select'
-import {range} from 'lodash'
-import Button from '@/Components/Button'
-import axios from 'axios'
-import Lucide from '@/Components/Lucide'
-import NormalResults from '@/Pages/Hotel/Booking/components/NormalResults'
-import GroupResults from '@/Pages/Hotel/Booking/components/GroupResults'
+import {CustomerProps, StepOneResponseProps} from '@/Pages/Hotel/Booking/types/response'
+import One from '@/Pages/Hotel/Booking/Steps/One'
+import Two from '@/Pages/Hotel/Booking/Steps/Two'
+import Three from '@/Pages/Hotel/Booking/Steps/Three'
+import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
+import Four from '@/Pages/Hotel/Booking/Steps/Four'
+import BookingSummary from '@/Pages/Hotel/Booking/components/BookingSummary'
 
-function Create(props: PageProps) {
-	// const ref = useRef(null)
-	const [firstStepData, setFirstStepData] = useState<FirstStepProps>({
-		check_in: dayjs().format('DD.MM.YYYY'),
-		check_out: dayjs().add(1, 'day').format('DD.MM.YYYY'),
-		booking_type: 'normal',
-	})
-	const [childrenCount, setChildrenCount] = useState(0)
-	const [openBooking, setOpenBooking] = useState(false)
-	const [results, setResults] = useState<ResponseProps>()
+function Create() {
+	const [step, setStep] = useState<number>(1)
+	const [stepOneResults, setStepOneResults] = useState<StepOneResponseProps | undefined>()
+	const [bookingType, setBookingType] = useState<string>('normal')
+	const [checkinRequired, setCheckinRequired] = useState<boolean>(false)
+	const [checkedRooms, setCheckedRooms] = useState<CheckedRoomsProps | undefined>(undefined)
+	const [bookingResult, setBookingResult] = useState<BookingResultProps | undefined>(undefined)
+	const [grandTotal, setGrandTotal] = useState<number>(0)
+	const [customerId, setCustomerId] = useState<number | undefined>()
+	const [bookingCustomer, setBookingCustomer] = useState<CustomerProps | undefined>(
+		customerId && stepOneResults ? stepOneResults.customers.find((customer) => customer.id === customerId) : undefined,
+	)
+	const [roomsGuests, setRoomsGuests] = useState<RoomTypeRoomGuestsProps>({})
 
 	useEffect(() => {
-		if (firstStepData.booking_type === 'open') {
-			setOpenBooking(true)
-			setFirstStepData((data) => ({
-				check_in: data.check_in,
-				check_out: data.check_out,
-				booking_type: 'open',
-				days_open: 3,
-				number_of_adults: data.number_of_adults || 1,
-				number_of_children: data.number_of_children || 0,
-			}))
-		} else if (firstStepData.booking_type === 'group') {
-			setOpenBooking(false)
-			setFirstStepData((data) => ({check_in: data.check_in, check_out: data.check_out, booking_type: 'group'}))
-			setChildrenCount(0)
-		} else {
-			setOpenBooking(false)
-			setFirstStepData((data) => ({
-				check_in: data.check_in,
-				check_out: data.check_out,
-				booking_type: 'normal',
-				number_of_adults: data.number_of_adults || 1,
-				number_of_children: data.number_of_children || 0,
-			}))
+		if (stepOneResults) {
+			let booking_type = bookingType === 'normal' ? 'Normal' : 'Açık'
+			let i = 0
+			if (checkedRooms) {
+				Object.values(checkedRooms).forEach((key) => {
+					i = i + key.length
+				})
+			}
+			booking_type += i > 1 ? ' Gurup Rezervasyon' : ' Rezervasyon'
+			setBookingResult({
+				check_in: stepOneResults.request.check_in,
+				check_out: stepOneResults.request.check_out,
+				night_count: stepOneResults.night_count,
+				booking_type: booking_type,
+				number_of_adults_total: stepOneResults.request.number_of_adults,
+				number_of_children_total: stepOneResults.request.number_of_children,
+			})
+
+			stepOneResults.data.forEach((item) => {
+				if (checkedRooms && checkedRooms[item.id] && checkedRooms[item.id].length > 0) {
+					setBookingResult((prevState: any) => {
+						return {
+							...prevState,
+							number_of_adults_total:
+								checkedRooms?.[item.id]?.length <= 1
+									? stepOneResults?.request.number_of_adults * checkedRooms?.[item.id]?.length
+									: prevState?.number_of_adults_total +
+									  stepOneResults?.request.number_of_adults * (checkedRooms?.[item.id]?.length - 1),
+							number_of_children_total:
+								checkedRooms?.[item.id]?.length <= 1
+									? stepOneResults?.request.number_of_children * checkedRooms?.[item.id]?.length
+									: (prevState?.number_of_children_total || 0) +
+									  stepOneResults?.request.number_of_children * (checkedRooms?.[item.id]?.length - 1),
+							typed_rooms:
+								prevState && Array.isArray(prevState.typed_rooms)
+									? [
+											...prevState.typed_rooms,
+											{
+												id: item.id,
+												name: item.name,
+												count: checkedRooms[item.id].length,
+												price: parseFloat(item.price.total_price?.replace(/,/g, '') || '0'),
+												total_price:
+													parseFloat(item.price.total_price?.replace(/,/g, '') || '0') * checkedRooms[item.id].length,
+											},
+									  ]
+									: [
+											{
+												id: item.id,
+												name: item.name,
+												count: checkedRooms[item.id].length,
+												price: parseFloat(item.price.total_price?.replace(/,/g, '') || '0'),
+												total_price:
+													parseFloat(item.price.total_price?.replace(/,/g, '') || '0') * checkedRooms[item.id].length,
+											},
+									  ],
+						}
+					})
+				}
+			})
 		}
-	}, [firstStepData.booking_type])
+	}, [stepOneResults, checkedRooms, bookingType])
 
-	const bookingTypes = [
-		{
-			label: 'Normal',
-			value: 'normal',
-		},
-		{
-			label: 'Açık Rezervasyon',
-			value: 'open',
-		},
-		{
-			label: 'Gurup Rezervasyon',
-			value: 'group',
-		},
-	]
+	useEffect(() => {
+		if (bookingResult) {
+			let total = 0
+			if (bookingResult.typed_rooms?.length === 0) {
+				setGrandTotal(0)
+			} else {
+				bookingResult.typed_rooms?.forEach((room) => {
+					total += parseFloat(room.total_price?.toString() || '0')
+				})
+				setGrandTotal(total)
+			}
+		}
+	}, [bookingResult])
 
-	const numberOfAdult = range(1, 10).map((item) => ({label: item, value: item}))
-	const numberOfChildren = range(0, 10).map((item) => ({label: item, value: item}))
-
-	const handleSubmit = (e: any) => {
-		e.preventDefault()
-		axios
-			.post<ResponseProps>(route('hotel.bookings.create.step.one'), firstStepData)
-			.then((response) => {
-				setResults(response.data)
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-	}
 	return (
 		<>
 			<Head title="Rezervasyon Oluştur" />
-			<h2 className="intro-y mt-10 text-lg font-medium">Rezervasyon Oluştur.</h2>
-			<form
-				onSubmit={(e) => handleSubmit(e)}
-				className="box p-5">
-				<div className="flex gap-3">
-					<div className="w-full">
-						<FormLabel htmlFor="booking_date">Rezervasyon Tarihi</FormLabel>
-						<Litepicker
-							id="booking_date"
-							value={`${firstStepData.check_in} - ${firstStepData.check_out}`}
-							options={{
-								singleMode: false,
-								numberOfColumns: 2,
-								numberOfMonths: 2,
-								tooltipText: {
-									one: 'gece',
-									other: 'gece',
-								},
-								tooltipNumber: (totalDays) => {
-									return totalDays - 1
-								},
-								format: 'DD.MM.YYYY',
-								mobileFriendly: true,
-								highlightedDaysFormat: 'YYYY-MM-DD',
-								highlightedDays: [dayjs().format('YYYY-MM-DD')],
-							}}
-							onChange={(date: string) => {
-								const dates = date.split(' - ')
-								setFirstStepData((data) => ({...data, check_in: dates[0], check_out: dates[1]}))
-							}}
-						/>
-					</div>
-					<div className="w-full">
-						<FormLabel htmlFor="booking_date">Rezervasyon Türü</FormLabel>
-						<Select
-							id="beds"
-							name="beds"
-							defaultValue={bookingTypes[0]}
-							onChange={(e: any, action: any) => {
-								if (action.action === 'select-option') {
-									console.log(e.value)
-									e && setFirstStepData((data) => ({...data, booking_type: e.value}))
-								} else if (action.action === 'clear') {
-									setFirstStepData((data) => ({...data, booking_type: 'normal'}))
-								} else {
-									setFirstStepData((data) => ({...data, booking_type: 'normal'}))
-								}
-							}}
-							className="remove-all my-select-container"
-							classNamePrefix="my-select"
-							styles={{
-								input: (base) => ({
-									...base,
-									'input:focus': {
-										boxShadow: 'none',
-									},
-								}),
-							}}
-							isClearable
-							hideSelectedOptions
-							options={bookingTypes}
-							placeholder="Rezervasyon Türü Seçiniz."
-						/>
-					</div>
-				</div>
-				{openBooking && (
-					<div className="flex justify-end">
-						<div className="w-1/2">
-							<FormLabel htmlFor="max_open_day">Maximum kaç gün</FormLabel>
-							<FormInput
-								id="max_open_day"
-								type="number"
-								step={1}
-								min={1}
-								value={firstStepData.days_open}
-								onChange={(e) => {
-									setFirstStepData((data) => ({
-										...data,
-										days_open: parseInt(e.target.value),
-									}))
-								}}
-								className="w-full"
-							/>
-						</div>
-					</div>
-				)}
-				{firstStepData.booking_type !== 'group' && (
-					<div className="flex gap-3">
-						<div className="w-full">
-							<FormLabel htmlFor="number_of_adults">Yetişkin Sayısı</FormLabel>
-							<Select
-								id="number_of_adults"
-								name="number_of_adults"
-								defaultValue={numberOfAdult[0]}
-								onChange={(e: any, action: any) => {
-									if (action.action === 'select-option') {
-										e && setFirstStepData((data) => ({...data, number_of_adults: e.value}))
-									} else if (action.action === 'clear') {
-										setFirstStepData((data) => ({...data, number_of_adults: 1}))
-									} else {
-										setFirstStepData((data) => ({...data, number_of_adults: 1}))
-									}
-								}}
-								className="remove-all my-select-container"
-								classNamePrefix="my-select"
-								styles={{
-									input: (base) => ({
-										...base,
-										'input:focus': {
-											boxShadow: 'none',
-										},
-									}),
-								}}
-								isClearable
-								hideSelectedOptions
-								options={numberOfAdult}
-								placeholder="Yetişkin Sayısı Seçiniz."
-							/>
-						</div>
-						<div className="w-full">
-							<FormLabel htmlFor="number_of_children">Çocuk Sayısı</FormLabel>
-							<Select
-								id="number_of_children"
-								name="number_of_children"
-								defaultValue={numberOfChildren[0]}
-								onChange={(e: any, action: any) => {
-									if (action.action === 'select-option') {
-										console.log(e.value)
-										e && setFirstStepData((data) => ({...data, number_of_children: e.value}))
-										e && setChildrenCount(e.value)
-									} else if (action.action === 'clear') {
-										setFirstStepData((data) => ({...data, number_of_children: 0}))
-										setChildrenCount(0)
-									} else {
-										setFirstStepData((data) => ({...data, number_of_children: 0}))
-										setChildrenCount(0)
-									}
-								}}
-								className="remove-all my-select-container"
-								classNamePrefix="my-select"
-								styles={{
-									input: (base) => ({
-										...base,
-										'input:focus': {
-											boxShadow: 'none',
-										},
-									}),
-								}}
-								isClearable
-								hideSelectedOptions
-								options={numberOfChildren}
-								placeholder="Çocuk Sayısı Seçiniz."
-							/>
-						</div>
-					</div>
-				)}
-				{childrenCount > 0 && firstStepData.booking_type !== 'group' && (
-					<div className="flex flex-col items-end justify-end">
-						{range(1, childrenCount + 1).map((item) => (
-							<div
-								key={item}
-								className="w-1/2 pl-1">
-								<FormLabel htmlFor="child_age">Çocuk {item} Yaşı</FormLabel>
-								<FormInput
-									id="child_age"
-									type="number"
-									step={1}
-									min={0}
-									defaultValue={1}
-									className="w-full"
+			<h2 className="intro-y my-5 text-lg font-medium">Rezervasyon Oluştur.</h2>
+			{step < 3 && (
+				<One
+					setBookingType={setBookingType}
+					setStepOneResults={setStepOneResults}
+					setStep={setStep}
+					setCheckinRequired={setCheckinRequired}
+					setCheckedRooms={setCheckedRooms}
+				/>
+			)}
+			{step > 1 && (
+				<div className="flex flex-col gap-5 lg:flex-row">
+					{step < 5 && (
+						<div className="lg:w-2/3">
+							{stepOneResults && step === 2 && (
+								<Two
+									stepOneResults={stepOneResults}
+									bookingType={bookingType}
+									setStep={setStep}
+									checkedRooms={checkedRooms}
+									setCheckedRooms={setCheckedRooms}
+									setRoomsGuests={setRoomsGuests}
 								/>
-							</div>
-						))}
-					</div>
-				)}
-				<div className="mt-5 flex justify-end">
-					<Button
-						type="submit"
-						variant="success">
-						Sonraki Adım
-					</Button>
+							)}
+							{stepOneResults && step === 3 && (
+								<Three
+									customers={stepOneResults.customers}
+									customerId={customerId}
+									setCustomerId={setCustomerId}
+									setStepOneResults={setStepOneResults}
+									setBookingCustomer={setBookingCustomer}
+									setStep={setStep}
+								/>
+							)}
+							{stepOneResults && step === 4 && (
+								<Four
+									guests={stepOneResults.guests}
+									setStep={setStep}
+									checkedRooms={checkedRooms}
+									data={stepOneResults.data}
+									setRoomsGuests={setRoomsGuests}
+									roomsGuests={roomsGuests}
+								/>
+							)}
+						</div>
+					)}
+					{stepOneResults && (
+						<BookingSummary
+							checkinRequired={checkinRequired}
+							bookingResult={bookingResult}
+							checkedRooms={checkedRooms}
+							setCheckedRooms={setCheckedRooms}
+							step={step}
+							setStep={setStep}
+							grandTotal={grandTotal}
+							setGrandTotal={setGrandTotal}
+							pricingCurrency={stepOneResults.currency}
+							customerId={customerId}
+							bookingCustomer={bookingCustomer}
+							data={stepOneResults.data}
+							roomsGuests={roomsGuests}
+						/>
+					)}
 				</div>
-			</form>
-			{results &&
-				(firstStepData.booking_type !== 'group' ? (
-					<NormalResults
-						currency={results.currency}
-						data={results.data}
-					/>
-				) : (
-					<GroupResults
-						currency={results.currency}
-						data={results.data}
-					/>
-				))}
+			)}
 		</>
 	)
 }
@@ -296,7 +186,7 @@ Create.layout = (page: React.ReactNode) => (
 				title: 'Rezervasyonlar',
 			},
 			{
-				href: route('hotel.bookings.create'),
+				href: route('hotel.booking_create'),
 				title: 'Rezervasyon Oluştur',
 			},
 		]}

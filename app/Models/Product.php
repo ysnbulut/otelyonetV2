@@ -16,7 +16,6 @@ class Product extends Model implements HasMedia
         'name',
         'description',
         'sku',
-        'cost',
         'price',
         'tax_rate',
         'preparation_time',
@@ -33,9 +32,14 @@ class Product extends Model implements HasMedia
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
-    public function units(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function units(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasManyThrough(SalesUnit::class, SalesUnitProducts::class, 'product_id', 'id', 'id', 'sales_unit_id')->select('sales_units.*', 'sales_unit_products.id as product_unit_id');
+        return $this->belongsToMany(SalesUnit::class, 'sales_unit_products', 'product_id', 'sales_unit_id', 'id', 'id')->withPivot('id');
+    }
+
+    public function prices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(UnitChannelProductPrice::class, SalesUnitProduct::class, 'product_id', 'sales_unit_product_id');
     }
 
     public function scopeFilter($query, array $filters)

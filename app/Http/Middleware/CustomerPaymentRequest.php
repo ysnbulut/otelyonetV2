@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Settings\GeneralSettings;
+use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
@@ -10,6 +10,12 @@ use Teknomavi\Tcmb\Doviz;
 
 class CustomerPaymentRequest
 {
+    protected PricingPolicySettings $settings;
+
+    public function __construct(PricingPolicySettings $settings)
+    {
+        $this->settings = $settings;
+    }
  public function handle(Request $request, Closure $next)
  {
   if ($request->isMethod('post')) {
@@ -18,8 +24,7 @@ class CustomerPaymentRequest
     unset($request['payment_date']);
     $currency_amount = $this->getCleanAmount($request->currency_amount);
     unset($request['currency_amount']);
-    $settings = new GeneralSettings();
-    if ($settings->pricing_currency !== 'TRY') {
+    if ($this->settings->pricing_currency['value'] !== 'TRY') {
      if ($request->currency !== 'TRY') {
       if ($currency_amount > 0) {
        $doviz = new Doviz();

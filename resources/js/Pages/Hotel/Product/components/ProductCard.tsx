@@ -1,8 +1,10 @@
 import React from 'react'
 import Lucide from '@/Components/Lucide'
 import {ProductCardDataProps} from '@/Pages/Hotel/Product/types/product-card'
+import noImg from '../../../../../images/noimage.jpg'
 
 function ProductCard(props: ProductCardDataProps) {
+	console.log(props)
 	return (
 		<div className="intro-y col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
 			<div className="box">
@@ -11,7 +13,7 @@ function ProductCard(props: ProductCardDataProps) {
 						<img
 							alt="Midone - HTML Admin Template"
 							className="rounded-md"
-							src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+							src={props.product.photo === '' ? noImg : props.product.photo}
 						/>
 						<span className="absolute top-0 z-10 m-5 rounded bg-pending/80 px-2 py-1 text-xs text-white">Featured</span>
 						<div className="absolute bottom-0 z-10 px-5 pb-6 text-white">

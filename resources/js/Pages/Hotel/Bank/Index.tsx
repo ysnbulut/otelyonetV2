@@ -7,27 +7,23 @@ import {PageProps} from './types/index'
 import Pagination from '@/Components/Pagination'
 import {FormSelect} from '@/Components/Form'
 import {Head, Link, router} from '@inertiajs/react'
+import Tippy from '@/Components/Tippy'
+import {pickBy} from 'lodash'
 
 function Index(props: PageProps) {
-	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
-	const [perPage, setPerPage] = useState(props.banks.per_page || 10)
-
-	const handleSearch = (e: any): void => {
-		e.preventDefault()
-		setSearchValue(e.target.value)
-	}
+	const [filter, setFilter] = useState({
+		search: props.filters.search || '',
+		per_page: props.banks.per_page || 10,
+	})
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			router.get(
-				route('hotel.case_and_banks.index'),
-				{search: searchValue},
-				{
-					replace: false,
-					preserveState: true,
-					only: ['customers'],
-				},
-			)
+			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
+			router.get(route('hotel.case_and_banks.index'), query, {
+				replace: false,
+				preserveState: true,
+				only: ['customers'],
+			})
 		}
 	}
 
@@ -40,54 +36,44 @@ function Index(props: PageProps) {
 				preserveState: false,
 			},
 		)
-		setPerPage(e.target.value)
+		setFilter((filter) => ({...filter, per_page: e.target.value}))
 	}
 	return (
 		<>
 			<Head title="Kasa ve Bankalar" />
-			<h2 className="intro-y mt-10 text-lg font-medium">Kasa ve Banka Hesapları</h2>
-			<div className="mt-5 grid grid-cols-12 gap-6">
-				<div className="intro-y col-span-12 mt-2 flex flex-wrap items-center sm:flex-nowrap">
-					<Button
-						variant="primary"
-						className="mr-2 shadow-md">
-						Yeni Hesap Ekle
-					</Button>
-					{/*<Menu>*/}
-					{/*  <Menu.Button as={Button} className="px-2 !box">*/}
-					{/*    <span className="flex items-center justify-center w-5 h-5">*/}
-					{/*      <Lucide icon="Plus" className="w-4 h-4" />*/}
-					{/*    </span>*/}
-					{/*  </Menu.Button>*/}
-					{/*  <Menu.Items className="w-40">*/}
-					{/*    <Menu.BedAndViewItem>*/}
-					{/*      <Lucide icon="Users" className="w-4 h-4 mr-2" /> Add Group*/}
-					{/*    </Menu.BedAndViewItem>*/}
-					{/*    <Menu.BedAndViewItem>*/}
-					{/*      <Lucide icon="MessageCircle" className="w-4 h-4 mr-2" /> Send*/}
-					{/*      Message*/}
-					{/*    </Menu.BedAndViewItem>*/}
-					{/*  </Menu.Items>*/}
-					{/*</Menu>*/}
-					<div className="mx-auto hidden text-slate-500 md:block">
-						{`${props.banks.total} kayıttan ${props.banks.from} ile ${props.banks.to} arası gösteriliyor`}
-					</div>
-					<div className="mt-3 w-full sm:ml-auto sm:mt-0 sm:w-auto md:ml-0">
-						<div className="relative w-56 text-slate-500">
+			<div className="my-2 grid grid-cols-12 gap-6">
+				<div className="intro-y col-span-12 mt-2 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center lg:justify-between">
+					<h2 className="intro-y text-lg font-medium">Kasa ve Banka Hesapları</h2>
+					<div className="flex justify-end gap-2">
+						<div className="relative text-slate-500">
 							<FormInput
 								type="text"
 								className="!box w-56 pr-10"
 								placeholder="Search..."
-								onChange={(e) => handleSearch(e)}
+								onChange={(e) => {
+									e.preventDefault()
+									setFilter((filter) => ({...filter, search: e.target.value}))
+								}}
 								onKeyDown={handleKeyDown}
 								name={'search'}
-								value={searchValue}
+								value={filter.search}
 							/>
 							<Lucide
 								icon="Search"
 								className="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4"
 							/>
 						</div>
+						<Tippy
+							as={Button}
+							onClick={() => router.visit(route('hotel.case_and_banks.create'))}
+							variant="soft-primary"
+							className="intro-x"
+							content="Yeni Kasa Ekle">
+							<Lucide
+								icon="Plus"
+								className="h-5 w-5"
+							/>
+						</Tippy>
 					</div>
 				</div>
 				{/* BEGIN: Users Layout */}
@@ -186,14 +172,18 @@ function Index(props: PageProps) {
 					</Pagination>
 					<FormSelect
 						onChange={handlePerPage}
-						defaultValue={perPage}
-						className="!box mt-3 w-20 sm:mt-0">
+						defaultValue={filter.per_page}
+						className="!box ml-auto mt-2 w-20 lg:mt-0">
 						{[10, 20, 25, 30, 40, 50, 100].map((item, key) => (
 							<option key={key}>{item}</option>
 						))}
 					</FormSelect>
 				</div>
-				{/* END: Pagination */}
+				<div className="col-span-12 -mt-3 flex items-center justify-center text-slate-300 dark:text-darkmode-300">
+					{`${props.banks.total} kayıttan ${props.banks.from !== null ? props.banks.from : '0'} ile ${
+						props.banks.to !== null ? props.banks.to : '0'
+					} arası gösteriliyor`}
+				</div>
 			</div>
 		</>
 	)

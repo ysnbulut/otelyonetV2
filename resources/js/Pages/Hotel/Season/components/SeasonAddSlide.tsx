@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react'
 import {Slideover} from '@/Components/Headless'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
-import {FormInput, FormLabel} from '@/Components/Form'
+import {FormCheck, FormInput, FormLabel} from '@/Components/Form'
 import Litepicker from '@/Components/Litepicker'
 import dayjs from 'dayjs'
 import {useForm} from '@inertiajs/react'
@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/utc'
 import tz from 'dayjs/plugin/timezone'
 import customFormat from 'dayjs/plugin/customParseFormat'
 import isBetween from 'dayjs/plugin/isBetween'
+import _ from 'lodash'
 moment.locale('tr')
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -62,7 +63,7 @@ function SeasonAddSlide({
 
 	return (
 		<Slideover
-			size="md"
+			size="lg"
 			staticBackdrop
 			open={slideOver}
 			onClose={() => {
@@ -90,63 +91,65 @@ function SeasonAddSlide({
 					{/* END: Slide Over Header */}
 					{/* BEGIN: Slide Over Body */}
 					<Slideover.Description>
-						<div className="w-full overflow-hidden">
-							<FormLabel htmlFor="modal-form-1">From</FormLabel>
-							<Litepicker
-								options={{
-									singleMode: false,
-									mobileFriendly: true,
-									numberOfColumns: 1,
-									numberOfMonths: 2,
-									showWeekNumbers: true,
-									lang: 'tr-TR',
-									format: 'DD.MM.YYYY',
-									autoApply: true,
-									inlineMode: true,
-									splitView: false,
-									lockDaysFormat: 'YYYY-MM-DD',
-									lockDays: seasonsDays,
-									dropdowns: {
-										minYear: dayjs().year(),
-										maxYear: dayjs().add(3, 'year').year(),
-										months: true,
-										years: true,
-									},
-									tooltipText: {
-										one: 'gece',
-										other: 'gece',
-									},
-									tooltipNumber: (totalDays) => {
-										return totalDays - 1
-									},
-								}}
-								value={calendarValue}
-								onChange={(date) => setCalendarValue(date)}
-							/>
-						</div>
-						<div className="mt-3">
-							<FormLabel htmlFor="season-title">Sezon Adı</FormLabel>
-							<FormInput
-								id="season-title"
-								type="text"
-								value={data.title}
-								onChange={(e) => {
-									setData((data: SeasonCalendarProps) => ({...data, title: e.target.value}))
-								}}
-								placeholder="Sezon Adı"
-							/>
-						</div>
-						<div className="mt-3">
-							<FormLabel htmlFor="season-description">Kısa Açıklama</FormLabel>
-							<FormInput
-								id="season-description"
-								type="text"
-								value={data.description}
-								onChange={(e) => {
-									setData((data: SeasonCalendarProps) => ({...data, description: e.target.value}))
-								}}
-								placeholder="Sezon Adı"
-							/>
+						<div className="px-5">
+							<div className="w-full">
+								<FormLabel htmlFor="modal-form-1">From</FormLabel>
+								<Litepicker
+									options={{
+										singleMode: false,
+										mobileFriendly: true,
+										numberOfColumns: 1,
+										numberOfMonths: 2,
+										showWeekNumbers: false,
+										lang: 'tr-TR',
+										format: 'DD.MM.YYYY',
+										autoApply: true,
+										inlineMode: false,
+										splitView: false,
+										lockDaysFormat: 'YYYY-MM-DD',
+										lockDays: seasonsDays,
+										dropdowns: {
+											minYear: dayjs().year(),
+											maxYear: dayjs().add(3, 'year').year(),
+											months: true,
+											years: true,
+										},
+										tooltipText: {
+											one: 'gece',
+											other: 'gece',
+										},
+										tooltipNumber: (totalDays) => {
+											return totalDays - 1
+										},
+									}}
+									value={calendarValue}
+									onChange={(date) => setCalendarValue(date)}
+								/>
+							</div>
+							<div className="mt-3">
+								<FormLabel htmlFor="season-title">Sezon Adı</FormLabel>
+								<FormInput
+									id="season-title"
+									type="text"
+									value={data.title}
+									onChange={(e) => {
+										setData((data: SeasonCalendarProps) => ({...data, title: e.target.value}))
+									}}
+									placeholder="Sezon Adı"
+								/>
+							</div>
+							<div className="mt-3">
+								<FormLabel htmlFor="season-description">Kısa Açıklama</FormLabel>
+								<FormInput
+									id="season-description"
+									type="text"
+									value={data.description}
+									onChange={(e) => {
+										setData((data: SeasonCalendarProps) => ({...data, description: e.target.value}))
+									}}
+									placeholder="Sezon Adı"
+								/>
+							</div>
 						</div>
 					</Slideover.Description>
 					{/* END: Slide Over Body */}
@@ -159,13 +162,13 @@ function SeasonAddSlide({
 								setSlideOver(false)
 							}}
 							className="mr-1 w-20">
-							Cancel
+							Kapat
 						</Button>
 						<Button
 							variant="primary"
 							type="submit"
 							className="w-20">
-							Send
+							Oluştur
 						</Button>
 					</Slideover.Footer>
 				</form>

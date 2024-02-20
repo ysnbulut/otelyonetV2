@@ -1,4 +1,4 @@
-import {Fragment, useState} from 'react'
+import React, {Fragment, useState} from 'react'
 import Lucide from '@/Components/Lucide'
 import Breadcrumb from '@/Components/Breadcrumb'
 import {FormInput} from '@/Components/Form'
@@ -10,6 +10,7 @@ import {Transition} from '@headlessui/react'
 import Button from '@/Components/Button'
 import {useAppDispatch, useAppSelector} from '@/stores/hooks'
 import {selectDarkMode, setDarkMode} from '@/stores/darkModeSlice'
+import {router} from '@inertiajs/react'
 
 interface BreadcrumbItem {
 	href: string
@@ -40,6 +41,19 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 	}
 
 	setDarkModeClass()
+
+	const logout = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		router.post(
+			route('logout'),
+			{},
+			{
+				onSuccess: () => {
+					router.replace(route('login'))
+				},
+			},
+		)
+	}
 
 	return (
 		<>
@@ -248,36 +262,24 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 							<Lucide
 								icon="User"
 								className="mr-2 h-4 w-4"
-							/>{' '}
+							/>
 							Profile
-						</Menu.Item>
-						<Menu.Item className="hover:bg-white/5">
-							<Lucide
-								icon="Edit"
-								className="mr-2 h-4 w-4"
-							/>{' '}
-							Add Account
 						</Menu.Item>
 						<Menu.Item className="hover:bg-white/5">
 							<Lucide
 								icon="Lock"
 								className="mr-2 h-4 w-4"
-							/>{' '}
+							/>
 							Reset Password
 						</Menu.Item>
-						<Menu.Item className="hover:bg-white/5">
-							<Lucide
-								icon="HelpCircle"
-								className="mr-2 h-4 w-4"
-							/>{' '}
-							Help
-						</Menu.Item>
 						<Menu.Divider className="bg-white/[0.08]" />
-						<Menu.Item className="hover:bg-white/5">
+						<Menu.Item
+							onClick={(e: any) => logout(e)}
+							className="hover:bg-white/5">
 							<Lucide
 								icon="ToggleRight"
 								className="mr-2 h-4 w-4"
-							/>{' '}
+							/>
 							Logout
 						</Menu.Item>
 					</Menu.Items>

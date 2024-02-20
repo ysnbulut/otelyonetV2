@@ -52,7 +52,7 @@ class CaseAndBanksController extends Controller
    */
   public function create()
   {
-    return view('hotel.pages.case-and-banks.create');
+    return Inertia::render('Hotel/Bank/Create');
   }
 
   /**

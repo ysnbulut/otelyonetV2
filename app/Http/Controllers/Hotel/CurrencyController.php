@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
-use App\Settings\GeneralSettings;
+use App\Settings\PricingPolicySettings;
 use Illuminate\Http\Request;
 use Teknomavi\Tcmb\Doviz;
 
 class CurrencyController extends Controller
 {
+
+    protected PricingPolicySettings $settings;
+
+    public function __construct()
+    {
+        $this->settings = new PricingPolicySettings();
+    }
     public function exchange(Request $request)
     {
-//        $settings = new GeneralSettings();
-//        if ($settings->pricing_currency !== 'TRY') {
+//        if ($this->settings->pricing_currency['value'] !== 'TRY') {
 //            return $this->convert($request);
 //        } else {
 //            return $request->amount;

@@ -1,47 +1,59 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Head, router, useForm} from '@inertiajs/react'
 import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {PageProps} from '@/Pages/Hotel/Product/types/create'
+import {PageProps, SalesUnitProps, UnitChannelsProductPriceProps} from '@/Pages/Hotel/Product/types/create'
 import Dropzone, {DropzoneElement} from '@/Components/Dropzone'
 import {FormInput, FormLabel} from '@/Components/Form'
 import FormTextarea from '@/Components/Form/FormTextarea'
 import Zoom from 'react-medium-image-zoom'
 import 'react-medium-image-zoom/dist/styles.css'
-import Toastify from 'toastify-js'
-import Select from 'react-select'
+import Select, {SelectInstance, ActionMeta, OnChangeValue} from 'react-select'
+import CurrencyInput from 'react-currency-input-field'
+import ProductSalesUnitsList from '@/Pages/Hotel/Product/components/ProductSalesUnitsList'
 
 function Create(props: PageProps) {
+	const ref = useRef<SelectInstance>(null)
 	const productImageDropzoneRef = useRef<DropzoneElement>()
+	const [photo, setPhoto] = useState<string>('')
+	const [selectedUnits, setSelectedUnits] = useState<SalesUnitProps[]>([])
+	const [salesUnits, setSalesUnits] = useState<SalesUnitProps>()
+	const [unitChannelProductPrices, setUnitChannelProductPrices] = useState<UnitChannelsProductPriceProps[]>()
 	const {data, setData, errors, setError, clearErrors} = useForm({
 		name: '',
 		description: '',
 		sku: '',
-		cost: '',
-		price: '',
+		price: '0',
 		tax_rate: '',
 		preparation_time: '',
-		photo: '',
+		photo_path: '',
+		category_id: '',
 	})
+
+	useEffect(() => {
+		setData((data) => ({...data, sales_units: selectedUnits.map((unit) => unit.id)}))
+	}, [selectedUnits])
+
+	useEffect(() => {
+		setData((data) => ({
+			...data,
+			unit_channel_product_prices: unitChannelProductPrices,
+		}))
+	}, [unitChannelProductPrices])
+
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		router.post(route('hotel.products.store'), data, {
-			onSuccess: () => {
-				Toastify({
-					text: 'Ürün başarıyla oluşturuldu.',
-					duration: 3000,
-					gravity: 'bottom',
-					position: 'right',
-					backgroundColor: 'linear-gradient(to right, #00b09b, #96c93d)',
-				}).showToast()
+			onSuccess: (response) => {
+				console.log('success', response)
 			},
 			onFinish: () => {
 				clearErrors()
 			},
 			onError: (errors) => {
-				setError('name', errors.name)
+				// setError('name', errors.name)
 			},
 		})
 		clearErrors()
@@ -49,7 +61,7 @@ function Create(props: PageProps) {
 	return (
 		<>
 			<Head title="Oda Türleri" />
-			<div className="mb-5 mt-10 flex w-full items-center justify-between">
+			<div className="my-5 flex w-full items-center justify-between">
 				<h2 className="intro-y text-lg font-medium">
 					Ürün <strong>Oluştur</strong>
 				</h2>
@@ -70,11 +82,11 @@ function Create(props: PageProps) {
 				className="box grid grid-cols-12 gap-4 p-5">
 				<div className="col-span-12 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
 					<div className="flex w-full items-center justify-center rounded md:h-44 md:w-44">
-						{data.photo !== '' ? (
+						{photo !== '' ? (
 							<>
 								<Zoom>
 									<img
-										src={data.photo}
+										src={photo}
 										alt="Product Photo"
 										className="h-auto w-full rounded object-cover md:h-44 md:w-44"
 									/>
@@ -82,7 +94,7 @@ function Create(props: PageProps) {
 								<FormInput
 									type="hidden"
 									name="photo"
-									value={data.photo}
+									value={data.photo_path}
 								/>
 							</>
 						) : (
@@ -98,10 +110,14 @@ function Create(props: PageProps) {
 									uploadMultiple: false,
 									maxFiles: 1,
 									init() {
-										this.on('success', (file, response: {name: string; original_name: string; url: string}) => {
-											setData((data) => ({...data, photo: response.url}))
-											this.removeFile(file)
-										})
+										this.on(
+											'success',
+											(file, response: {name: string; original_name: string; url: string; path: string}) => {
+												setData((data) => ({...data, photo_path: response.path}))
+												setPhoto(response.url)
+												this.removeFile(file)
+											},
+										)
 									},
 								}}
 								className="flex h-full items-center rounded">
@@ -120,6 +136,10 @@ function Create(props: PageProps) {
 								id="name"
 								name="name"
 								type="text"
+								value={data.name}
+								onChange={(e) => {
+									setData((data) => ({...data, name: e.target.value}))
+								}}
 							/>
 						</>
 						<div className="mt-2">
@@ -139,8 +159,8 @@ function Create(props: PageProps) {
 						</div>
 					</div>
 				</div>
-				<div className="col-span-12 grid grid-cols-10 gap-4">
-					<div className="col-span-10 mt-2 lg:col-span-2">
+				<div className="col-span-12 grid grid-cols-12 gap-4">
+					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
 							htmlFor="sku"
 							className="font-medium">
@@ -155,67 +175,7 @@ function Create(props: PageProps) {
 							}}
 						/>
 					</div>
-					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
-						<FormLabel
-							htmlFor="cost"
-							className="font-medium">
-							Ürün Maliyeti
-						</FormLabel>
-						<FormInput
-							id="cost"
-							name="cost"
-							value={data.cost}
-							onChange={(e) => {
-								setData((data) => ({...data, cost: e.target.value}))
-							}}
-						/>
-					</div>
-					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
-						<FormLabel
-							htmlFor="price"
-							className="font-medium">
-							Fiyatı
-						</FormLabel>
-						<FormInput
-							id="price"
-							name="price"
-							value={data.price}
-							onChange={(e) => {
-								setData((data) => ({...data, price: e.target.value}))
-							}}
-						/>
-					</div>
-					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
-						<FormLabel
-							htmlFor="tax_rate"
-							className="font-medium">
-							Vergi Oranı
-						</FormLabel>
-						<FormInput
-							id="tax_rate"
-							name="tax_rate"
-							value={data.tax_rate}
-							onChange={(e) => {
-								setData((data) => ({...data, tax_rate: e.target.value}))
-							}}
-						/>
-					</div>
-					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
-						<FormLabel
-							htmlFor="preparation_time"
-							className="font-medium">
-							Hazırlanma Süresi
-						</FormLabel>
-						<FormInput
-							id="preparation_time"
-							name="preparation_time"
-							value={data.preparation_time}
-							onChange={(e) => {
-								setData((data) => ({...data, preparation_time: e.target.value}))
-							}}
-						/>
-					</div>
-					<div className="col-span-10 mt-2 sm:col-span-5 lg:col-span-2">
+					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
 							htmlFor="preparation_time"
 							className="font-medium">
@@ -239,11 +199,124 @@ function Create(props: PageProps) {
 								value: category.id,
 							}))}
 							onChange={(e) => {
-								e && setData((data) => ({...data, preparation_time: e.value.toString()}))
+								e && setData((data) => ({...data, category_id: e.value.toString()}))
+							}}
+						/>
+					</div>
+					<div className="col-span-12 mt-2 lg:col-span-4">
+						<FormLabel
+							htmlFor="preparation_time"
+							className="font-medium">
+							Hazırlanma Süresi
+						</FormLabel>
+						<FormInput
+							id="preparation_time"
+							name="preparation_time"
+							value={data.preparation_time}
+							onChange={(e) => {
+								setData((data) => ({...data, preparation_time: e.target.value}))
+							}}
+						/>
+					</div>
+					<div className="col-span-12 mt-2 lg:col-span-6">
+						<FormLabel
+							htmlFor="price"
+							className="font-medium">
+							Fiyatı
+						</FormLabel>
+						<CurrencyInput
+							id="price"
+							allowNegativeValue={false}
+							allowDecimals={true}
+							decimalSeparator=","
+							decimalScale={2}
+							suffix=" TRY"
+							value={data.price}
+							decimalsLimit={2}
+							required
+							onValueChange={(value) => value && setData((data) => ({...data, price: value}))}
+							name="price"
+							className="w-full rounded-md border-slate-200 text-right text-sm shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
+						/>
+					</div>
+					<div className="col-span-12 mt-2 lg:col-span-6">
+						<FormLabel
+							htmlFor="tax_rate"
+							className="font-medium">
+							Vergi Oranı
+						</FormLabel>
+						<FormInput
+							id="tax_rate"
+							name="tax_rate"
+							value={data.tax_rate}
+							onChange={(e) => {
+								setData((data) => ({...data, tax_rate: e.target.value}))
 							}}
 						/>
 					</div>
 				</div>
+				<div className="col-span-12 mt-2">
+					<FormLabel
+						htmlFor="preparation_time"
+						className="font-medium">
+						Ürünün Satılacağı Üniteleri Seç
+					</FormLabel>
+					<div className="grid grid-cols-12 gap-2">
+						<Select
+							ref={ref}
+							id="preparation_time"
+							name="preparation_time"
+							className="remove-all my-select-container col-span-12 sm:col-span-9 md:col-span-10 lg:col-span-11"
+							classNamePrefix="my-select"
+							placeholder="Satış üniteleri"
+							styles={{
+								input: (base) => ({
+									...base,
+									'input:focus': {
+										boxShadow: 'none',
+									},
+								}),
+							}}
+							options={props.sales_units
+								.filter((unit) => !selectedUnits.find((selected_unit) => selected_unit.id === unit.id))
+								.map((unit) => ({
+									label: unit.name,
+									value: unit.id,
+								}))}
+							onChange={(newValue: OnChangeValue<any, any>, actionMeta: ActionMeta<any>) => {
+								if (actionMeta.action === 'select-option') {
+									newValue &&
+										setSalesUnits(
+											props.sales_units.find((unit: {id: number; name: string}) => unit.id === newValue.value),
+										)
+								}
+							}}
+						/>
+						<Button
+							type="button"
+							className="col-span-12 sm:col-span-3 md:col-span-2 lg:col-span-1"
+							variant="soft-secondary"
+							onClick={(e: any) => {
+								e.preventDefault()
+								if (salesUnits) {
+									setSelectedUnits((selectedUnits) => [...selectedUnits, salesUnits])
+									ref.current && ref.current.clearValue()
+								}
+							}}>
+							Ekle
+							<Lucide
+								icon="Plus"
+								className="ml-2 hidden h-5 w-5 lg:block"
+							/>
+						</Button>
+					</div>
+				</div>
+				<ProductSalesUnitsList
+					productPrice={data.price}
+					selectedUnits={selectedUnits}
+					unitChannelProductPrices={unitChannelProductPrices}
+					setUnitChannelProductPrices={setUnitChannelProductPrices}
+				/>
 				<div className="col-span-12 flex justify-end">
 					<Button
 						type="submit"

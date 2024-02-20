@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\CaseAndBanks
  *
- * @property-read Collection<int, CustomerPayments> $transactions
+ * @property-read Collection<int, BookingPayments> $transactions
  * @property-read int|null $transactions_count
  * @method static Builder|CaseAndBanks balance()
  * @method static Builder|CaseAndBanks filter(array $filters)
@@ -32,7 +32,7 @@ class CaseAndBanks extends Model
 
   public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
   {
-    return $this->hasMany(CustomerPayments::class);
+    return $this->hasMany(BookingPayments::class);
   }
 
   public function scopeBalance($query)

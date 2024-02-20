@@ -20,6 +20,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BookingRooms extends Model
 {
-	protected $fillable = ['booking_id', 'room_id', 'number_of_adults', 'number_of_children'];
+	protected $fillable = ['booking_id', 'room_id', 'check_in'];
 	use SoftDeletes;
+
+    public function booking(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
+    }
+
+    public function room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Room::class);
+    }
+
+    public function guests(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id');
+    }
 }

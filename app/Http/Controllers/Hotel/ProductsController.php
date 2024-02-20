@@ -35,6 +35,7 @@ class ProductsController extends Controller
                     ->through(function ($product) {
                         return [
                             'id' => $product->id,
+                            'photo' => $product->getFirstMediaUrl('product_images', 'thumb'),
                             'name' => $product->name,
                             'category' => $product->category->name,
                             'sku' => $product->sku,
@@ -75,8 +76,19 @@ class ProductsController extends Controller
     {
         return Inertia::render('Hotel/Product/Create',[
             'categories' => ProductCategory::all(['id', 'name']),
-            'units' => SalesUnit::all(['id', 'name']),
-            'channels' => SalesChannel::all(['id', 'name']),
+            'sales_units' => SalesUnit::all(['id', 'name'])->map(function ($unit) {
+                return [
+                    'id' => $unit->id,
+                    'name' => $unit->name,
+                    'channels' => $unit->channels->map(function ($channel) {
+                        return [
+                            'id' => $channel->id,
+                            'name' => $channel->name,
+                            'sales_unit_channel_id' => $channel->sales_unit_channel_id,
+                        ];
+                    }),
+                ];
+            }),
         ]);
     }
 
@@ -85,7 +97,40 @@ class ProductsController extends Controller
      */
     public function store(StoreProductsRequest $request)
     {
-        //
+        $data = $request->validated();
+        $product = Product::create([
+            'product_category_id' => $data['category_id'],
+            'name' => $data['name'],
+            'description' =>  $data['description'],
+            'sku' =>  $data['sku'],
+            'price' =>  (float) $data['price'],
+            'tax_rate' =>  $data['tax_rate'],
+            'preparation_time' =>  $data['preparation_time'],
+            'is_active' => 1,
+        ]);
+
+        $product->addMedia($data['photo_path'])->toMediaCollection('product_images');
+
+        $product->units()->attach($data['sales_units']);
+
+        if(count($data['unit_channel_product_prices']) > 1) {
+            foreach ($data['unit_channel_product_prices'] as $key => $value) {
+                $product->units->each(function ($unit) use ($value) {
+                    $unit->channels->each(function ($channel) use ($value, $unit) {
+                        if ($channel->pivot->id == $value['sales_unit_channel_id']) {
+                            $channel->unitPrices()->create([
+                                'sales_unit_channel_id' => $value['sales_unit_channel_id'],
+                                'sales_unit_product_id' => $unit->pivot->id,
+                                'price' => (float) $value['price'],
+                            ]);
+                        }
+                    });
+                });
+            }
+        }
+        return redirect()
+            ->route('hotel.products.index')
+            ->with('success', 'Ürün başarıyla eklendi.');
     }
 
     /**

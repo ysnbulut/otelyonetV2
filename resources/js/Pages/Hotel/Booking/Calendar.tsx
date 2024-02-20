@@ -8,8 +8,6 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 import googleCalendarPlugin from '@fullcalendar/google-calendar'
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline'
 import dayjs from 'dayjs'
-import {DateSelectArg, EventChangeArg} from '@fullcalendar/core'
-import axios from 'axios'
 
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
@@ -230,7 +228,7 @@ Calendar.layout = (page: any) => (
 			},
 			{
 				title: 'Rezervasyon Oluştur',
-				href: route('hotel.bookings.create'),
+				href: route('hotel.booking_create'),
 			},
 		]}
 		children={page}

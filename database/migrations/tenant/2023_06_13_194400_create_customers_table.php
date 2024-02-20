@@ -12,14 +12,15 @@ return new class extends Migration {
  {
   Schema::create('customers', function (Blueprint $table) {
    $table->id();
-   $table->enum('type', ['individual', 'company']);
+   $table->enum('type', ['individual', 'company'])->default('individual');
    $table->string('title');
+    $table->string('tax_office')->nullable();
    $table->string('tax_number');
    $table->string('email')->nullable();
    $table->string('phone')->nullable();
-   $table->string('country');
-   $table->string('city');
-   $table->string('address');
+   $table->string('country')->nullable();;
+   $table->string('city')->nullable();;
+   $table->string('address')->nullable();;
    $table->timestamps();
    $table->softDeletes();
   });

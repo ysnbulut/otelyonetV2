@@ -18,6 +18,9 @@ return new class extends Migration {
 				->onDelete('cascade');
 			$table->date('check_in');
 			$table->date('check_out')->nullable();
+            $table->integer('number_of_rooms')->default(1);
+            $table->integer('number_of_adults')->default(1);
+            $table->integer('number_of_children')->default(0);
 			$table->timestamps();
 			$table->softDeletes();
 		});

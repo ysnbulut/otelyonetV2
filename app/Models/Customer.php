@@ -14,8 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read Collection<int, CustomerPayments> $payments
+ * @property-read Collection<int, BookingPayments> $payments
  * @property-read int|null $payments_count
+ * @property mixed $tax_office
  * @method static Builder|Customer filter(array $filters)
  * @method static Builder|Customer newModelQuery()
  * @method static Builder|Customer newQuery()
@@ -29,42 +30,42 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Customer extends Model
 {
-  use SoftDeletes;
+    use SoftDeletes;
 
-  protected $fillable = ['title', 'type', 'tax_number', 'city', 'country', 'address', 'phone', 'email'];
+    protected $fillable = ['title', 'type', 'tax_office', 'tax_number', 'city', 'country', 'address', 'phone', 'email'];
 
-  public function scopeRemainingBalance()
-  {
-    $bookingAmount = $this->bookings()
-      ->join('booking_amounts', 'bookings.id', '=', 'booking_amounts.booking_id')
-      ->whereNull('bookings.deleted_at')
-      ->sum('booking_amounts.grand_total');
-    $paymentAmount = $this->payments()->sum('amount_paid');
-    return $paymentAmount - $bookingAmount;
-  }
+    public function scopeRemainingBalance()
+    {
+        $bookingAmount = $this->bookings()
+            ->join('booking_amounts', 'bookings.id', '=', 'booking_amounts.booking_id')
+            ->whereNull('bookings.deleted_at')
+            ->sum('booking_amounts.grand_total');
+        $paymentAmount = $this->payments()->sum('amount_paid');
+        return $paymentAmount - $bookingAmount;
+    }
 
-  public function bookings(): HasMany
-  {
-    return $this->hasMany(Booking::class, 'customer_id', 'id');
-  }
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'customer_id', 'id');
+    }
 
-  public function payments(): HasMany
-  {
-    return $this->hasMany(CustomerPayments::class, 'customer_id', 'id');
-  }
+    public function payments(): HasMany
+    {
+        return $this->hasMany(BookingPayments::class, 'customer_id', 'id');
+    }
 
-  public function scopeFilter($query, array $filters)
-  {
-    $query
-      ->when($filters['search'] ?? null, function ($query, $search) {
-        $query->where(function ($query) use ($search) {
-          $query
-            ->where('title', 'like', '%' . $search . '%')
-            ->orWhere('tax_number', 'like', '%' . $search . '%')
-            ->orWhere('phone', 'like', '%' . $search . '%')
-            ->orWhere('email', 'like', '%' . $search . '%');
-        });
-      });
+    public function scopeFilter($query, array $filters)
+    {
+        $query
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('tax_number', 'like', '%' . $search . '%')
+                        ->orWhere('phone', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            });
 //            ->when($filters['trashed'] ?? null, function ($query, $trashed) {
 //                if ($trashed === 'with') {
 //                    $query->withTrashed();
@@ -72,5 +73,5 @@ class Customer extends Model
 //                    $query->onlyTrashed();
 //                }
 //            });
-  }
+    }
 }

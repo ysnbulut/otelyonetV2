@@ -24,6 +24,7 @@ class MediaController extends Controller
             'name' => $name,
             'original_name' => $file->getClientOriginalName(),
             'url' => asset('tmp/uploads/' . $name),
+            'path' => $path.'/'.$name
         ]);
     }
 }

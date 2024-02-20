@@ -106,8 +106,8 @@ export function SeasonListItem(props: SeasonListItemProps) {
 						data.unit_price === '0' || data.unit_price === '0,00'
 							? 'text-danger'
 							: props.season.name
-							  ? ''
-							  : 'text-pending',
+								? ''
+								: 'text-pending',
 					)}>
 					{props.season.name ? props.season.name : 'Sezon Dışı' + ' Fiyatı'}
 				</h3>
@@ -134,12 +134,12 @@ export function SeasonListItem(props: SeasonListItemProps) {
 					name="unit_price"
 					className={twMerge(
 						'w-full rounded-md border-slate-200 text-right shadow-sm transition duration-200' +
-							' ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4' +
-							' focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100' +
-							' dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80' +
-							' dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent' +
-							' dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100' +
-							' [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50',
+						' ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4' +
+						' focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100' +
+						' dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80' +
+						' dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent' +
+						' dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100' +
+						' [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50',
 						data.unit_price === '0' || data.unit_price === '0,00'
 							? 'border-danger text-danger focus:border-danger focus:ring-danger '
 							: 'focus:border-primary focus:ring-primary ',

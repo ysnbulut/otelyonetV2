@@ -22,17 +22,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BookingGuests extends Model
 {
- use SoftDeletes;
+    use SoftDeletes;
 
- protected $fillable = ['booking_id', 'guest_id'];
+    protected $fillable = ['booking_room_id', 'guest_id'];
 
- public function booking(): \Illuminate\Database\Eloquent\Relations\BelongsTo
- {
-  return $this->belongsTo(Booking::class);
- }
+    public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(BookingRooms::class);
+    }
 
- public function guest(): \Illuminate\Database\Eloquent\Relations\BelongsTo
- {
-  return $this->belongsTo(Guest::class);
- }
+    public function booking(): \Illuminate\Database\Eloquent\Relations\hasOneThrough
+    {
+        return $this->hasOneThrough(Booking::class, BookingRooms::class, 'id', 'id', 'booking_room_id', 'booking_id');
+    }
+
+    public function guest(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Guest::class);
+    }
 }
