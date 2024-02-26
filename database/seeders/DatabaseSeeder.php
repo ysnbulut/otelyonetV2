@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Building;
+use App\Models\Floor;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\LaravelSettings\Migrations\SettingsMigrator;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,18 +20,31 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        // ! buraya bakılacak
 //        $superUser = User::factory()->create([
 //            'name' => 'Yasin Bulut',
 //            'email' => 'hi@yasinbulut.com',
 //            'password' => bcrypt('vfbh5csdq'),
 //        ]);
 //        $superUser->assignRole('super-admin');
-//        $user = User::factory()->create([
-//            'name' => 'Admin',
-//            'email' => 'admin@otelyonet.com',
-//            'password' => bcrypt('admin'),
-//        ]);
-//        $user->assignRole('admin');
+
+        $role = Role::create(['name' => 'Super Admin']);
+        $user = User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@otelyonet.com',
+            'password' => bcrypt('admin'),
+        ]);
+        $user->assignRole($role);
+
+        $building = Building::create([
+            'name' => 'Ana Bina',
+            'description' => 'Otelin Ana Binası'
+        ]);
+
+        Floor::create([
+            'building_id' => $building->id,
+            'name' => 'Zemin Kat',
+        ]);
 
         $pricingPolicy = ['label' => 'Oda Satış Politikası', 'description' => 'Oda şatış politikası odanın kişi bazlı mı yoksa ünite bazlı mı fiyatlandırılacağını belirler. Kişi bazlı fiyatlandırmada oda fiyatı kişi sayısına göre değişirken, ünite bazlı fiyatlandırmada oda fiyatı sabittir.', 'name' => 'pricing_policy', 'type' => 'select', //text, number, select, boolean
             'options' => [['label' => 'Kişi Bazlı Fiyatlandırma', 'value' => 'person_based',], ['label' => 'Ünite Bazlı Fiyatlandırma', 'value' => 'unit_based',]], 'value' => 'person_based',];
@@ -77,7 +93,7 @@ class DatabaseSeeder extends Seeder
         $this->migrator->add('pricing_policy.pricing_currency', $pricingCurrency); //person_based -  unit_based
         $this->migrator->add('pricing_policy.check_in_time_policy', $checkInTimePolicy);
         $this->migrator->add('pricing_policy.check_out_time_policy', $checkOutTimePolicy);
-        $this->migrator->add('pricing_policy.accommodation_types', $accommodationTypes);
+        $this->migrator->add('pricing_policy.accommodation_type', $accommodationTypes);
 
     }
 }

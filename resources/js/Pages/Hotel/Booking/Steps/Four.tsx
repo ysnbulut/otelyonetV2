@@ -6,9 +6,6 @@ import Tippy from '@/Components/Tippy'
 import Lucide from '@/Components/Lucide'
 
 function Four(props: StepFourProps) {
-	useEffect(() => {
-		console.log('props.roomsGuests', props.roomsGuests)
-	}, [props.data])
 	return (
 		<div className="box p-5">
 			{props.data.map(
@@ -58,6 +55,8 @@ function Four(props: StepFourProps) {
 																		{
 																			name: '',
 																			surname: '',
+																			date_of_birth: '',
+																			gender: '',
 																			identification_number: '',
 																			is_foreign_national: false,
 																		},

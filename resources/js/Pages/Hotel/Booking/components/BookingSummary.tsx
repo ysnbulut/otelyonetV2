@@ -201,8 +201,8 @@ function BookingSummary(props: BookingSummaryProps) {
 										{props.checkedRooms[room_type.id].map((room, index) => {
 											const groom = room_type.rooms.find((r) => r.id === room)
 											return (
-												<>
-													<div className="flex items-center justify-center border-y bg-slate-50 py-0.5 text-right">
+												<div key={index}>
+													<div className="flex items-center justify-center border-y bg-slate-50 py-0.5 text-right dark:bg-darkmode-600">
 														<span className="text-xs font-semibold">{groom?.name} No'lu Oda Misafirleri</span>
 													</div>
 													{props.roomsGuests && props.roomsGuests[room_type.id] && groom && (
@@ -214,14 +214,19 @@ function BookingSummary(props: BookingSummaryProps) {
 																	<th className="text-left text-xs">#</th>
 																	<th className="text-left text-xs">Ad</th>
 																	<th className="text-left text-xs">Soyad</th>
-																	<th className="text-left text-xs">Kimlik No</th>
+																	<th className="text-left text-xs">D. Tarihi</th>
+																	<th className="text-left text-xs">Cinsiyet</th>
+																	<th className="text-left text-xs">Uyruk</th>
+																	<th className="text-left text-xs">TC \ Yabancı Kimlik No</th>
 																</tr>
 															</thead>
 															<tbody>
 																{Object.values(props.roomsGuests[room_type.id][groom.id]).map((guest, index) => {
 																	if (guest.name !== '' && guest.surname !== '') {
 																		return (
-																			<tr className="border-b">
+																			<tr
+																				key={index}
+																				className="border-b">
 																				<td
 																					data-label="#"
 																					className="border-none text-xs font-bold">
@@ -236,6 +241,21 @@ function BookingSummary(props: BookingSummaryProps) {
 																					data-label="Soyad"
 																					className="border-none text-xs">
 																					{guest.surname}
+																				</td>
+																				<td
+																					data-label="D. Tarihi"
+																					className="border-none text-xs">
+																					{guest.date_of_birth}
+																				</td>
+																				<td
+																					data-label="Cinsiyet"
+																					className="border-none text-xs">
+																					{guest.gender === 'male' ? 'Erkek' : 'Kadın'}
+																				</td>
+																				<td
+																					data-label="Uyruk"
+																					className="border-none text-xs">
+																					{guest.nationality}
 																				</td>
 																				<td
 																					data-label="Kimlik No"
@@ -257,7 +277,7 @@ function BookingSummary(props: BookingSummaryProps) {
 															</tbody>
 														</table>
 													)}
-												</>
+												</div>
 											)
 										})}
 									</div>
@@ -304,7 +324,7 @@ function BookingSummary(props: BookingSummaryProps) {
 									required={true}
 									disabled={true}
 									name="unit_price"
-									className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0"
+									className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 								/>
 							</div>
 						)}
@@ -337,7 +357,7 @@ function BookingSummary(props: BookingSummaryProps) {
 									values && setGrandTotal(values?.float || 0)
 								}}
 								name="unit_price"
-								className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0"
+								className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 							/>
 						</div>
 					</fieldset>

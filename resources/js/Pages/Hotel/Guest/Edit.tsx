@@ -9,12 +9,15 @@ import withReactContent from 'sweetalert2-react-content'
 import Lucide from '@/Components/Lucide'
 import Tippy from '@/Components/Tippy'
 import LoadingIcon from '@/Components/LoadingIcon'
+import Litepicker from '@/Components/Litepicker'
+import dayjs from 'dayjs'
 
 function Edit(props: PageProps) {
 	const MySwal = withReactContent(Swal)
 	const {data, setData, put, processing, errors} = useForm({
 		name: props.guest.name,
 		surname: props.guest.surname,
+		date_of_birth: props.guest.date_of_birth,
 		nationality: props.guest.nationality,
 		gender: props.guest.gender,
 		identification_number: props.guest.identification_number,
@@ -122,7 +125,7 @@ function Edit(props: PageProps) {
 						</div>
 					</div>
 					<div className="flex w-full flex-col gap-2 lg:flex-row">
-						<div className="input-form my-2 w-full lg:w-1/3">
+						<div className="input-form my-2 w-full lg:w-1/2">
 							<FormLabel
 								htmlFor="guest-nationality"
 								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
@@ -144,28 +147,7 @@ function Edit(props: PageProps) {
 							/>
 							{errors.nationality && <div className="text-theme-6 mt-2 text-danger">{errors.nationality}</div>}
 						</div>
-						<div className="input-form my-2 w-full lg:w-1/3">
-							<FormLabel
-								htmlFor="guest-gender"
-								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
-								Cinsiyet
-								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, Lütfen Seçiniz.
-								</span>
-							</FormLabel>
-							<FormSelect
-								className="w-full"
-								name="gender"
-								id="guest-gender"
-								value={data.gender}
-								onChange={(e) => setData((data) => ({...data, gender: e.target.value}))}>
-								<option value="unspecified">Belirtilmedi</option>
-								<option value="male">Erkek</option>
-								<option value="female">Kadın</option>
-							</FormSelect>
-							{errors.gender && <div className="text-theme-6 mt-2 text-danger">{errors.gender}</div>}
-						</div>
-						<div className="input-form my-2 w-full lg:w-1/3">
+						<div className="input-form my-2 w-full lg:w-1/2">
 							<FormLabel
 								htmlFor="guest-identification-number"
 								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
@@ -188,6 +170,55 @@ function Edit(props: PageProps) {
 							{errors.identification_number && (
 								<div className="text-theme-6 mt-2 text-danger">{errors.identification_number}</div>
 							)}
+						</div>
+					</div>
+					<div className="flex w-full flex-col gap-2 lg:flex-row">
+						<div className="input-form my-2 w-full lg:w-1/2">
+							<FormLabel
+								htmlFor="date_of_birth"
+								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
+								Doğum Tarihi
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
+									Gerekli, Lütfen Giriniz.
+								</span>
+							</FormLabel>
+							<Litepicker
+								name="date_of_birth"
+								id="date_of_birth"
+								options={{
+									singleMode: true,
+									numberOfColumns: 1,
+									numberOfMonths: 1,
+									format: 'DD.MM.YYYY',
+									mobileFriendly: true,
+									showWeekNumbers: false,
+								}}
+								onChange={(date) => {
+									console.log(date, 'asdasdasd')
+								}}
+							/>
+							{errors.gender && <div className="text-theme-6 mt-2 text-danger">{errors.gender}</div>}
+						</div>
+						<div className="input-form my-2 w-full lg:w-1/2">
+							<FormLabel
+								htmlFor="guest-gender"
+								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
+								Cinsiyet
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
+									Gerekli, Lütfen Seçiniz.
+								</span>
+							</FormLabel>
+							<FormSelect
+								className="w-full"
+								name="gender"
+								id="guest-gender"
+								value={data.gender}
+								onChange={(e) => setData((data) => ({...data, gender: e.target.value}))}>
+								<option value="unspecified">Belirtilmedi</option>
+								<option value="male">Erkek</option>
+								<option value="female">Kadın</option>
+							</FormSelect>
+							{errors.gender && <div className="text-theme-6 mt-2 text-danger">{errors.gender}</div>}
 						</div>
 					</div>
 				</div>

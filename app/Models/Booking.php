@@ -107,12 +107,7 @@ class Booking extends Model
 
 	public function rooms(): BelongsToMany
 	{
-		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->orderByDesc('name');
-	}
-
-	public function guests(): BelongsToMany
-	{
-		return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_id', 'guest_id');
+		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id');
 	}
 
 	public function customer(): BelongsTo

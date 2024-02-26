@@ -1,10 +1,13 @@
 import React from 'react'
 import Lucide from '@/Components/Lucide'
 import {ProductCardDataProps} from '@/Pages/Hotel/Product/types/product-card'
-import noImg from '../../../../../images/noimage.jpg'
+import {useAppSelector} from '@/stores/hooks'
+import {selectDarkMode} from '@/stores/darkModeSlice'
+import image from '../../../../../images/image.jpg'
+import image_dark from '../../../../../images/image_dark.jpg'
 
 function ProductCard(props: ProductCardDataProps) {
-	console.log(props)
+	const darkMode = useAppSelector(selectDarkMode)
 	return (
 		<div className="intro-y col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
 			<div className="box">
@@ -13,7 +16,7 @@ function ProductCard(props: ProductCardDataProps) {
 						<img
 							alt="Midone - HTML Admin Template"
 							className="rounded-md"
-							src={props.product.photo === '' ? noImg : props.product.photo}
+							src={props.product.photo === '' ? (darkMode ? image : image_dark) : props.product.photo}
 						/>
 						<span className="absolute top-0 z-10 m-5 rounded bg-pending/80 px-2 py-1 text-xs text-white">Featured</span>
 						<div className="absolute bottom-0 z-10 px-5 pb-6 text-white">

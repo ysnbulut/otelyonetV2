@@ -98,6 +98,7 @@ export interface GuestProps {
 	id?: number
 	name: string
 	surname: string
+	date_of_birth: string
 	is_foreign_national: boolean
 	nationality?: string | null
 	identification_number: string

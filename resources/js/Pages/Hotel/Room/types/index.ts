@@ -5,7 +5,7 @@ interface Links {
 	label: string
 	active: boolean
 }
-interface RoomDataProps {
+export interface RoomDataProps {
 	id: number
 	name: string
 	type: string

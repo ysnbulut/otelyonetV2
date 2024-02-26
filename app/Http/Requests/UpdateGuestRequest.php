@@ -25,11 +25,13 @@ class UpdateGuestRequest extends FormRequest
 		return [
 			'name' => ['required', 'string', 'max:255', 'min:2'],
 			'surname' => ['required', 'string', 'max:255', 'min:2'],
+            'is_foreign_national' => ['required', 'boolean'],
 			'nationality' => ['required', 'string', 'max:255', 'min:2'],
-			'identification_number' => ['required', 'string', 'max:255', 'min:6', 'unique:guests,identification_number'],
-			'phone' => ['required', 'string', 'max:255'],
-			'email' => ['required', 'string', 'email', 'max:255'],
-			'gender' => ['required', 'in:male,female,unspecified'],
+            'date_of_birth' => ['required', 'date'],
+			'identification_number' => ['required', 'string', 'max:255', 'min:6'], //, 'unique:guests,identification_number'
+			'phone' => ['nullable', 'string', 'max:255'],
+			'email' => ['nullable', 'string', 'email', 'max:255'],
+			'gender' => ['nullable', 'in:male,female,unspecified'],
 		];
 	}
 }

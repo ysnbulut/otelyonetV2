@@ -23,7 +23,7 @@ class RoomController extends Controller
             'rooms' => Room::orderBy('id')
                 ->filter(Request::only('search', 'trashed'))
                 ->with(['roomType', 'roomView', 'floor'])
-                ->paginate(10)
+                ->paginate(24)
                 ->withQueryString()
                 ->through(function ($room) {
                     return [

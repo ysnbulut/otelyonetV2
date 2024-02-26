@@ -36,20 +36,15 @@ class GuestController extends Controller
 					return [
 						'id' => $guest->id,
 						'full_name' => $guest->fullName,
+                        'is_foreign_national' => $guest->is_foreign_national,
 						'nationality' => $guest->nationality,
+                        'identification_number' => $guest->identification_number,
+                        'date_of_birth' => $guest->date_of_birth,
 						'phone' => $guest->phone,
 						'email' => $guest->email,
 					];
 				}),
 		]);
-	}
-
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create()
-	{
-		return view('hotel.pages.guests.create');
 	}
 
 	/**

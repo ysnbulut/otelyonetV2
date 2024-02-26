@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
  * @property-read mixed $full_name
+ * @property mixed $date_of_birth
  * @method static Builder|Guest filter(array $filters)
  * @method static Builder|Guest newModelQuery()
  * @method static Builder|Guest newQuery()
@@ -28,19 +29,20 @@ class Guest extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'surname', 'is_foreign_national', 'nationality', 'identification_number', 'phone', 'email', 'gender'];
+    protected $fillable = ['name', 'surname', 'is_foreign_national', 'nationality', 'date_of_birth', 'identification_number',
+        'phone', 'email', 'gender'];
 
     public function getFullNameAttribute(): string
     {
         return $this->name . ' ' . $this->surname;
     }
 
-    public function scopeOrderByFullName($query)
+    public function scopeOrderByFullName($query): void
     {
         $query->orderBy('last_name')->orderBy('first_name');
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): void
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -56,7 +58,7 @@ class Guest extends Model
 //            });
     }
 
-    public function booking_room()
+    public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(BookingRooms::class, 'booking_guests', 'guest_id', 'booking_room_id');
     }

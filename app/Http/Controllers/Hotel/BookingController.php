@@ -15,14 +15,12 @@ use App\Models\BookingGuests;
 use App\Models\BookingRooms;
 use App\Models\CaseAndBanks;
 use App\Models\Customer;
-use App\Models\BookingPayments;
 use App\Models\Guest;
 use App\Models\Room;
 use App\Models\TypeHasView;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -198,7 +196,9 @@ class BookingController extends Controller
                 $query->whereNotIn('id', $unavailableRoomsIds);
             },
         ])
-            ->has('rooms')
+            ->whereHas('rooms', function ($query) use ($unavailableRoomsIds) {
+                $query->whereNotIn('id', $unavailableRoomsIds);
+            })
             ->whereHas('type', function ($query) use ($request) {
                 $query->with(['beds', 'features'])->where('adult_capacity', '>=', $request->number_of_adults)->where('child_capacity', '>=', $request->number_of_children);
             })
@@ -254,17 +254,6 @@ class BookingController extends Controller
         ];
     }
 
-    /**
-     * @return \Inertia\Response
-     */
-    public function create(): \Inertia\Response
-    {
-        return Inertia::render('Hotel/Booking/Create');
-    }
-
-    /*
-     * Store a newly created resource in storage.
-     */
     public function store(StoreBookingRequest $request)
     {
         $data = $request->validated();
@@ -296,8 +285,10 @@ class BookingController extends Controller
                         [
                             'name' => $value['name'],
                             'surname' => $value['surname'],
-                            'nationality' => 'Türk',
-                            'identification_number' => 'asdasdasd'
+                            'nationality' => $value['nationality'],
+                            'gender' => $value['gender'],
+                            'date_of_birth' => Carbon::createFromFormat('d.m.Y', $value['date_of_birth'])->format('Y-m-d'),
+                            'identification_number' =>  $value['identification_number'],
                         ]
                     );
                     BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()->attach($guest);
@@ -307,12 +298,24 @@ class BookingController extends Controller
         return redirect()->route('hotel.bookings.index')->with('success', 'Rezervasyon başarıyla oluşturuldu.');
     }
 
+    /*
+     * Store a newly created resource in storage.
+     */
+
+    /**
+     * @return \Inertia\Response
+     */
+    public function create(): \Inertia\Response
+    {
+        return Inertia::render('Hotel/Booking/Create');
+    }
+
     /**
      * Display the specified resource.
      */
     public function show(Booking $booking)
     {
-        return view('hotel.pages.bookings.show', data: [
+        return [
             'currency' => $this->settings->currency['value'],
             'booking' => [
                 'id' => $booking->id,
@@ -328,8 +331,17 @@ class BookingController extends Controller
                     'name' => $room->name,
                     'room_type' => $room->roomType->name,
                     'room_view' => $room->roomView->name,
-                    'number_of_adults' => $room->pivot->number_of_adults,
-                    'number_of_children' => $room->pivot->number_of_children,
+                    'room_type_full_name' => $room->roomType->name . ' ' . $room->roomView->name,
+                    'quests' => BookingGuests::where('booking_room_id', $room->pivot->id)->get()->map(fn($booking_room)
+                    => [
+                        'booking_guests_id' => $booking_room->id,
+                        'id' => $booking_room->guest->id,
+                        'name' => $booking_room->guest->name,
+                        'surname' => $booking_room->guest->surname,
+                        'birth_date' => $booking_room->guest->date_of_birth,
+                        'nationality' => $booking_room->guest->nationality,
+                        'identification_number' => $booking_room->guest->identification_number,
+                    ]),
                 ]),
             ],
             'customer' => [
@@ -361,11 +373,6 @@ class BookingController extends Controller
                     'description' => $payment->description,
                 ]
             ),
-            'guests' => $booking->guests->map(fn($guest) => [
-                'id' => $guest->id,
-                'name' => $guest->name,
-                'surname' => $guest->surname,
-            ]),
             'amount' => [
                 'id' => $booking->amount->id,
                 'price' => $booking->amount->price,
@@ -384,7 +391,7 @@ class BookingController extends Controller
             'case_and_banks' => CaseAndBanks::select(['id', 'name'])->get(),
             'remaining_balance' => round($booking->remainingBalance(), 2),
             'remaining_balance_formatted' => number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $this->settings->currency['value']
-        ]);
+        ];
     }
 
     /**

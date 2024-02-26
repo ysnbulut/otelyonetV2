@@ -160,7 +160,7 @@ function Index(props: PageProps) {
 									<Table.Td
 										dataLabel="Aksiyon"
 										className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
-										asdasd
+										eklenecek
 									</Table.Td>
 								</Table.Tr>
 							))}

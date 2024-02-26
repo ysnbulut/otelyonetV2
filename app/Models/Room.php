@@ -6,6 +6,10 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,47 +32,40 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Room extends Model
 {
- use SoftDeletes;
+    use SoftDeletes;
 
-	protected $fillable = [
-  'building_id',
-  'floor_id',
-  'type_has_view_id',
-  'name',
-//  'description',
-  'is_clean',
-  'status',
- ];
+    protected $fillable = ['building_id', 'floor_id', 'type_has_view_id', 'name', //  'description',
+        'is_clean', 'status',];
 
- public function building(): \Illuminate\Database\Eloquent\Relations\BelongsTo
- {
-  return $this->belongsTo(Building::class);
- }
+    public function building(): BelongsTo
+    {
+        return $this->belongsTo(Building::class);
+    }
 
- public function floor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
- {
-  return $this->belongsTo(Floor::class);
- }
+    public function floor(): BelongsTo
+    {
+        return $this->belongsTo(Floor::class);
+    }
 
- public function typeHasView(): \Illuminate\Database\Eloquent\Relations\BelongsTo
- {
-	return $this->belongsTo(TypeHasView::class);
- }
+    public function typeHasView(): BelongsTo
+    {
+        return $this->belongsTo(TypeHasView::class);
+    }
 
- public function roomType(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
- {
-  return $this->hasOneThrough(RoomType::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'type_id');
- }
+    public function roomType(): HasOneThrough
+    {
+        return $this->hasOneThrough(RoomType::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'type_id');
+    }
 
- public function roomView(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
- {
-  return $this->hasOneThrough(RoomView::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'view_id');
- }
+    public function roomView(): HasOneThrough
+    {
+        return $this->hasOneThrough(RoomView::class, TypeHasView::class, 'id', 'id', 'type_has_view_id', 'view_id');
+    }
 
- public function bookings(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
- {
-  return $this->hasManyThrough(Booking::class, BookingRooms::class, 'room_id', 'id', 'id', 'booking_id');
- }
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(Booking::class, BookingRooms::class, 'room_id', 'id', 'id', 'booking_id');
+    }
 
     /**
      * @param $query
@@ -77,11 +74,9 @@ class Room extends Model
      */
     public function scopeFilter($query, array $filters): void
     {
-        $query
-            ->when($filters['search'] ?? null, function ($query, $search) {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
-                    $query
-                        ->where('name', 'like', '%' . $search . '%');
+                    $query->where('name', 'like', '%' . $search . '%');
                 });
                 $query->orWhereHas('roomType', function ($query) use ($search) {
                     $query->where('name', 'like', '%' . $search . '%');

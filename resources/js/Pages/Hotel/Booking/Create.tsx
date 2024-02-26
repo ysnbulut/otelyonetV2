@@ -150,7 +150,7 @@ function Create() {
 							)}
 						</div>
 					)}
-					{stepOneResults && (
+					{stepOneResults && stepOneResults.data.length > 0 && (
 						<BookingSummary
 							checkinRequired={checkinRequired}
 							bookingResult={bookingResult}

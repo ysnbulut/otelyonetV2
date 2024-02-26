@@ -65,7 +65,7 @@ function SummaryTypedRoom(props: SummaryTypedRoomProps) {
 						// 	values && values.float !== parseFloat(props.room.price) && setPriceFocus(true)
 						// }}
 						name="unit_price"
-						className="w-28 border-none px-0.5 py-0.5 text-right text-sm font-normal text-danger focus:border-none focus:ring-0"
+						className="w-28 border-none px-0.5 py-0.5 text-right text-sm font-normal text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 					/>
 				</div>
 			</div>
@@ -108,7 +108,7 @@ function SummaryTypedRoom(props: SummaryTypedRoomProps) {
 						// 	values && values.float !== parseFloat(props.room.price) && setTotalPriceFocus(true)
 						// }}
 						name="unit_price"
-						className="w-32 border-none px-0.5 py-0.5 text-right text-sm font-bold text-danger focus:border-none focus:ring-0"
+						className="w-32 border-none px-0.5 py-0.5 text-right text-sm font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 					/>
 				</div>
 			</div>
