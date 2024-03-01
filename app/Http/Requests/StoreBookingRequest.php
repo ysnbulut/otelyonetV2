@@ -22,6 +22,10 @@ class StoreBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'number_of_adults' => ['required', 'integer', 'min:1'],
+            'number_of_children' => ['required', 'integer', 'min:0'],
+            'children_ages' => ['nullable', 'array', 'min:0'],
+            'checkin_required' => ['required', 'boolean'],
             'booking_result' => ['required', 'array'],
             'booking_result.check_in' => ['required', 'date', 'date_format:d.m.Y', 'after_or_equal:today'],
             'booking_result.check_out' => ['required', 'date', 'date_format:d.m.Y', 'after:booking_result.check_in'],
@@ -57,7 +61,16 @@ class StoreBookingRequest extends FormRequest
     public function messages()
     {
         return [
-          'booking_result.check_in.required' => 'Check-in tarihi zorunludur.',
+            'number_of_adults.required' => 'Yetişkin sayısı zorunludur.',
+            'number_of_adults.integer' => 'Yetişkin sayısı tam sayı olmalıdır.',
+            'number_of_adults.min' => 'Yetişkin sayısı en az 1 olmalıdır.',
+            'number_of_children.required' => 'Çocuk sayısı zorunludur.',
+            'number_of_children.integer' => 'Çocuk sayısı tam sayı olmalıdır.',
+            'number_of_children.min' => 'Çocuk sayısı en az 0 olmalıdır.',
+            'children_ages.required' => 'Çocuk yaşları zorunludur.',
+            'children_ages.array' => 'Çocuk yaşları dizi olmalıdır.',
+            'children_ages.min' => 'Çocuk yaşları en az 0 olmalıdır.',
+            'booking_result.check_in.required' => 'Check-in tarihi zorunludur.',
             'booking_result.check_in.date' => 'Check-in tarihi geçerli bir tarih olmalıdır.',
             'booking_result.check_in.date_format' => 'Check-in tarihi gün.ay.yıl formatında olmalıdır.',
             'booking_result.check_in.after_or_equal' => 'Check-in tarihi bugün veya bugünden sonraki bir tarih olmalıdır.',

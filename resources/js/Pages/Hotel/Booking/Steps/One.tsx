@@ -257,6 +257,7 @@ function One(props: StepOneProps) {
 								type="number"
 								step={1}
 								min={0}
+								max={props.child_age_limit}
 								defaultValue={1}
 								onChange={(e) => {
 									setChidrenAges((ages) => {

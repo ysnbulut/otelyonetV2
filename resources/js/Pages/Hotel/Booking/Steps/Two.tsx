@@ -10,6 +10,7 @@ function Two(props: StepTwoProps) {
 			{props.stepOneResults.data.length > 0 ? (
 				props.stepOneResults.data.map((item, key) => (
 					<AvailableRooms
+						accommodationType={props.accommodationType}
 						key={key}
 						currency={props.stepOneResults.currency}
 						item={item}

@@ -35,6 +35,17 @@ function AvailableRooms(props: AvailableRoomsProps) {
 		}
 	}
 
+	const accommodationTypes: {[key: string]: string} = {
+		only_room: 'Sadece Oda',
+		room_breakfast: 'Oda ve Kahvaltı',
+		half_board: 'Yarım Pansiyon',
+		full_board: 'Tam Pansiyon',
+		all_inclusive: 'Her Şey Dahil',
+		ultra_all_inclusive: 'Ultra Her Şey Dahil',
+	}
+
+	const accommodationType = accommodationTypes[props.accommodationType] || 'Sadece Oda'
+
 	useEffect(() => {
 		setCalcTotalPrice(props.item.price.total_price && parseFloat(props.item.price.total_price.replace(/,/g, '')))
 	}, [props.request])
@@ -245,13 +256,16 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						</Disclosure>
 					</Disclosure.Group>
 					{props.item.rooms && (
-						<div className="flex justify-end">
-							<h3 className="text-xl">
+						<div className="flex items-center justify-between">
+							<span className="rounded-md bg-slate-100 px-2 py-1 text-lg font-semibold text-primary">
+								{accommodationType}
+							</span>
+							<span className="rounded-md bg-slate-100 px-2 py-1 text-xl ">
 								Toplam Tutar :
 								<span className="text-xl font-semibold text-danger">
 									{formatToTurkishLira(calcTotalPrice)} {props.currency}
 								</span>
-							</h3>
+							</span>
 						</div>
 					)}
 				</div>

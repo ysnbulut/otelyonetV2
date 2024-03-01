@@ -5,7 +5,6 @@ import {GuestProps} from '@/Pages/Hotel/Booking/types/response'
 import countryList from '@/json/country.json'
 import Select from 'react-select'
 import Litepicker from '@/Components/Litepicker'
-import dayjs from 'dayjs'
 
 interface RoomGuestsProps {
 	guestIndex: number

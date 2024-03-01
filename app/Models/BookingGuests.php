@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read Booking|null $booking
  * @property-read Guest|null $guest
+ * @property mixed $check_in
+ * @property mixed $check_out
+ * @property mixed $check_in_date
+ * @property mixed $status
+ * @property mixed $check_out_date
+ * @property mixed $check_in_kbs
+ * @property mixed $check_out_kbs
  * @method static Builder|BookingGuests newModelQuery()
  * @method static Builder|BookingGuests newQuery()
  * @method static Builder|BookingGuests onlyTrashed()
@@ -24,7 +31,17 @@ class BookingGuests extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['booking_room_id', 'guest_id'];
+    protected $fillable = [
+        'booking_room_id',
+        'guest_id',
+        'check_in',
+        'check_out',
+        'status',
+        'check_in_date',
+        'check_out_date',
+        'check_in_kbs',
+        'check_out_kbs'
+    ];
 
     public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

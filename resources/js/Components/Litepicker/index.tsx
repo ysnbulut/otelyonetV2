@@ -1,82 +1,82 @@
-import { createRef, useEffect, useRef } from "react";
-import { setValue, init, reInit } from "./litepicker";
-import LitepickerJs from "litepicker";
-import { FormInput } from "@/Components/Form";
-import { ILPConfiguration } from "litepicker/dist/types/interfaces";
+import {createRef, useEffect, useRef} from 'react'
+import {setValue, init, reInit} from './litepicker'
+import LitepickerJs from 'litepicker'
+import {FormInput} from '@/Components/Form'
+import {ILPConfiguration} from 'litepicker/dist/types/interfaces'
+import 'litepicker/dist/plugins/mobilefriendly'
 
 export interface LitepickerElement extends HTMLInputElement {
-  litePickerInstance: LitepickerJs;
+	litePickerInstance: LitepickerJs
 }
 
-type LitepickerConfig = Partial<ILPConfiguration>;
+type LitepickerConfig = Partial<ILPConfiguration>
 
 interface MainProps {
-  options: {
-    format?: string | undefined;
-  } & LitepickerConfig;
-  value: string;
-  onChange: (date: string) => void;
-  getRef: (el: LitepickerElement) => void;
+	options: {
+		format?: string | undefined
+	} & LitepickerConfig
+	value: string
+	onChange: (date: string) => void
+	getRef: (el: LitepickerElement) => void
 }
 
-export type LitepickerProps = MainProps &
-  Omit<React.ComponentPropsWithoutRef<"input">, keyof MainProps>;
+export type LitepickerProps = MainProps & Omit<React.ComponentPropsWithoutRef<'input'>, keyof MainProps>
 
 function Litepicker(props: LitepickerProps) {
-  const initialRender = useRef(true);
-  const litepickerRef = createRef<LitepickerElement>();
-  const tempValue = useRef(props.value);
+	const initialRender = useRef(true)
+	const litepickerRef = createRef<LitepickerElement>()
+	const tempValue = useRef(props.value)
 
-  useEffect(() => {
-    if (litepickerRef.current) {
-      props.getRef(litepickerRef.current);
-    }
+	useEffect(() => {
+		if (litepickerRef.current) {
+			props.getRef(litepickerRef.current)
+		}
 
-    if (initialRender.current) {
-      setValue(props);
-      if (litepickerRef.current !== null) {
-        init(litepickerRef.current, props);
-      }
-      initialRender.current = false;
-    } else {
-      if (tempValue.current !== props.value && litepickerRef.current !== null) {
-        reInit(litepickerRef.current, props);
-      }
-    }
+		if (initialRender.current) {
+			setValue(props)
+			if (litepickerRef.current !== null) {
+				init(litepickerRef.current, props)
+			}
+			initialRender.current = false
+		} else {
+			if (tempValue.current !== props.value && litepickerRef.current !== null) {
+				reInit(litepickerRef.current, props)
+			}
+		}
 
-    tempValue.current = props.value;
-  }, [props.value]);
+		tempValue.current = props.value
+	}, [props.value])
 
-  const { options, value, onChange, getRef, ...computedProps } = props;
-  return (
-    <FormInput
-      ref={litepickerRef}
-      type="text"
-      value={props.value}
-      onChange={(e) => {
-        props.onChange(e.target.value);
-      }}
-      {...computedProps}
-    />
-  );
+	const {options, value, onChange, getRef, ...computedProps} = props
+	return (
+		<FormInput
+			ref={litepickerRef}
+			type="text"
+			value={props.value}
+			onChange={(e) => {
+				props.onChange(e.target.value)
+			}}
+			{...computedProps}
+		/>
+	)
 }
 
 Litepicker.defaultProps = {
-  options: {
-    showWeekNumbers: true,
-    lang: 'tr-TR',
-    format: 'DD.MM.YYYY',
-    autoApply: true,
-    dropdowns: {
-      minYear: 1990,
-      maxYear: null,
-      months: true,
-      years: true,
-    },
-  },
-  value: "",
-  onChange: () => {},
-  getRef: () => {},
-};
+	options: {
+		showWeekNumbers: true,
+		lang: 'tr-TR',
+		format: 'DD.MM.YYYY',
+		autoApply: true,
+		dropdowns: {
+			minYear: 1990,
+			maxYear: null,
+			months: true,
+			years: true,
+		},
+	},
+	value: '',
+	onChange: () => {},
+	getRef: () => {},
+}
 
-export default Litepicker;
+export default Litepicker

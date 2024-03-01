@@ -9,7 +9,13 @@ import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/
 import Four from '@/Pages/Hotel/Booking/Steps/Four'
 import BookingSummary from '@/Pages/Hotel/Booking/components/BookingSummary'
 
-function Create() {
+interface CreateProps {
+	baby_age_limit: number
+	child_age_limit: number
+	accommodation_type: string
+}
+
+function Create(props: CreateProps) {
 	const [step, setStep] = useState<number>(1)
 	const [stepOneResults, setStepOneResults] = useState<StepOneResponseProps | undefined>()
 	const [bookingType, setBookingType] = useState<string>('normal')
@@ -107,6 +113,9 @@ function Create() {
 			<h2 className="intro-y my-5 text-lg font-medium">Rezervasyon Oluştur.</h2>
 			{step < 3 && (
 				<One
+					baby_age_limit={props.baby_age_limit}
+					child_age_limit={props.child_age_limit}
+					accommodation_type={props.accommodation_type}
 					setBookingType={setBookingType}
 					setStepOneResults={setStepOneResults}
 					setStep={setStep}
@@ -120,6 +129,7 @@ function Create() {
 						<div className="lg:w-2/3">
 							{stepOneResults && step === 2 && (
 								<Two
+									accommodationType={props.accommodation_type}
 									stepOneResults={stepOneResults}
 									bookingType={bookingType}
 									setStep={setStep}
@@ -163,6 +173,9 @@ function Create() {
 							pricingCurrency={stepOneResults.currency}
 							customerId={customerId}
 							bookingCustomer={bookingCustomer}
+							number_of_adults={stepOneResults.request.number_of_adults}
+							number_of_children={stepOneResults.request.number_of_children}
+							children_ages={stepOneResults.request.children_ages}
 							data={stepOneResults.data}
 							roomsGuests={roomsGuests}
 						/>

@@ -107,7 +107,7 @@ class Booking extends Model
 
 	public function rooms(): BelongsToMany
 	{
-		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id');
+		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id', 'number_of_adults', 'number_of_children', 'children_ages');
 	}
 
 	public function customer(): BelongsTo
@@ -140,7 +140,7 @@ class Booking extends Model
 		$checkOut = $this->check_out;
 		$checkIn = Carbon::createFromFormat('Y-m-d', $checkIn);
 		$checkOut = Carbon::createFromFormat('Y-m-d', $checkOut);
-		return $checkIn->diffInDays($checkOut) + 1 . ' Gece';
+		return $checkIn->diffInDays($checkOut) . ' Gece';
 	}
 
 	public function scopeStayDurationDay(): ?string

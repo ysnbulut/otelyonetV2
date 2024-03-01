@@ -14,6 +14,9 @@ export interface StepsProps {
 }
 
 export interface StepOneProps extends StepsProps {
+	baby_age_limit: number
+	child_age_limit: number
+	accommodation_type: string
 	setBookingType: React.Dispatch<React.SetStateAction<string>>
 	setStepOneResults: React.Dispatch<React.SetStateAction<StepOneResponseProps | undefined>>
 	setCheckinRequired: React.Dispatch<React.SetStateAction<boolean>>
@@ -42,6 +45,7 @@ export interface BookingResultProps {
 }
 
 export interface StepTwoProps extends StepsProps {
+	accommodationType: string
 	stepOneResults: StepOneResponseProps
 	bookingType: string
 	checkedRooms: CheckedRoomsProps | undefined

@@ -20,8 +20,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BookingRooms extends Model
 {
-	protected $fillable = ['booking_id', 'room_id', 'check_in'];
-	use SoftDeletes;
+    protected $fillable = [
+        'booking_id',
+        'room_id',
+        'number_of_adults',
+        'number_of_children',
+        'children_ages'
+    ];
+    use SoftDeletes;
 
     public function booking(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -35,6 +41,6 @@ class BookingRooms extends Model
 
     public function guests(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id');
+        return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id')->withPivot('check_in', 'check_out', 'status', 'check_in_date', 'check_out_date', 'check_in_kbs',  'check_out_kbs');
     }
 }

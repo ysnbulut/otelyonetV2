@@ -81,91 +81,105 @@ function Index(props: PageProps) {
 					</div>
 				</div>
 				<div className="intro-y col-span-12 overflow-auto lg:overflow-visible">
-					<Table
-						id="responsive-table"
-						className="border-separate border-spacing-y-[10px] sm:mt-2">
-						<Table.Thead>
-							<Table.Tr>
-								<Table.Th className="whitespace-nowrap border-b-0">GİRİŞ/ÇIKIŞ TARİHİ</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0">ODALAR</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0">MÜŞTERİ</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0">TOPLAM TUTAR</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0">BAKİYE</Table.Th>
-								<Table.Th className="whitespace-nowrap border-b-0 text-center">AKSİYONLAR</Table.Th>
-							</Table.Tr>
-						</Table.Thead>
-						<Table.Tbody className="divide-y-[0.7rem] divide-transparent">
-							{props.bookings.data.map((booking) => (
-								<Table.Tr
-									key={booking.id}
-									className="intro-y">
-									<Table.Td
-										dataLabel="Giriş Çıkış Tarihi"
-										className="w-full rounded-t-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
-										<div className="flex items-center gap-3">
-											<Lucide
-												icon="CalendarRange"
-												className="hidden h-8 w-8 lg:block"
-											/>
-											<Link
-												href={route('hotel.bookings.show', booking.id)}
-												className="flex flex-col whitespace-nowrap">
-												<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
-													Giriş Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_in}</span>
-												</span>
-												{booking.open_booking ? (
-													<span className="flex items-center text-base font-semibold text-orange-500 dark:text-orange-300">
-														Açık Rezervasyon
-													</span>
-												) : (
-													<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
-														Çıkış Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_out}</span>
-													</span>
-												)}
-											</Link>
-										</div>
-									</Table.Td>
-									<Table.Td
-										dataLabel="Odalar"
-										className={twMerge(
-											booking.rooms_count > 2 ? 'text-lg' : 'text-2xl',
-											'bg-white font-semibold text-primary first:rounded-l-md lg:shadow-[20px_3px_20px_#0000000b]' +
-												' last:rounded-r-md dark:bg-darkmode-600',
-										)}>
-										{booking.rooms}
-									</Table.Td>
-									<Table.Td
-										dataLabel="Müşteri"
-										className="bg-white first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
-										<Link
-											className="text-base font-medium"
-											href={route('hotel.customers.show', booking.customer_id)}>
-											{booking.customer}
-										</Link>
-									</Table.Td>
-									<Table.Td
-										dataLabel="Tutar"
-										className="bg-white first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
-										<span className="text-xl font-semibold">{booking.amount_formatted}</span>
-									</Table.Td>
-									<Table.Td
-										dataLabel="Kalan Ödeme"
-										className="bg-white text-right first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
-										{booking.remaining_balance === 0 ? (
-											<span className="text-xl font-semibold text-green-600">Ödendi</span>
-										) : (
-											<span className="text-xl font-semibold text-red-400">{booking.remaining_balance_formatted}</span>
-										)}
-									</Table.Td>
-									<Table.Td
-										dataLabel="Aksiyon"
-										className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
-										eklenecek
-									</Table.Td>
+					{props.bookings.data.length > 0 ? (
+						<Table
+							id="responsive-table"
+							className="border-separate border-spacing-y-[10px] sm:mt-2">
+							<Table.Thead>
+								<Table.Tr>
+									<Table.Th className="whitespace-nowrap border-b-0">GİRİŞ/ÇIKIŞ TARİHİ</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">ODALAR</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">MÜŞTERİ</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">TOPLAM TUTAR</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">BAKİYE</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0 text-center">AKSİYONLAR</Table.Th>
 								</Table.Tr>
-							))}
-						</Table.Tbody>
-					</Table>
+							</Table.Thead>
+							<Table.Tbody className="divide-y-[0.7rem] divide-transparent">
+								{props.bookings.data.map((booking) => (
+									<Table.Tr
+										key={booking.id}
+										className="intro-y">
+										<Table.Td
+											dataLabel="Giriş Çıkış Tarihi"
+											className="w-full rounded-t-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											<div className="flex items-center gap-3">
+												<Lucide
+													icon="CalendarRange"
+													className="hidden h-8 w-8 lg:block"
+												/>
+												<Link
+													href={route('hotel.bookings.show', booking.id)}
+													className="flex flex-col whitespace-nowrap">
+													<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
+														Giriş Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_in}</span>
+													</span>
+													{booking.open_booking ? (
+														<span className="flex items-center text-base font-semibold text-orange-500 dark:text-orange-300">
+															Açık Rezervasyon
+														</span>
+													) : (
+														<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
+															Çıkış Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_out}</span>
+														</span>
+													)}
+												</Link>
+											</div>
+										</Table.Td>
+										<Table.Td
+											dataLabel="Odalar"
+											className={twMerge(
+												booking.rooms_count > 2 ? 'text-lg' : 'text-2xl',
+												'bg-white font-semibold text-primary first:rounded-l-md lg:shadow-[20px_3px_20px_#0000000b]' +
+													' last:rounded-r-md dark:bg-darkmode-600',
+											)}>
+											{booking.rooms}
+										</Table.Td>
+										<Table.Td
+											dataLabel="Müşteri"
+											className="bg-white first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
+											<Link
+												className="text-base font-medium"
+												href={route('hotel.customers.show', booking.customer_id)}>
+												{booking.customer}
+											</Link>
+										</Table.Td>
+										<Table.Td
+											dataLabel="Tutar"
+											className="bg-white first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
+											<span className="text-xl font-semibold">{booking.amount_formatted}</span>
+										</Table.Td>
+										<Table.Td
+											dataLabel="Kalan Ödeme"
+											className="bg-white text-right first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
+											{booking.remaining_balance === 0 ? (
+												<span className="text-xl font-semibold text-green-600">Ödendi</span>
+											) : (
+												<span className="text-xl font-semibold text-red-400">
+													{booking.remaining_balance_formatted}
+												</span>
+											)}
+										</Table.Td>
+										<Table.Td
+											dataLabel="Aksiyon"
+											className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
+											eklenecek
+										</Table.Td>
+									</Table.Tr>
+								))}
+							</Table.Tbody>
+						</Table>
+					) : (
+						<div className="box col-span-12 flex min-h-96 flex-col items-center justify-center text-slate-700 text-opacity-30 dark:text-slate-500 dark:text-opacity-30">
+							<div className="flex items-center justify-center gap-5">
+								<Lucide
+									icon="AlertTriangle"
+									className="h-12 w-12"
+								/>
+								<span className="text-3xl font-semibold">Henüz rezervasyonunuz yok.</span>
+							</div>
+						</div>
+					)}
 				</div>
 				<div className="intro-y col-span-12 flex flex-col lg:flex-row">
 					<Pagination className="w-full flex-shrink">

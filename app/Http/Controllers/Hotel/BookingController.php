@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class BookingController extends Controller
 {
@@ -77,7 +78,7 @@ class BookingController extends Controller
             ]);
     }
 
-    public function calendar(): \Inertia\Response
+    public function calendar(): Response
     {
         $bookings = Booking::orderBy('id')
             ->with('rooms')
@@ -257,6 +258,8 @@ class BookingController extends Controller
     public function store(StoreBookingRequest $request)
     {
         $data = $request->validated();
+        $check_in_required = $data['checkin_required'];
+        $selected_room_count = collect($data['booking_result']['typed_rooms'])->sum('count');
         $booking_data = [
             'customer_id' => $data['customer_id'],
             'check_in' => Carbon::createFromFormat('d.m.Y', $data['booking_result']['check_in'])->format('Y-m-d'),
@@ -266,8 +269,15 @@ class BookingController extends Controller
             'number_of_children' => $data['booking_result']['number_of_children_total'],
         ];
         $booking = Booking::create($booking_data);
-        collect($data['checked_rooms'])->each(function ($room) use ($booking) {
-            $booking->rooms()->attach($room, ['check_in' => 0]);
+        $number_of_adults = $data['booking_result']['number_of_adults_total'] / $selected_room_count || $data['number_of_adults'];
+        $number_of_children = $data['booking_result']['number_of_children_total'] / $selected_room_count || $data['number_of_children'];
+        $children_ages = $number_of_children > 0 ? $data['children_ages'] : null;
+        collect($data['checked_rooms'])->each(function ($room) use (
+            $booking, $number_of_adults, $number_of_children,
+            $children_ages
+        ) {
+            $booking->rooms()->attach($room, ['number_of_adults' => $number_of_adults, 'number_of_children' =>
+                $number_of_children, 'children_ages' => json_encode($children_ages)]);
         });
         $amount_data = [
             'price' => $data['grand_total'],
@@ -278,8 +288,8 @@ class BookingController extends Controller
             'grand_total' => $data['grand_total'] + ($data['grand_total'] * $this->settings->tax_rate['value'] / 100),
         ];
         $booking->amount()->create($amount_data);
-        collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking) {
-            collect($room_ytpe)->each(function ($guest, $key) use ($booking) {
+        collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking, $check_in_required) {
+            collect($room_ytpe)->each(function ($guest, $key) use ($booking, $check_in_required) {
                 foreach ($guest as $value) {
                     $guest = Guest::create(
                         [
@@ -288,10 +298,12 @@ class BookingController extends Controller
                             'nationality' => $value['nationality'],
                             'gender' => $value['gender'],
                             'date_of_birth' => Carbon::createFromFormat('d.m.Y', $value['date_of_birth'])->format('Y-m-d'),
-                            'identification_number' =>  $value['identification_number'],
+                            'identification_number' => $value['identification_number'],
                         ]
                     );
-                    BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()->attach($guest);
+                    BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()
+                        ->attach($guest, ['check_in' => $check_in_required, 'status'
+                        => $check_in_required ? 'check_in' : 'pending', 'check_in_date' => $check_in_required ? Carbon::now() : null]);
                 }
             });
         });
@@ -303,11 +315,15 @@ class BookingController extends Controller
      */
 
     /**
-     * @return \Inertia\Response
+     * @return Response
      */
-    public function create(): \Inertia\Response
+    public function create(): Response
     {
-        return Inertia::render('Hotel/Booking/Create');
+        return Inertia::render('Hotel/Booking/Create', [
+            'baby_age_limit' => $this->settings->baby_age_limit['value'],
+            'child_age_limit' => $this->settings->child_age_limit['value'],
+            'accommodation_type' => $this->settings->accommodation_type['value'],
+        ]);
     }
 
     /**
@@ -315,39 +331,78 @@ class BookingController extends Controller
      */
     public function show(Booking $booking)
     {
+        $availableDatesCountArr = [];
         return [
             'currency' => $this->settings->currency['value'],
+            'accommodation_type' => $this->settings->accommodation_type['value'],
             'booking' => [
                 'id' => $booking->id,
                 'check_in' => Carbon::parse($booking->check_in)->format('d.m.Y'),
                 'check_out' => $booking->check_out != NULL ? Carbon::parse($booking->check_out)->format('d.m.Y') : NULL,
-                'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
-                'number_of_children' => $booking->rooms->sum('pivot.number_of_children'),
-                'open_booking' => $booking->check_out === null ? 'Evet' : 'Hayır',
-                'stay_duration_day' => $booking->scopeStayDurationDay(),
-                'stay_duration_night' => $booking->scopeStayDurationNight(),
-                /*'children_ages' => $booking->children_ages,*/
-                'rooms' => $booking->rooms->map(fn($room) => [
-                    'name' => $room->name,
-                    'room_type' => $room->roomType->name,
-                    'room_view' => $room->roomView->name,
-                    'room_type_full_name' => $room->roomType->name . ' ' . $room->roomView->name,
-                    'quests' => BookingGuests::where('booking_room_id', $room->pivot->id)->get()->map(fn($booking_room)
-                    => [
-                        'booking_guests_id' => $booking_room->id,
-                        'id' => $booking_room->guest->id,
-                        'name' => $booking_room->guest->name,
-                        'surname' => $booking_room->guest->surname,
-                        'birth_date' => $booking_room->guest->date_of_birth,
-                        'nationality' => $booking_room->guest->nationality,
-                        'identification_number' => $booking_room->guest->identification_number,
-                    ]),
-                ]),
+                'number_of_rooms' => $booking->number_of_rooms,
+                'number_of_adults' => $booking->number_of_adults,
+                'number_of_children' => $booking->number_of_children,
+                'open_booking' => $booking->check_out === null,
+                'stay_duration_days' => $booking->stayDurationDay(),
+                'stay_duration_nights' => $booking->stayDurationNight(),
+                'rooms' => $booking->rooms->map(function($room) use (&$availableDatesCountArr) {
+                    $guestStatus = [
+                        'pending' => 'Bekleniyor',
+                        'check_in' => 'Check In Yapıldı',
+                        'check_out' => 'Check Out Yapıldı',
+                        'not_coming' => 'Gelmedi.',
+                    ];
+                    $checkinDates = $room->bookings->map(fn($booking) => $booking->check_in)->toArray();
+                    $availableDatesCount = 0;
+                    for ($i = 1; $i < 8; $i++) {
+                        $date = Carbon::now()->endOf('day');
+                        $date->addDay($i);
+                        $dateStr = $date->format('Y-m-d');
+                        if (!in_array($dateStr, $checkinDates)) {
+                            $availableDatesCount++;
+                        } else {
+                            break;
+                        }
+                    }
+                    $availableDatesCountArr[] = $availableDatesCount;
+                    return [
+                        'id' => $room->id,
+                        'name' => $room->name,
+                        'room_type' => $room->roomType->name,
+                        'room_view' => $room->roomView->name,
+                        'room_type_full_name' => $room->roomType->name . ' ' . $room->roomView->name,
+                        'number_of_adults' => $room->pivot->number_of_adults,
+                        'number_of_children' => $room->pivot->number_of_children,
+                        'children_ages' => $room->pivot->children_ages !== null ? json_decode($room->pivot->children_ages) :
+                            null,
+                        'guests' => BookingGuests::where('booking_room_id', $room->pivot->id)->get()->map(fn
+                        ($booking_room) => [
+                            'booking_guests_id' => $booking_room->id,
+                            'id' => $booking_room->guest->id,
+                            'name' => $booking_room->guest->name,
+                            'surname' => $booking_room->guest->surname,
+                            'date_of_birth' => $booking_room->guest->date_of_birth,
+                            'gender' => $booking_room->guest->gender,
+                            'nationality' => $booking_room->guest->nationality,
+                            'identification_number' => $booking_room->guest->identification_number,
+                            'is_check_in' => $booking_room->check_in,
+                            'is_check_out' => $booking_room->check_out,
+                            'status' => $guestStatus[$booking_room->status],
+                            'check_in_date' => $booking_room->check_in_date !== null ? Carbon::parse
+                            ($booking_room->check_in_date)->format('d.m.Y') : null,
+                            'check_out_date' => $booking_room->check_out_date !== null ? Carbon::parse
+                            ($booking_room->check_out_date)->format('d.m.Y') : null,
+                            'check_in_kbs' => $booking_room->check_in_kbs,
+                            'check_out_kbs' => $booking_room->check_out_kbs,
+                        ]),
+                    ];
+                }),
             ],
             'customer' => [
                 'id' => $booking->customer->id,
                 'title' => $booking->customer->title,
                 'type' => $booking->customer->type == 'individual' ? 'Bireysel' : 'Kurumsal',
+                'tax_office' => $booking->customer->tax_office,
                 'tax_number' => $booking->customer->tax_number,
                 'country' => $booking->customer->country,
                 'city' => $booking->customer->city,
@@ -388,6 +443,7 @@ class BookingController extends Controller
                 'grand_total' => $booking->amount->grand_total,
                 'grand_total_formatted' => number_format($booking->amount->grand_total, 2, '.', ',') . ' ' . $this->settings->currency['value'],
             ],
+            'extendable_number_of_days' => min($availableDatesCountArr),
             'case_and_banks' => CaseAndBanks::select(['id', 'name'])->get(),
             'remaining_balance' => round($booking->remainingBalance(), 2),
             'remaining_balance_formatted' => number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $this->settings->currency['value']

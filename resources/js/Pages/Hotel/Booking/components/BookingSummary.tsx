@@ -12,6 +12,9 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {router} from '@inertiajs/react'
 interface BookingSummaryProps {
+	number_of_adults: number
+	number_of_children: number
+	children_ages: number[]
 	checkinRequired: boolean
 	step: number
 	setStep: React.Dispatch<React.SetStateAction<number>>
@@ -89,10 +92,14 @@ function BookingSummary(props: BookingSummaryProps) {
 			const data = {
 				booking_result: props.bookingResult,
 				checked_rooms: props.checkedRooms,
+				checkin_required: props.checkinRequired,
 				grand_total: grandTotal,
 				discount: props.grandTotal - grandTotal,
 				customer_id: props.customerId,
 				rooms_guests: props.roomsGuests,
+				number_of_adults: props.number_of_adults,
+				number_of_children: props.number_of_children,
+				children_ages: props.children_ages,
 			}
 			// @ts-ignore
 			router.post(route('hotel.bookings.store'), data, {
@@ -188,7 +195,13 @@ function BookingSummary(props: BookingSummaryProps) {
 			{props.step > 4 && props.bookingResult && props.bookingResult.typed_rooms && props.roomsGuests && (
 				<div className="flex flex-col p-2">
 					<fieldset className="rounded border p-2">
-						<legend className="text-xs font-thin">Oda Misafir Bilgileri</legend>
+						<legend className="items-centerm flex w-full justify-between text-xs font-thin">
+							<span>Oda Misafir Bilgileri</span>
+							<hr className="mx-0.5 mt-2 flex-grow border border-x-0 border-b border-t-0" />
+							{props.checkinRequired && (
+								<span className="rounded bg-slate-100 px-1 py-0.5 font-extrabold text-danger">Check in yapılacak.</span>
+							)}
+						</legend>
 						{props.data.map(
 							(room_type, index) =>
 								props.checkedRooms &&

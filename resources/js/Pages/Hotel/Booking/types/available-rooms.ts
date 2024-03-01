@@ -27,6 +27,7 @@ interface ResultDataProps {
 }
 
 export interface AvailableRoomsProps extends StepsProps {
+	accommodationType: string
 	currency: string
 	item: ResultDataProps
 	request: StepOneRequestProps
