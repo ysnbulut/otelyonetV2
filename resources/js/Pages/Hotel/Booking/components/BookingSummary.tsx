@@ -199,7 +199,9 @@ function BookingSummary(props: BookingSummaryProps) {
 							<span>Oda Misafir Bilgileri</span>
 							<hr className="mx-0.5 mt-2 flex-grow border border-x-0 border-b border-t-0" />
 							{props.checkinRequired && (
-								<span className="rounded bg-slate-100 px-1 py-0.5 font-extrabold text-danger">Check in yapılacak.</span>
+								<span className="rounded bg-slate-100 px-1 py-0.5 font-extrabold text-danger dark:bg-darkmode-700 dark:text-danger/70">
+									Check in yapılacak.
+								</span>
 							)}
 						</legend>
 						{props.data.map(

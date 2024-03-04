@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read RoomType|null $roomType
  * @property-read RoomView|null $roomView
  * @property-read TypeHasView|null $typeHasView
+ * @property mixed $can_be_checkout
+ * @property mixed $pivot
  * @method static Builder|Room newModelQuery()
  * @method static Builder|Room newQuery()
  * @method static Builder|Room onlyTrashed()

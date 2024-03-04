@@ -264,6 +264,7 @@ class BookingController extends Controller
             'customer_id' => $data['customer_id'],
             'check_in' => Carbon::createFromFormat('d.m.Y', $data['booking_result']['check_in'])->format('Y-m-d'),
             'check_out' => Carbon::createFromFormat('d.m.Y', $data['booking_result']['check_out'])->format('Y-m-d'),
+            'channel_id' => 122, //reception_id
             'number_of_rooms' => collect($data['booking_result']['typed_rooms'])->sum('count'),
             'number_of_adults' => $data['booking_result']['number_of_adults_total'],
             'number_of_children' => $data['booking_result']['number_of_children_total'],
@@ -277,7 +278,7 @@ class BookingController extends Controller
             $children_ages
         ) {
             $booking->rooms()->attach($room, ['number_of_adults' => $number_of_adults, 'number_of_children' =>
-                $number_of_children, 'children_ages' => json_encode($children_ages)]);
+                $number_of_children, 'children_ages' => json_encode($children_ages), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
         });
         $amount_data = [
             'price' => $data['grand_total'],
@@ -291,19 +292,23 @@ class BookingController extends Controller
         collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking, $check_in_required) {
             collect($room_ytpe)->each(function ($guest, $key) use ($booking, $check_in_required) {
                 foreach ($guest as $value) {
-                    $guest = Guest::create(
-                        [
-                            'name' => $value['name'],
-                            'surname' => $value['surname'],
-                            'nationality' => $value['nationality'],
-                            'gender' => $value['gender'],
-                            'date_of_birth' => Carbon::createFromFormat('d.m.Y', $value['date_of_birth'])->format('Y-m-d'),
-                            'identification_number' => $value['identification_number'],
-                        ]
-                    );
-                    BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()
-                        ->attach($guest, ['check_in' => $check_in_required, 'status'
-                        => $check_in_required ? 'check_in' : 'pending', 'check_in_date' => $check_in_required ? Carbon::now() : null]);
+                    if($value['name'] != null && $value['surname'] != null &&  $value['nationality'] != null ) {
+                        $guest = Guest::create(
+                            [
+                                'name' => $value['name'],
+                                'surname' => $value['surname'],
+                                'nationality' => $value['nationality'],
+                                'gender' => $value['gender'],
+                                'date_of_birth' => Carbon::createFromFormat('d.m.Y', $value['date_of_birth'])->format('Y-m-d'),
+                                'identification_number' => $value['identification_number'],
+                            ]
+                        );
+                        BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()
+                            ->attach($guest, ['check_in' => $check_in_required, 'status'
+                            => $check_in_required ? 'check_in' : 'pending', 'check_in_date' => $check_in_required ?
+                                Carbon::now() : null, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
+                    }
+
                 }
             });
         });
@@ -332,11 +337,12 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         $availableDatesCountArr = [];
-        return [
+        return Inertia::render('Hotel/Booking/Show',[
             'currency' => $this->settings->currency['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
             'booking' => [
                 'id' => $booking->id,
+                'channel' => $booking->channel->name,
                 'check_in' => Carbon::parse($booking->check_in)->format('d.m.Y'),
                 'check_out' => $booking->check_out != NULL ? Carbon::parse($booking->check_out)->format('d.m.Y') : NULL,
                 'number_of_rooms' => $booking->number_of_rooms,
@@ -345,17 +351,11 @@ class BookingController extends Controller
                 'open_booking' => $booking->check_out === null,
                 'stay_duration_days' => $booking->stayDurationDay(),
                 'stay_duration_nights' => $booking->stayDurationNight(),
-                'rooms' => $booking->rooms->map(function($room) use (&$availableDatesCountArr) {
-                    $guestStatus = [
-                        'pending' => 'Bekleniyor',
-                        'check_in' => 'Check In Yapıldı',
-                        'check_out' => 'Check Out Yapıldı',
-                        'not_coming' => 'Gelmedi.',
-                    ];
+                'rooms' => $booking->rooms->map(function($room) use (&$availableDatesCountArr, $booking) {
                     $checkinDates = $room->bookings->map(fn($booking) => $booking->check_in)->toArray();
                     $availableDatesCount = 0;
                     for ($i = 1; $i < 8; $i++) {
-                        $date = Carbon::now()->endOf('day');
+                        $date = Carbon::parse($booking->check_out)->endOf('day');
                         $date->addDay($i);
                         $dateStr = $date->format('Y-m-d');
                         if (!in_array($dateStr, $checkinDates)) {
@@ -365,7 +365,17 @@ class BookingController extends Controller
                         }
                     }
                     $availableDatesCountArr[] = $availableDatesCount;
+                    $bookingGuests = BookingGuests::where('booking_room_id', $room->pivot->id)->get();
+                    $canBeCheckoutArr = [];
+                    $bookingGuests->each(function($booking_guest) use (&$canBeCheckoutArr) {
+                        if ($booking_guest->check_in && !$booking_guest->check_out) {
+                            $canBeCheckoutArr[] = true;
+                        } else {
+                            $canBeCheckoutArr[] = false;
+                        }
+                    });
                     return [
+                        'booking_room_id' => $room->pivot->id,
                         'id' => $room->id,
                         'name' => $room->name,
                         'room_type' => $room->roomType->name,
@@ -375,25 +385,27 @@ class BookingController extends Controller
                         'number_of_children' => $room->pivot->number_of_children,
                         'children_ages' => $room->pivot->children_ages !== null ? json_decode($room->pivot->children_ages) :
                             null,
-                        'guests' => BookingGuests::where('booking_room_id', $room->pivot->id)->get()->map(fn
-                        ($booking_room) => [
-                            'booking_guests_id' => $booking_room->id,
-                            'id' => $booking_room->guest->id,
-                            'name' => $booking_room->guest->name,
-                            'surname' => $booking_room->guest->surname,
-                            'date_of_birth' => $booking_room->guest->date_of_birth,
-                            'gender' => $booking_room->guest->gender,
-                            'nationality' => $booking_room->guest->nationality,
-                            'identification_number' => $booking_room->guest->identification_number,
-                            'is_check_in' => $booking_room->check_in,
-                            'is_check_out' => $booking_room->check_out,
-                            'status' => $guestStatus[$booking_room->status],
-                            'check_in_date' => $booking_room->check_in_date !== null ? Carbon::parse
-                            ($booking_room->check_in_date)->format('d.m.Y') : null,
-                            'check_out_date' => $booking_room->check_out_date !== null ? Carbon::parse
-                            ($booking_room->check_out_date)->format('d.m.Y') : null,
-                            'check_in_kbs' => $booking_room->check_in_kbs,
-                            'check_out_kbs' => $booking_room->check_out_kbs,
+                        'can_be_check_in' => in_array(false, $canBeCheckoutArr),
+                        'can_be_check_out' => in_array(true, $canBeCheckoutArr),
+                        'guests' => $bookingGuests->map(fn
+                        ($booking_guest) => [
+                            'booking_guests_id' => $booking_guest->id,
+                            'id' => $booking_guest->guest->id,
+                            'name' => $booking_guest->guest->name,
+                            'surname' => $booking_guest->guest->surname,
+                            'date_of_birth' => $booking_guest->guest->date_of_birth,
+                            'gender' => $booking_guest->guest->gender,
+                            'nationality' => $booking_guest->guest->nationality,
+                            'identification_number' => $booking_guest->guest->identification_number,
+                            'is_check_in' => $booking_guest->check_in,
+                            'is_check_out' => $booking_guest->check_out,
+                            'status' => $booking_guest->status,
+                            'check_in_date' => $booking_guest->check_in_date !== null ? Carbon::parse
+                            ($booking_guest->check_in_date)->format('d.m.Y') : null,
+                            'check_out_date' => $booking_guest->check_out_date !== null ? Carbon::parse
+                            ($booking_guest->check_out_date)->format('d.m.Y') : null,
+                            'check_in_kbs' => $booking_guest->check_in_kbs,
+                            'check_out_kbs' => $booking_guest->check_out_kbs,
                         ]),
                     ];
                 }),
@@ -446,8 +458,10 @@ class BookingController extends Controller
             'extendable_number_of_days' => min($availableDatesCountArr),
             'case_and_banks' => CaseAndBanks::select(['id', 'name'])->get(),
             'remaining_balance' => round($booking->remainingBalance(), 2),
-            'remaining_balance_formatted' => number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $this->settings->currency['value']
-        ];
+            'remaining_balance_formatted' => number_format($booking->remainingBalance(), 2, '.', ',') . ' ' .
+                $this->settings->currency['value'],
+            'booking_messages' => $booking->messages,
+        ]);
     }
 
     /**

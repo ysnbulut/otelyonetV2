@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $payments_count
  * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
+ * @property mixed $channel
+ * @property mixed $messages
  * @method static Builder|Booking newModelQuery()
  * @method static Builder|Booking newQuery()
  * @method static Builder|Booking onlyTrashed()
@@ -45,6 +47,7 @@ class Booking extends Model
 		'customer_id',
 		'check_in',
 		'check_out',
+        'channel_id',
         'number_of_rooms',
 		'number_of_adults',
 		'number_of_children',
@@ -105,6 +108,11 @@ class Booking extends Model
 			})->with('rooms')->get()->pluck('rooms')->flatten()->pluck('id')->unique()->toArray();
 	}
 
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(BookingChannel::class, 'channel_id', 'id');
+    }
+
 	public function rooms(): BelongsToMany
 	{
 		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id', 'number_of_adults', 'number_of_children', 'children_ages');
@@ -130,6 +138,10 @@ class Booking extends Model
 	{
 		return $this->hasOne(BookingAmounts::class);
 	}
+
+    public function messages(): HasMany {
+        return $this->hasMany(BookingMessage::class, 'booking_id', 'id');
+    }
 
 	public function scopeStayDurationNight(): string
 	{

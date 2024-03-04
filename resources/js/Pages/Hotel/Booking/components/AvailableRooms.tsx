@@ -230,7 +230,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						<Disclosure defaultOpen={false}>
 							<Disclosure.Button className="my-2 flex justify-between rounded-md border px-5 py-2">
 								{props.item.rooms ? (
-									<span className="text-xl font-semibold text-primary">
+									<span className="text-xl font-semibold text-primary dark:text-light">
 										{props.item.available_room_count} <span className="font-light">uygun oda</span>
 										<span className="ml-2 text-xs font-thin">oda seçimi yapmak için tıklayın.</span>
 									</span>
@@ -257,12 +257,12 @@ function AvailableRooms(props: AvailableRoomsProps) {
 					</Disclosure.Group>
 					{props.item.rooms && (
 						<div className="flex items-center justify-between">
-							<span className="rounded-md bg-slate-100 px-2 py-1 text-lg font-semibold text-primary">
+							<span className="rounded-md bg-slate-100 px-4 py-1 text-lg font-semibold text-primary dark:bg-darkmode-700 dark:text-light">
 								{accommodationType}
 							</span>
-							<span className="rounded-md bg-slate-100 px-2 py-1 text-xl ">
+							<span className="rounded-md bg-slate-100 px-3 py-1 text-xl dark:bg-darkmode-700 ">
 								Toplam Tutar :
-								<span className="text-xl font-semibold text-danger">
+								<span className="ml-2 text-xl font-semibold text-danger">
 									{formatToTurkishLira(calcTotalPrice)} {props.currency}
 								</span>
 							</span>

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateBookingGuestsCheckOutRequest extends FormRequest
+class UpdateBookingGuestsCheckInOutRequest extends FormRequest
 {
     public function rules(): array
     {

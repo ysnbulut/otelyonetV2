@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateBookingGuestsCheckInOutRequest;
 use App\Models\BookingGuests;
 use App\Http\Requests\StoreBookingGuestsRequest;
 use App\Http\Requests\UpdateBookingGuestsRequest;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Request;
 
 class BookingGuestsController extends Controller
 {
@@ -57,6 +60,31 @@ class BookingGuestsController extends Controller
 		//
 	}
 
+    public function checkIn(UpdateBookingGuestsCheckInOutRequest $request)
+    {
+        $request->validated();
+        foreach ($request->booking_guests as $bookingGuestId) {
+            $bookingGuest = BookingGuests::find($bookingGuestId);
+            $bookingGuest->update([
+                'status' => 'check_in',
+                'check_in' => true,
+                'check_in_date' => Carbon::now()->format('Y-m-d'),
+            ]);
+        }
+    }
+
+    public function checkOut(UpdateBookingGuestsCheckInOutRequest $request)
+    {
+        $request->validated();
+        foreach ($request->booking_guests as $bookingGuestId) {
+            $bookingGuest = BookingGuests::find($bookingGuestId);
+            $bookingGuest->update([
+                'status' => 'check_out',
+                'check_out' => true,
+                'check_out_date' => Carbon::now()->format('Y-m-d'),
+            ]);
+        }
+    }
 	/**
 	 * Remove the specified resource from storage.
 	 */

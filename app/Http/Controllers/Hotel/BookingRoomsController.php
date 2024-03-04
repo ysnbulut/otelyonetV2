@@ -60,8 +60,11 @@ class BookingRoomsController extends Controller
 	/**
 	 * Remove the specified resource from storage.
 	 */
-	public function destroy(BookingRooms $bookingRooms)
+	public function destroy($booking_room_id)
 	{
-		//
+        $bookingRoom = BookingRooms::find($booking_room_id);
+        $bookingRoom->booking_guests()->forceDelete();
+        $bookingRoom->expenses()->delete();
+        $bookingRoom->forceDelete();
 	}
 }

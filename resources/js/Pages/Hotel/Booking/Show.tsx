@@ -1,6 +1,6 @@
 import React, {Fragment, useEffect, useState} from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Head, Link, useForm} from '@inertiajs/react'
+import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
@@ -15,6 +15,9 @@ import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import Sqids from 'sqids'
 import Tippy from '@/Components/Tippy'
+import TableItem from '@/Pages/Hotel/Booking/components/TableItem'
+import axios from 'axios'
+import BookingRooms from '@/Pages/Hotel/Booking/components/BookingRooms'
 
 dayjs.extend(customParseFormat)
 
@@ -35,7 +38,7 @@ function Show(props: BookingShowProps) {
 		description: '',
 	})
 
-	const booking_type = props.booking.check_out === null ? 'Açık' : 'Normal'
+	// const booking_type = props.booking.check_out === null ? 'Açık' : 'Normal'
 
 	const accommodationTypes: {[key: string]: string} = {
 		only_room: 'Sadece Oda',
@@ -47,10 +50,6 @@ function Show(props: BookingShowProps) {
 	}
 
 	const accommodationType = accommodationTypes[props.accommodation_type] || 'Sadece Oda'
-
-	useEffect(() => {
-		console.log(props.booking.check_in)
-	}, [])
 
 	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -79,8 +78,13 @@ function Show(props: BookingShowProps) {
 					<div className="box relative mt-5 grid grid-cols-12">
 						<Tippy
 							content="Rezervasyon Kodu"
-							className="absolute right-0 top-0 rounded-bl rounded-tr-md border-b border-l border-slate-100/30 bg-white/30 p-2 shadow">
-							<h3 className="text-lg font-extrabold text-slate-50">{sqids.encode([props.booking.id])}</h3>
+							className="absolute right-0 top-0 h-11 w-32 rounded-tr-md border-b border-l border-slate-100/20 bg-white/30 p-2">
+							<h3 className="text-center text-lg font-extrabold text-slate-50">{sqids.encode([props.booking.id])}</h3>
+						</Tippy>
+						<Tippy
+							content="Rezervasyon Kanalı"
+							className="absolute right-0 top-11 w-32 rounded-bl border-y border-l border-indigo-500/80 bg-indigo-600/80 p-2 shadow">
+							<h6 className="rounded text-center text-xs font-semibold text-slate-50">{props.booking.channel}</h6>
 						</Tippy>
 						<div className="col-span-12 rounded-t-md border-b border-teal-700 bg-teal-600 px-4 py-5 dark:bg-teal-700/40">
 							<h3 className="rounded-md text-xl font-bold text-light">Rezervasyon Bilgileri</h3>
@@ -117,20 +121,25 @@ function Show(props: BookingShowProps) {
 									</span>
 								</div>
 							</div>
-							<div className="mt-2 flex w-full justify-end gap-2">
-								<Button
-									variant="soft-success"
-									className="flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-									<Lucide
-										icon="CalendarPlus"
-										className="mr-1 h-5 w-5"
-									/>
-									SÜREYİ UZAT
-								</Button>
+							<div className="mt-2 flex w-full justify-end gap-3">
+								{!props.booking.open_booking && (
+									<Button
+										variant="soft-success"
+										className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
+										<Lucide
+											icon="CalendarPlus"
+											className="mr-1 h-5 w-5"
+										/>
+										SÜREYİ UZAT
+										<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
+											{props.extendable_number_of_days}
+										</span>
+									</Button>
+								)}
 								{props.booking.open_booking && (
 									<Button
 										variant="soft-pending"
-										className="flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+										className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
 										<Lucide
 											icon="CalendarMinus"
 											className="mr-1 h-5 w-5"
@@ -141,12 +150,12 @@ function Show(props: BookingShowProps) {
 								{dayjs(props.booking.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
 									<Button
 										variant="soft-danger"
-										className="flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
+										className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
 										<Lucide
 											icon="CalendarX2"
 											className="mr-1 h-5 w-5"
 										/>
-										İPTAL ET {props.booking.check_in} {dayjs().format('DD.MM.YYYY')}
+										İPTAL ET
 									</Button>
 								)}
 							</div>
@@ -190,155 +199,14 @@ function Show(props: BookingShowProps) {
 						</div>
 						<div className="col-span-12 border-b border-slate-200 bg-white px-4 py-5 dark:bg-darkmode-200/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Oda Bilgileri</h3>
-							<div className="flex items-start justify-between justify-items-start py-3 text-dark dark:text-light">
+							<div className="flex flex-col items-start justify-between justify-items-start gap-3 py-3 text-dark dark:text-light">
 								{props.booking.rooms.map((room, index) => (
-									<fieldset
+									<BookingRooms
 										key={index}
-										className="w-full rounded-xl border-4 border-slate-200 p-5 shadow-inner dark:border-red-500">
-										<legend className="mx-auto rounded-lg bg-slate-200 px-3 py-1 text-lg font-semibold text-dark">
-											{room.name}'nolu oda
-										</legend>
-										<div className="flex flex-col items-start justify-between justify-items-start text-dark dark:text-light">
-											<h3 className="w-full rounded-t-lg border-b bg-slate-100 px-5 py-1 text-center text-sm font-semibold lg:flex-row lg:gap-2 dark:bg-darkmode-400">
-												Oda Misafirleri
-											</h3>
-											<div className="flex w-full flex-col items-center justify-center gap-1 bg-slate-100 px-5 py-1 text-center text-sm font-semibold lg:flex-row lg:gap-2 dark:bg-darkmode-400">
-												<span className="font-semibold">
-													Yetişkin Sayısı :<span className="ml-1 font-normal">{room.number_of_adults}</span>
-												</span>
-												<span className="font-semibold">
-													Çocuk Sayısı :<span className="ml-1 font-normal">{room.number_of_children}</span>
-												</span>
-												<span className="font-semibold">
-													Çocuk Yaşları :
-													<span className="ml-1 font-normal">
-														{room.children_ages.length > 0 ? room.children_ages.join(', ') : 'Çocuk Yok'}
-													</span>
-												</span>
-											</div>
-											<div className="flex w-full items-center justify-between rounded-b-lg border-t bg-slate-100 px-3 py-2">
-												<h3 className="text-xs font-semibold">Misafir Durum Renkleri</h3>
-												<div className="flex gap-2">
-													<Tippy
-														content="Bekleniyor"
-														className="h-6 w-6 rounded-full bg-pending"
-													/>
-													<Tippy
-														content="Gelmeyecek"
-														className="h-6 w-6 rounded-full bg-danger"
-													/>
-													<Tippy
-														content="Check İn"
-														className="h-6 w-6 rounded-full bg-success"
-													/>
-													<Tippy
-														content="Check Out"
-														className="h-6 w-6 rounded-full bg-slate-700"
-													/>
-												</div>
-											</div>
-											<div className="flex w-full flex-col text-sm font-semibold">
-												<table
-													id="responsive-table"
-													className="w-full border-spacing-y-[10px] border-none">
-													<thead className="border-b">
-														<tr>
-															<th className="text-xs">
-																<FormCheck>
-																	<FormCheck.Input
-																		type="checkbox"
-																		id="check-all"
-																		name="check-all"
-																		checked={true}
-																		onChange={(e) => console.log(e)}
-																	/>
-																</FormCheck>
-															</th>
-															<th className="text-left text-xs">Durum</th>
-															<th className="text-left text-xs">Ad</th>
-															<th className="text-left text-xs">Soyad</th>
-															<th className="text-left text-xs">Uyruk</th>
-															<th className="text-left text-xs">TC \ Yabancı Kimlik No</th>
-															<th className="text-left text-xs">Aksiyon</th>
-														</tr>
-													</thead>
-													<tbody>
-														{room.guests.map((guest, index) => (
-															<tr
-																key={index}
-																className="border-b">
-																<td
-																	data-label="#"
-																	className="flex justify-center border-none text-xs font-bold">
-																	<FormCheck>
-																		<FormCheck.Input
-																			type="checkbox"
-																			id={`guest-${guest.id}`}
-																			value={guest.booking_guests_id}
-																			name={`guest-${guest.id}`}
-																			checked={true}
-																			onChange={(e) => console.log(e)}
-																		/>
-																	</FormCheck>
-																</td>
-																<td
-																	data-label="#"
-																	className="border-none text-xs font-bold">
-																	<span className="rounded-full bg-slate-600 px-[7px] py-[2px] text-center text-slate-50">
-																		{index + 1}
-																	</span>
-																</td>
-																<td
-																	data-label="Ad"
-																	className="border-none text-xs">
-																	{guest.name}
-																</td>
-																<td
-																	data-label="Soyad"
-																	className="border-none text-xs">
-																	{guest.surname}
-																</td>
-																<td
-																	data-label="Uyruk"
-																	className="border-none text-xs">
-																	{guest.nationality}
-																</td>
-																<td
-																	data-label="Kimlik No"
-																	className="border-none text-xs">
-																	{guest.identification_number}
-																</td>
-																<td
-																	data-label="Kimlik No"
-																	className="border-none text-xs">
-																	asd
-																</td>
-															</tr>
-														))}
-													</tbody>
-												</table>
-												<div className="flex items-center justify-between gap-1 rounded-md bg-secondary px-2 py-2 shadow-inner">
-													<h3 className="text-xs font-semibold">Toplu İşlemler</h3>
-													<div className="flex gap-2">
-														<Tippy content="Seçilenleri Check-in Yap">
-															<Button
-																variant="soft-success"
-																className="border border-success/70 px-2 py-1 text-green-800/60 shadow">
-																Check-in
-															</Button>
-														</Tippy>
-														<Tippy content="Seçilenleri Check-out Yap">
-															<Button
-																variant="soft-dark"
-																className="border border-dark/70 px-2 py-1 text-slate-800 shadow">
-																Check-out
-															</Button>
-														</Tippy>
-													</div>
-												</div>
-											</div>
-										</div>
-									</fieldset>
+										room={room}
+										booking_rooms={props.booking.rooms}
+										check_in={props.booking.check_in}
+									/>
 								))}
 							</div>
 						</div>
@@ -352,15 +220,15 @@ function Show(props: BookingShowProps) {
 							<span
 								className={twMerge([
 									'font-sans font-bold xl:text-xl 2xl:text-3xl',
-									props.remaining_balance < 0 ? 'text-red-600' : 'text-green-700',
+									props.remaining_balance > 0 ? 'text-red-600' : 'text-green-700',
 								])}>
 								{props.remaining_balance_formatted}
 							</span>
 						</div>
 						<div className="box mt-5 flex flex-col items-center justify-between gap-2 p-5">
 							<Button
-								variant={props.remaining_balance < 0 ? 'primary' : 'soft-dark'}
-								onClick={() => props.remaining_balance < 0 && setShowPaymentForm(!showPaymentForm)}
+								variant={props.remaining_balance > 0 ? 'primary' : 'soft-dark'}
+								onClick={() => props.remaining_balance > 0 && setShowPaymentForm(!showPaymentForm)}
 								className="w-full text-xl font-semibold shadow-md"
 								type="button"
 								disabled={props.remaining_balance == 0}>
@@ -499,19 +367,32 @@ function Show(props: BookingShowProps) {
 										className="shadow-md"
 										variant="secondary"
 										type="button">
-										{' '}
 										Vazgeç
 									</Button>
 									<Button
 										className="shadow-md"
 										variant="primary"
 										type="submit">
-										{' '}
 										Tahsilat Ekle
 									</Button>
 								</div>
 							</form>
 						</div>
+						{props.booking_messages.length > 0 && (
+							<div className="box mt-5 flex flex-col items-center justify-between gap-2 p-5">
+								<h3 className="text-lg font-semibold">Rezevasyon Mesajları</h3>
+								<div>
+									{props.booking_messages.map((message, index) => (
+										<div
+											key={index}
+											className="flex flex-col items-start justify-between justify-items-start gap-3 rounded-md border border-slate-200 p-3">
+											<p className="text-sm font-normal">{message.message}</p>
+										</div>
+									))}
+								</div>
+								<form>asdas</form>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

@@ -18,7 +18,7 @@ return new class extends Migration {
 				->onDelete('cascade');
 			$table->date('check_in');
 			$table->date('check_out')->nullable();
-            $table->foreignId('channel_id')->constrained('channels');
+            $table->foreignId('channel_id')->constrained('booking_channels');
             $table->integer('number_of_rooms')->default(1);
             $table->integer('number_of_adults')->default(1);
             $table->integer('number_of_children')->default(0);

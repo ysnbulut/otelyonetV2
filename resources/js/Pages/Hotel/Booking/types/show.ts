@@ -16,7 +16,9 @@ interface GuestsProps {
 	check_out_kbs: boolean
 }
 
-interface RoomsProps {
+export interface RoomsProps {
+	booking_room_id: number
+	id: number
 	name: string
 	room_type: string
 	room_view: string
@@ -24,11 +26,14 @@ interface RoomsProps {
 	number_of_adults: number
 	number_of_children: number
 	children_ages: number[]
+	can_be_check_in: boolean
+	can_be_check_out: boolean
 	guests: GuestsProps[]
 }
 
 interface BookingProps {
 	id: number
+	channel: string
 	check_in: string
 	check_out: string
 	number_of_rooms: number
@@ -86,6 +91,14 @@ interface AmountsProps {
 	grand_total_formatted: string
 }
 
+interface BookingMessagesProps {
+	id: number
+	message: string
+	is_reminder: boolean
+	reminder_date: string
+	is_read: boolean
+}
+
 export type BookingShowProps = {
 	currency: string
 	accommodation_type: string
@@ -94,6 +107,8 @@ export type BookingShowProps = {
 	booking_payments: BookingPaymentsProps[]
 	amounts: AmountsProps
 	case_and_banks: CaseAndBankProps[]
+	extendable_number_of_days: number
 	remaining_balance: number
 	remaining_balance_formatted: string
+	booking_messages: BookingMessagesProps[]
 }

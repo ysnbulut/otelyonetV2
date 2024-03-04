@@ -48,12 +48,12 @@ class StoreBookingRequest extends FormRequest
             'rooms_guests' => ['required', 'array'],
             'rooms_guests.*' => ['required', 'array'],
             'rooms_guests.*.*' => ['required', 'array'],
-            'rooms_guests.*.*.*.name' => ['sometimes', 'string'],
-            'rooms_guests.*.*.*.surname' => ['sometimes', 'string'],
-            'rooms_guests.*.*.*.date_of_birth' => ['sometimes', 'string'],
-            'rooms_guests.*.*.*.nationality' => ['sometimes', 'string'],
-            'rooms_guests.*.*.*.gender' => ['sometimes', 'string'],
-            'rooms_guests.*.*.*.identification_number' => ['sometimes', 'string'],
+            'rooms_guests.*.*.*.name' => ['nullable', 'string'],
+            'rooms_guests.*.*.*.surname' => ['nullable', 'string'],
+            'rooms_guests.*.*.*.date_of_birth' => ['nullable', 'string'],
+            'rooms_guests.*.*.*.nationality' => ['nullable', 'string'],
+            'rooms_guests.*.*.*.gender' => ['nullable', 'string'],
+            'rooms_guests.*.*.*.identification_number' => ['nullable', 'string'],
 
         ];
     }
