@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {PageProps, SelectedFeatures} from './types/create'
 import {Head, router, useForm} from '@inertiajs/react' //useForm
 import Button from '@/Components/Button'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {FormInput, FormLabel, FormTextarea, InputGroup} from '@/Components/Form'
 import 'react-medium-image-zoom/dist/styles.css'
 import Swal from 'sweetalert2'

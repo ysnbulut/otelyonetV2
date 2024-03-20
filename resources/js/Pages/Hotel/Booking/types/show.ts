@@ -1,19 +1,20 @@
-interface GuestsProps {
-	booking_guests_id: number
-	id: number
+export interface GuestsProps {
+	booking_guests_id?: number
+	id?: number
 	name: string
 	surname: string
-	date_of_birth: string
+	birthday: string
 	gender: string
-	nationality: string
+	citizen?: string
+	citizen_id?: string
 	identification_number: string
-	is_check_in: boolean
-	is_check_out: boolean
-	status: string
-	check_in_date: string
-	check_out_date: string
-	check_in_kbs: boolean
-	check_out_kbs: boolean
+	is_check_in?: boolean
+	is_check_out?: boolean
+	status?: string
+	check_in_date?: string
+	check_out_date?: string
+	check_in_kbs?: boolean
+	check_out_kbs?: boolean
 }
 
 export interface RoomsProps {
@@ -99,9 +100,15 @@ interface BookingMessagesProps {
 	is_read: boolean
 }
 
+export interface CitizenProps {
+	id: number
+	name: string
+}
+
 export type BookingShowProps = {
 	currency: string
 	accommodation_type: string
+	citizens: CitizenProps[]
 	booking: BookingProps
 	customer: CustomerProps
 	booking_payments: BookingPaymentsProps[]

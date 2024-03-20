@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {PageProps} from './types'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import {FormInput, FormSelect} from '@/Components/Form'
@@ -97,7 +97,7 @@ function Index({...props}: PageProps) {
 										<Table.Td
 											dataLabel="Uyruk"
 											className="bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
-											{guest.nationality}
+											{guest.citizen}
 										</Table.Td>
 										<Table.Td
 											dataLabel="Telefon"

@@ -47,50 +47,50 @@ const initialState: SideMenuState = {
 				},
 			],
 		},
-		// {
-		// 	icon: 'Store',
-		// 	title: 'POS',
-		// 	pathname: 'hotel.pos.index',
-		// 	permission: ['hotel.customers.index'],
-		// 	subMenu: [
-		// 		{
-		// 			icon: 'ScanBarcode',
-		// 			title: 'Ürünler',
-		// 			pathname: 'hotel.products.index',
-		// 			permission: ['hotel.booking_create.*'],
-		// 		},
-		// 		{
-		// 			icon: 'Group',
-		// 			title: 'Ürün Kategorileri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'ShowerHead',
-		// 			title: 'Hizmetler',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Boxes',
-		// 			title: 'Hizmet Kategorileri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Combine',
-		// 			title: 'Satış Üniteleri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Split',
-		// 			title: 'Satış Kanalları',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 	],
-		// },
+		{
+			icon: 'Store',
+			title: 'POS',
+			pathname: 'hotel.pos.index',
+			permission: ['hotel.customers.index'],
+			subMenu: [
+				{
+					icon: 'ScanBarcode',
+					title: 'Ürünler',
+					pathname: 'hotel.products.index',
+					permission: ['hotel.booking_create.*'],
+				},
+				{
+					icon: 'Group',
+					title: 'Ürün Kategorileri',
+					pathname: 'hotel.pos.index',
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'ShowerHead',
+					title: 'Hizmetler',
+					pathname: 'hotel.pos.index',
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Boxes',
+					title: 'Hizmet Kategorileri',
+					pathname: 'hotel.pos.index',
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Combine',
+					title: 'Satış Üniteleri',
+					pathname: 'hotel.pos.index',
+					permission: ['hotel.bookings.index'],
+				},
+				{
+					icon: 'Split',
+					title: 'Satış Kanalları',
+					pathname: 'hotel.pos.index',
+					permission: ['hotel.bookings.index'],
+				},
+			],
+		},
 		{
 			icon: 'Users2',
 			title: 'Müşteriler',
@@ -213,12 +213,12 @@ const initialState: SideMenuState = {
 	],
 }
 
-export const sideMenuSlice = createSlice({
+export const hotelSideMenuSlice = createSlice({
 	name: 'sideMenu',
 	initialState,
 	reducers: {},
 })
 
-export const selectSideMenu = (state: RootState) => state.sideMenu.menu
+export const hotelSelectSideMenu = (state: RootState) => state.hotelSideMenu.menu
 
-export default sideMenuSlice.reducer
+export default hotelSideMenuSlice.reducer

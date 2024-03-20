@@ -1,6 +1,6 @@
 import React from 'react'
 import {Head} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 
 function IndexWork(props: any) {
 	return (

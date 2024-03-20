@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react'
 import {Head, useForm} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {PageProps} from '@/Pages/Hotel/PricingPolicySettings/types/edit'
 import {FormLabel, FormInput, FormCheck} from '@/Components/Form'
 import Select, {SelectInstance} from 'react-select'
@@ -89,7 +89,7 @@ function Edit(props: PageProps) {
 										}),
 									}}
 									isClearable
-									placeholder="Yetişkin Sayısı Seçiniz."
+									placeholder={`${setting.label} Seçiniz`}
 								/>
 							)}
 							{setting.type === 'text' && (

@@ -11,6 +11,7 @@ import SummaryTypedRoom from '@/Pages/Hotel/Booking/components/SummaryTypedRoom'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {router} from '@inertiajs/react'
+import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
 interface BookingSummaryProps {
 	number_of_adults: number
 	number_of_children: number
@@ -28,14 +29,13 @@ interface BookingSummaryProps {
 	data: StepOneDataProps[]
 	roomsGuests: RoomTypeRoomGuestsProps | undefined
 	pricingCurrency: string
+	citizens: CitizenProps[]
 }
 
 function BookingSummary(props: BookingSummaryProps) {
 	const mySwal = withReactContent(Swal)
 	const [nextStepDisabled, setNextStepDisabled] = useState(true)
 	const [grandTotal, setGrandTotal] = useState<number>(parseFloat(props.grandTotal.toFixed(2)))
-	const [roomsGuests, setRoomsGuests] = useState<RoomTypeRoomGuestsProps | undefined>(props.roomsGuests)
-
 	const Toast = mySwal.mixin({
 		toast: true,
 		position: 'top-end',
@@ -209,7 +209,9 @@ function BookingSummary(props: BookingSummaryProps) {
 								props.checkedRooms &&
 								props.checkedRooms[room_type.id] &&
 								props.checkedRooms[room_type.id].length > 0 && (
-									<div className="rounded border">
+									<div
+										key={index}
+										className="rounded border">
 										<div className="flex items-center justify-between rounded-t px-2 py-1">
 											<span className="text-sm font-bold">{room_type.name}</span>
 										</div>
@@ -260,7 +262,7 @@ function BookingSummary(props: BookingSummaryProps) {
 																				<td
 																					data-label="D. Tarihi"
 																					className="border-none text-xs">
-																					{guest.date_of_birth}
+																					{guest.birthday}
 																				</td>
 																				<td
 																					data-label="Cinsiyet"
@@ -270,7 +272,10 @@ function BookingSummary(props: BookingSummaryProps) {
 																				<td
 																					data-label="Uyruk"
 																					className="border-none text-xs">
-																					{guest.nationality}
+																					{
+																						props.citizens.find((citizen) => citizen.id === parseInt(guest.citizen_id))
+																							?.name
+																					}
 																				</td>
 																				<td
 																					data-label="Kimlik No"
@@ -281,7 +286,9 @@ function BookingSummary(props: BookingSummaryProps) {
 																		)
 																	} else {
 																		return (
-																			<div className="flex items-center justify-center py-1">
+																			<div
+																				key={index}
+																				className="flex items-center justify-center py-1">
 																				<span className="text-xs font-semibold text-danger">
 																					Misafir bilgisi girilmedi.
 																				</span>
@@ -309,7 +316,7 @@ function BookingSummary(props: BookingSummaryProps) {
 							<Tippy content="Sezon geçişleri olabileceğinden gecelik fiyat için ortalama ibaresi kullanılmıştır. Bu bölümdeki gecelik fiyat seçilen tarih aralığındaki toplam tutarın konaklama süresine bölünmesi sonucu hesaplanmıştır net gecelik fiyat değildir.">
 								<Lucide
 									icon="HelpCircle"
-									className="ml-1 h-4 w-4 rounded-full bg-slate-300"
+									className="ml-1 h-4 w-4 rounded-full bg-slate-300 dark:bg-darkmode-800"
 								/>
 							</Tippy>
 						</legend>
@@ -328,7 +335,7 @@ function BookingSummary(props: BookingSummaryProps) {
 							<div className="flex items-center justify-between py-1">
 								<span className="text-base font-semibold">Toplam İndirim</span>
 								<CurrencyInput
-									id="unit-price"
+									id="discount-price"
 									allowNegativeValue={false}
 									allowDecimals={true}
 									decimalSeparator=","
@@ -338,7 +345,7 @@ function BookingSummary(props: BookingSummaryProps) {
 									decimalsLimit={2}
 									required={true}
 									disabled={true}
-									name="unit_price"
+									name="discount_price"
 									className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 								/>
 							</div>
@@ -353,7 +360,7 @@ function BookingSummary(props: BookingSummaryProps) {
 									}}>
 									<Lucide
 										icon="Undo2"
-										className="ml-1 h-4 w-4 rounded-full bg-slate-200 p-0.5"
+										className="ml-1 h-4 w-4 rounded-full bg-slate-200 p-0.5 dark:bg-darkmode-800"
 									/>
 								</Tippy>
 							</span>

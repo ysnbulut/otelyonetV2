@@ -53,12 +53,13 @@ Route::middleware([
 ])->group(function () {
 
     require __DIR__.'/auth.php';
+
     Route::post('upload-media', MediaController::class)->middleware('auth:sanctum')->name('upload-media');
-    Route::get('/test', [UnitPriceController::class, 'test'])->name('test.test');
-    Route::get('/test1', function () {
-        $unitPrice = \App\Models\UnitPrice::with('season')->where('id', 12)->get();
-        return $unitPrice;
-    })->name('test.test1');
+//    Route::get('/test', [UnitPriceController::class, 'test'])->name('test.test');
+//    Route::get('/test1', function () {
+//        $unitPrice = \App\Models\UnitPrice::with('season')->where('id', 12)->get();
+//        return $unitPrice;
+//    })->name('test.test1');
 
 
 
@@ -206,6 +207,8 @@ Route::middleware([
         Route::get('/upcomings', [BookingController::class, 'upcoming'])->name('hotel.bookings.upcoming');
         Route::post('/', [BookingController::class, 'store'])->name('hotel.bookings.store');
         Route::get('/{booking}', [BookingController::class, 'show'])->name('hotel.bookings.show');
+        Route::post('/booking_room/add_guest', [BookingRoomsController::class, 'addGuests'])
+            ->name('hotel.bookings.booking_room.add_guest');
         Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.bookings.edit');
         Route::put('/{booking}', [BookingController::class, 'update'])->name('hotel.bookings.update');
         Route::delete('/{booking}', [BookingController::class, 'destroy'])->name('hotel.bookings.destroy');

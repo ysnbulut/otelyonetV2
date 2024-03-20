@@ -15,9 +15,9 @@ return new class extends Migration {
 			$table->string('name', 100);
 			$table->string('surname', 100);
             $table->boolean('is_foreign_national')->default(false);
-			$table->string('nationality', 50);
+			$table->foreignId('citizen_id')->constrained('citizens');
 			$table->string('identification_number', 25);
-            $table->date('date_of_birth');
+            $table->date('birthday');
 			$table->string('phone', 25)->nullable();
 			$table->string('email', 100)->nullable();
 			$table->enum('gender', ['male', 'female', 'unspecified'])->default('unspecified');

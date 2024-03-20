@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import {StepFourProps} from '@/Pages/Hotel/Booking/types/steps'
 import RoomGuests from '@/Pages/Hotel/Booking/components/RoomGuests'
 import Button from '@/Components/Button'
@@ -21,9 +21,7 @@ function Four(props: StepFourProps) {
 								const groom = room_type.rooms.find((r) => r.id === room)
 								return (
 									<div key={index}>
-										<div className="border-b py-2">
-											<h3 className="text-lg font-semibold">{groom?.name} No'lu Oda için Misafir Bilgileri</h3>
-										</div>
+										<h3 className="text-right text-lg font-semibold">{groom?.name} No'lu Oda için Misafir Bilgileri</h3>
 										{props.roomsGuests &&
 											props.roomsGuests[room_type.id] &&
 											Object.values(props.roomsGuests[room_type.id]).length > 0 &&
@@ -31,6 +29,7 @@ function Four(props: StepFourProps) {
 											Object.keys(props.roomsGuests[room_type.id][groom.id]).map((guest, index) => (
 												<RoomGuests
 													key={index}
+													citizens={props.citizens}
 													guestIndex={index}
 													guest={props.roomsGuests[room_type.id][groom.id][index]}
 													roomTypeId={room_type.id}
@@ -55,8 +54,9 @@ function Four(props: StepFourProps) {
 																		{
 																			name: '',
 																			surname: '',
-																			date_of_birth: '',
+																			birthday: '',
 																			gender: '',
+																			citizen_id: '',
 																			identification_number: '',
 																			is_foreign_national: false,
 																		},

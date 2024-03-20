@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {PageProps} from './types'
 import {Head} from '@inertiajs/react'
 import RoomTypesList from './components/RoomTypesList'

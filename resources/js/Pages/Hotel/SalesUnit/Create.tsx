@@ -3,7 +3,7 @@ import {Head, router} from '@inertiajs/react'
 import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 
 function Create(props: any) {
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

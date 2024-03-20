@@ -28,21 +28,34 @@ class CurrencyController extends Controller
     public function convert(Request $request)
     {
         if ($request->currency !== 'TRY') {
+            $doviz = new Doviz();
+            $kur = $doviz->kurAlis($request->currency, Doviz::TYPE_EFEKTIFALIS);
             if ($request->amount > 0) {
-                $doviz = new Doviz();
-                $kur = $doviz->kurAlis($request->currency, Doviz::TYPE_EFEKTIFALIS);
-                return round($request->amount / $kur, 2);
+                return [
+                    'currency' => $request->currency,
+                    'amount' => $request->amount,
+                    'exchange_rate' => $kur,
+                    'total' => round($request->amount * $kur, 2),
+                ];
             } else {
-                return $request->amount;
+                return [
+                    'currency' => $request->currency,
+                    'amount' => 0,
+                    'exchange_rate' => $kur,
+                    'total' => 0,
+                ];
             }
         } else {
-            return $request->amount;
+            return [
+                'currency' => $request->currency,
+                'amount' => $request->amount,
+                'exchange_rate' => 1,
+                'total' => round($request->amount, 2),
+            ];
         }
     }
 
     public function amountConvert(Request $request) {
-        return [
-            'amount' => $this->convert($request)
-        ];
+        return $this->convert($request);
     }
 }

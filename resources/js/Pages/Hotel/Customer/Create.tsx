@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {PageProps} from './types/create'
 import Tippy from '@/Components/Tippy'
 import Lucide from '@/Components/Lucide'

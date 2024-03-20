@@ -5,8 +5,9 @@ export interface Guest {
 	name: string
 	surname: string
 	full_name: string
-	date_of_birth: string
-	nationality: string
+	birthday: string
+	citizen_id: number
+	is_foreign_national: boolean
 	identification_number: string
 	phone: string
 	email: string
@@ -14,5 +15,6 @@ export interface Guest {
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
+	citizens: Array<{id: number; name: string; code: number}>
 	guest: Guest
 }

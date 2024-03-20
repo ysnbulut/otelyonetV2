@@ -57,6 +57,7 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
                 'route' => collect(new Ziggy)['routes'][$request->route()?->getName()] ?? null,
             ],
+            'is_tenant' => (bool) $tenant
         ];
     }
 }

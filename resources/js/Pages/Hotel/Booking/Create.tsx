@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {Head} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {CustomerProps, StepOneResponseProps} from '@/Pages/Hotel/Booking/types/response'
 import One from '@/Pages/Hotel/Booking/Steps/One'
 import Two from '@/Pages/Hotel/Booking/Steps/Two'
@@ -8,11 +8,13 @@ import Three from '@/Pages/Hotel/Booking/Steps/Three'
 import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
 import Four from '@/Pages/Hotel/Booking/Steps/Four'
 import BookingSummary from '@/Pages/Hotel/Booking/components/BookingSummary'
+import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
 
 interface CreateProps {
 	baby_age_limit: number
 	child_age_limit: number
 	accommodation_type: string
+	citizens: CitizenProps[]
 }
 
 function Create(props: CreateProps) {
@@ -150,6 +152,7 @@ function Create(props: CreateProps) {
 							)}
 							{stepOneResults && step === 4 && (
 								<Four
+									citizens={props.citizens}
 									guests={stepOneResults.guests}
 									setStep={setStep}
 									checkedRooms={checkedRooms}
@@ -178,6 +181,7 @@ function Create(props: CreateProps) {
 							children_ages={stepOneResults.request.children_ages}
 							data={stepOneResults.data}
 							roomsGuests={roomsGuests}
+							citizens={props.citizens}
 						/>
 					)}
 				</div>

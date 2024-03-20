@@ -14,7 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
  * @property-read mixed $full_name
- * @property mixed $date_of_birth
+ * @property mixed $birthday
+ * @property mixed $citizen_id
  * @method static Builder|Guest filter(array $filters)
  * @method static Builder|Guest newModelQuery()
  * @method static Builder|Guest newQuery()
@@ -29,7 +30,7 @@ class Guest extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'surname', 'is_foreign_national', 'nationality', 'date_of_birth', 'identification_number',
+    protected $fillable = ['name', 'surname', 'is_foreign_national', 'citizen_id', 'birthday', 'identification_number',
         'phone', 'email', 'gender'];
 
     public function getFullNameAttribute(): string

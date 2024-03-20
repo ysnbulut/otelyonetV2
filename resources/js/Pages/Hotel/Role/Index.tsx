@@ -5,7 +5,7 @@ import {FormSelect} from '@/Components/Form'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import Pagination from '@/Components/Pagination'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import Tippy from '@/Components/Tippy'
 
 function Index(props: PageProps) {

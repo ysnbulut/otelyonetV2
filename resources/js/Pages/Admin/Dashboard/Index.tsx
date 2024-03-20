@@ -1,8 +1,10 @@
 import React from 'react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AdminAuthenticatedLayout from '@/Layouts/AdminAuthenticatedLayout'
 import route from 'ziggy-js'
+import {PageProps} from './types'
 
-function Index() {
+function Index(props: PageProps) {
+	console.log(props)
 	return (
 		<div>
 			<h1>Dashboard</h1>
@@ -11,7 +13,7 @@ function Index() {
 }
 
 Index.layout = (page: React.ReactNode) => (
-	<AuthenticatedLayout
+	<AdminAuthenticatedLayout
 		// header={<h2 className='font-semibold text-xl text-gray-800 leading-tight'>Show</h2>}
 		breadcrumb={[
 			{
@@ -20,7 +22,7 @@ Index.layout = (page: React.ReactNode) => (
 			},
 		]}>
 		{page}
-	</AuthenticatedLayout>
+	</AdminAuthenticatedLayout>
 )
 
 export default Index

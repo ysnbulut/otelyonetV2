@@ -1,4 +1,5 @@
 import {CustomerProps, GuestProps, StepOneResponseProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
+import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
 
 export interface StepOneRequestProps {
 	check_in: string
@@ -64,7 +65,7 @@ export interface StepThreeProps extends StepsProps {
 export interface StepFourProps {
 	guests: GuestProps[]
 	checkedRooms: CheckedRoomsProps | undefined
-	// customerId: number | undefined
+	citizens: CitizenProps[]
 	setStep: React.Dispatch<React.SetStateAction<number>>
 	data: StepOneDataProps[]
 	roomsGuests: RoomTypeRoomGuestsProps

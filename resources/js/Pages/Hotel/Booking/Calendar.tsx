@@ -18,7 +18,7 @@ import isBetween from 'dayjs/plugin/isBetween'
 import moment from 'moment'
 import {PageProps} from '@/Pages/Hotel/Booking/types/calendar'
 import {Head} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 
 moment.locale('tr')
 dayjs.extend(utc)

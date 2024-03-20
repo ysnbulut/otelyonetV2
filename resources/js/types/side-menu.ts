@@ -1,4 +1,4 @@
-import {Menu} from '@/stores/sideMenuSlice'
+import {Menu} from '@/stores/hotelSideMenuSlice'
 import {slideDown, slideUp} from '@/utils/helper'
 import {router} from '@inertiajs/react'
 import _ from 'lodash'
@@ -90,6 +90,7 @@ const nestedMenu = (
 			} else {
 				menuItem.activeDropdown = false
 			}
+
 			if (role !== 'Super Admin') {
 				if (permissions && permissions.find((permission) => _.includes(menuItem.permission, permission))) {
 					formattedMenu.push(menuItem)

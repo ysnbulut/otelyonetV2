@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {PageProps} from './types/show'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, useForm} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import CurrencyInput from 'react-currency-input-field'

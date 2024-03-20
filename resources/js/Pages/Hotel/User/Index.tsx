@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {PageProps} from './types'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router} from '@inertiajs/react'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'

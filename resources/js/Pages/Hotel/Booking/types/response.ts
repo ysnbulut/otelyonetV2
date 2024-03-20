@@ -98,9 +98,10 @@ export interface GuestProps {
 	id?: number
 	name: string
 	surname: string
-	date_of_birth: string
+	birthday: string
 	is_foreign_national: boolean
-	nationality?: string | null
+	citizen_id: string
+	citizen?: string | null
 	identification_number: string
 	phone?: string | null
 	email?: string | null

@@ -20,9 +20,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');
 
-    Route::get('/login', function () {
-        return redirect('/');
-    });
+//    Route::get('/login', function () {
+//        return redirect('/');
+//    });
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 

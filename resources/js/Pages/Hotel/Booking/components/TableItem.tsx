@@ -10,8 +10,8 @@ interface TableItemProps {
 		id: number
 		name: string
 		surname: string
-		date_of_birth: string
-		nationality: string
+		birthday: string
+		citizen: string
 		identification_number: string
 		status: string
 		check_in_date: string
@@ -32,24 +32,6 @@ function TableItem(props: TableItemProps) {
 	useEffect(() => {
 		setChecked(props.checked)
 	}, [props.checked])
-
-	useEffect(() => {
-		if (checked && !props.checked) {
-			props.setSelectedBookingGuests((prev) =>
-				!prev.includes(props.guest.booking_guests_id) ? [...prev, props.guest.booking_guests_id] : prev,
-			)
-		} else if (!checked && props.checked) {
-			props.setSelectedBookingGuests((prev) => prev.filter((guest) => guest !== props.guest.booking_guests_id))
-		} else if (!checked && !props.checked) {
-			props.setSelectedBookingGuests([])
-		} else if (checked && props.checked) {
-			props.setSelectedBookingGuests((prev) =>
-				!prev.includes(props.guest.booking_guests_id) ? [...prev, props.guest.booking_guests_id] : prev,
-			)
-		} else {
-			props.setSelectedBookingGuests([])
-		}
-	}, [checked, props.checked])
 
 	return (
 		<tr className="border-b">
@@ -96,7 +78,7 @@ function TableItem(props: TableItemProps) {
 				data-label="Uyruk"
 				style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'center'}}
 				className="border-none text-xs">
-				{props.guest.nationality}
+				{props.guest.citizen}
 			</td>
 			<td
 				data-label="Kimlik No"

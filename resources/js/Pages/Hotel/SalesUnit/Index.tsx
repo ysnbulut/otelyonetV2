@@ -4,7 +4,7 @@ import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
 import Item from './components/Item'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {PageProps} from '@/Pages/Hotel/SalesUnit/types'
 
 function Index(props: PageProps) {

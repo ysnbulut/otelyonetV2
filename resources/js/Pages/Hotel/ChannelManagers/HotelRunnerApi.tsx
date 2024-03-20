@@ -1,5 +1,5 @@
 import React from 'react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, router} from '@inertiajs/react'
 import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'

@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Helpers\PriceCalculator;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\BookingCreateStepFiveStoreRequest;
-use App\Http\Requests\BookingCreateStepFourStoreRequest;
 use App\Http\Requests\BookingStepOneRequest;
-use App\Http\Requests\BookingStepTwoRequest;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Models\Booking;
 use App\Models\BookingGuests;
 use App\Models\BookingRooms;
 use App\Models\CaseAndBanks;
+use App\Models\Citizen;
 use App\Models\Customer;
 use App\Models\Guest;
 use App\Models\Room;
@@ -285,21 +283,24 @@ class BookingController extends Controller
             'campaign' => 0,
             'discount' => $data['discount'],
             'total_price' => $data['grand_total'],
-            'tax' => $data['grand_total'] * $this->settings->tax_rate['value'] / 100,
-            'grand_total' => $data['grand_total'] + ($data['grand_total'] * $this->settings->tax_rate['value'] / 100),
+            'tax' => round($data['grand_total'] - ($data['grand_total'] / (1 +
+                        ($this->settings->tax_rate['value'] /
+                            100))), 2),
+            'grand_total' => $data['grand_total'],
         ];
+//        dd($amount_data);
         $booking->amount()->create($amount_data);
         collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking, $check_in_required) {
             collect($room_ytpe)->each(function ($guest, $key) use ($booking, $check_in_required) {
                 foreach ($guest as $value) {
-                    if($value['name'] != null && $value['surname'] != null &&  $value['nationality'] != null ) {
+                    if($value['name'] != null && $value['surname'] != null &&  $value['citizen_id'] != null ) {
                         $guest = Guest::create(
                             [
                                 'name' => $value['name'],
                                 'surname' => $value['surname'],
-                                'nationality' => $value['nationality'],
+                                'citizen_id' => $value['citizen_id'],
                                 'gender' => $value['gender'],
-                                'date_of_birth' => Carbon::createFromFormat('d.m.Y', $value['date_of_birth'])->format('Y-m-d'),
+                                'birthday' => Carbon::createFromFormat('d.m.Y', $value['birthday'])->format('Y-m-d'),
                                 'identification_number' => $value['identification_number'],
                             ]
                         );
@@ -328,6 +329,7 @@ class BookingController extends Controller
             'baby_age_limit' => $this->settings->baby_age_limit['value'],
             'child_age_limit' => $this->settings->child_age_limit['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
+            'citizens' => Citizen::select(['id', 'name'])->get(),
         ]);
     }
 
@@ -340,6 +342,7 @@ class BookingController extends Controller
         return Inertia::render('Hotel/Booking/Show',[
             'currency' => $this->settings->currency['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
+            'citizens' => Citizen::select(['id', 'name'])->get(),
             'booking' => [
                 'id' => $booking->id,
                 'channel' => $booking->channel->name,
@@ -393,9 +396,10 @@ class BookingController extends Controller
                             'id' => $booking_guest->guest->id,
                             'name' => $booking_guest->guest->name,
                             'surname' => $booking_guest->guest->surname,
-                            'date_of_birth' => $booking_guest->guest->date_of_birth,
+                            'birthday' => $booking_guest->guest->birthday,
                             'gender' => $booking_guest->guest->gender,
-                            'nationality' => $booking_guest->guest->nationality,
+                            'citizen_id' => $booking_guest->guest->citizen_id,
+                            'citizen' => Citizen::find($booking_guest->guest->citizen_id)->name,
                             'identification_number' => $booking_guest->guest->identification_number,
                             'is_check_in' => $booking_guest->check_in,
                             'is_check_out' => $booking_guest->check_out,

@@ -1,7 +1,7 @@
 import {Transition} from 'react-transition-group'
 import {useState, useEffect, createRef, Dispatch, SetStateAction} from 'react'
 import {toRaw} from '@/utils/helper'
-import {selectSideMenu} from '@/stores/sideMenuSlice'
+import {hotelSelectSideMenu} from '@/stores/hotelSideMenuSlice'
 import {useAppSelector} from '@/stores/hooks'
 import {FormattedMenu, nestedMenu} from '@/types/side-menu'
 import {linkTo, enter, leave} from './mobile-menu'
@@ -12,8 +12,8 @@ import SimpleBar from 'simplebar'
 
 function Main({role, permissions, pricingPolicy}: {role: string; permissions: string[]; pricingPolicy: string}) {
 	const [formattedMenu, setFormattedMenu] = useState<Array<FormattedMenu | 'divider'>>([])
-	const sideMenuStore = useAppSelector(selectSideMenu)
-	const mobileMenu = () => nestedMenu(toRaw(sideMenuStore), role, permissions, pricingPolicy)
+	const hotelSideMenuStore = useAppSelector(hotelSelectSideMenu)
+	const mobileMenu = () => nestedMenu(toRaw(hotelSideMenuStore), role, permissions, pricingPolicy)
 	const [activeMobileMenu, setActiveMobileMenu] = useState(false)
 	const scrollableRef = createRef<HTMLDivElement>()
 
@@ -22,7 +22,7 @@ function Main({role, permissions, pricingPolicy}: {role: string; permissions: st
 			new SimpleBar(scrollableRef.current)
 		}
 		setFormattedMenu(mobileMenu())
-	}, [sideMenuStore, location])
+	}, [hotelSideMenuStore, location])
 
 	return (
 		<>

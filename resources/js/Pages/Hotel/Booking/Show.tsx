@@ -1,12 +1,12 @@
-import React, {Fragment, useEffect, useState} from 'react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
-import {Head, Link, router, useForm} from '@inertiajs/react'
+import React, {useState} from 'react'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
+import {Head, Link, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
 import TransactionsSection from '@/Pages/Hotel/Customer/components/TransactionsSection'
 import {twMerge} from 'tailwind-merge'
-import {FormCheck, FormInput, FormLabel} from '@/Components/Form'
+import {FormInput, FormLabel} from '@/Components/Form'
 import Litepicker from '@/Components/Litepicker'
 import TomSelect from '@/Components/TomSelect'
 import CurrencyInput from 'react-currency-input-field'
@@ -15,8 +15,6 @@ import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import Sqids from 'sqids'
 import Tippy from '@/Components/Tippy'
-import TableItem from '@/Pages/Hotel/Booking/components/TableItem'
-import axios from 'axios'
 import BookingRooms from '@/Pages/Hotel/Booking/components/BookingRooms'
 
 dayjs.extend(customParseFormat)
@@ -204,6 +202,7 @@ function Show(props: BookingShowProps) {
 									<BookingRooms
 										key={index}
 										room={room}
+										citizens={props.citizens}
 										booking_rooms={props.booking.rooms}
 										check_in={props.booking.check_in}
 									/>

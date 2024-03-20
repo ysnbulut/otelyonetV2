@@ -1,36 +1,32 @@
-import {Dispatch, PropsWithChildren, ReactNode, SetStateAction, useEffect, useState} from 'react'
-import {Transition} from 'react-transition-group'
-import {selectSideMenu} from '@/stores/sideMenuSlice'
-import {useAppSelector} from '@/stores/hooks'
-import {enter, FormattedMenu, leave, linkTo, nestedMenu} from '@/types/side-menu'
-import Lucide from '@/Components/Lucide'
+import React, {Dispatch, ReactNode, SetStateAction} from 'react'
+import MobileMenu from '@/Components/MobileMenu'
+import {Link} from '@inertiajs/react'
 import logoUrl from '../../images/logo.png'
+import {Transition} from 'react-transition-group'
+import {enter, FormattedMenu, leave, linkTo} from '@/types/side-menu'
 import clsx from 'clsx'
 import TopBar from '@/Components/TopBar'
-import MobileMenu from '@/Components/MobileMenu'
 import SideMenuTooltip from '@/Components/SideMenuTooltip'
-import {Link, usePage} from '@inertiajs/react'
-import {PageProps} from '@/types'
-import {motion} from 'framer-motion'
+import Lucide from '@/Components/Lucide'
+import {User} from '@/types'
+
 interface BreadcrumbItem {
-	title: string
 	href: string
+	title: string
 }
-function Authenticated({
-	header,
-	breadcrumb,
-	children,
-}: PropsWithChildren<{
-	header?: ReactNode
+interface AuthenticatedProps {
+	auth: {
+		user: User
+		role: string
+		permissions: string[]
+		pricing_policy: string
+	}
+	formattedMenu: (FormattedMenu | 'divider')[]
+	setFormattedMenu: Dispatch<SetStateAction<(FormattedMenu | 'divider')[]>>
 	breadcrumb: BreadcrumbItem[]
-}>) {
-	const {props} = usePage<PageProps>()
-	const [formattedMenu, setFormattedMenu] = useState<Array<FormattedMenu | 'divider'>>([])
-	const sideMenuStore = useAppSelector(selectSideMenu)
-	const sideMenu = () => nestedMenu(sideMenuStore, props.auth.role, props.auth.permissions, props.auth.pricing_policy)
-	useEffect(() => {
-		setFormattedMenu(sideMenu())
-	}, [sideMenuStore, route().current()])
+	children: ReactNode | undefined
+}
+function AuthLayout(props: AuthenticatedProps) {
 	return (
 		<div className="py-2">
 			<MobileMenu
@@ -56,7 +52,7 @@ function Authenticated({
 					/>
 					<ul>
 						{/* BEGIN: First Child */}
-						{formattedMenu.map((menu, menuKey) =>
+						{props.formattedMenu.map((menu, menuKey) =>
 							menu == 'divider' ? (
 								<Divider
 									type="li"
@@ -67,7 +63,7 @@ function Authenticated({
 								<li key={menuKey}>
 									<Menu
 										menu={menu}
-										formattedMenuState={[formattedMenu, setFormattedMenu]}
+										formattedMenuState={[props.formattedMenu, props.setFormattedMenu]}
 										level="first"
 									/>
 									{/* BEGIN: Second Child */}
@@ -87,7 +83,7 @@ function Authenticated({
 													<li key={subMenuKey}>
 														<Menu
 															menu={subMenu}
-															formattedMenuState={[formattedMenu, setFormattedMenu]}
+															formattedMenuState={[props.formattedMenu, props.setFormattedMenu]}
 															level="second"
 														/>
 														{/* BEGIN: Third Child */}
@@ -109,7 +105,7 @@ function Authenticated({
 																		<li key={lastSubMenuKey}>
 																			<Menu
 																				menu={lastSubMenu}
-																				formattedMenuState={[formattedMenu, setFormattedMenu]}
+																				formattedMenuState={[props.formattedMenu, props.setFormattedMenu]}
 																				level="third"
 																			/>
 																		</li>
@@ -133,21 +129,34 @@ function Authenticated({
 				{/* END: Side Menu */}
 				{/* BEGIN: Content */}
 				<div className="md:max-w-auto min-h-screen min-w-0 max-w-full flex-1 rounded-[30px] bg-slate-100 px-4 pb-10 before:block before:h-px before:w-full before:content-[''] md:px-[22px] dark:bg-darkmode-700">
-					<TopBar breadcrumb={breadcrumb} />
-					{children}
+					<TopBar breadcrumb={props.breadcrumb} />
+					{props.children}
 				</div>
 				{/* END: Content */}
-				<motion.div
-					className="fixed bottom-9 left-[calc(50vw-1.5rem)] z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary"
-					whileHover={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}
-					whileTap={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}>
-					<Lucide
-						icon="Plus"
-						className="h-8 w-8 text-white"
-					/>
-				</motion.div>
+				{/* BEGIN: Hızlı Menu */}
+				{/*<motion.div*/}
+				{/*	className="fixed bottom-9 left-[calc(50vw-1.5rem)] z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary"*/}
+				{/*	whileHover={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}*/}
+				{/*	whileTap={{scale: [1, 1.3, 1.2, 1, 1.2], rotate: 315}}>*/}
+				{/*	<Lucide*/}
+				{/*		icon="Plus"*/}
+				{/*		className="h-8 w-8 text-white"*/}
+				{/*	/>*/}
+				{/*</motion.div>*/}
+				{/* END: Hızlı Menu */}
 			</div>
 		</div>
+	)
+}
+
+function Divider<C extends React.ElementType>(props: {as?: C} & React.ComponentPropsWithoutRef<C>) {
+	const {className, ...computedProps} = props
+	const Component = props.as || 'div'
+
+	return (
+		<Component
+			{...computedProps}
+			className={clsx([props.className, 'relative z-10 h-px w-full bg-white/[0.08] dark:bg-white/[0.07]'])}></Component>
 	)
 }
 
@@ -223,15 +232,4 @@ function Menu(props: {
 	)
 }
 
-function Divider<C extends React.ElementType>(props: {as?: C} & React.ComponentPropsWithoutRef<C>) {
-	const {className, ...computedProps} = props
-	const Component = props.as || 'div'
-
-	return (
-		<Component
-			{...computedProps}
-			className={clsx([props.className, 'relative z-10 h-px w-full bg-white/[0.08] dark:bg-white/[0.07]'])}></Component>
-	)
-}
-
-export default Authenticated
+export default AuthLayout

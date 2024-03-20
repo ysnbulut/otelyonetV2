@@ -77,7 +77,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						generateD[parseInt(key)][room].push({
 							name: '',
 							surname: '',
-							date_of_birth: '',
+							birthday: '',
 							gender: '',
 							identification_number: '',
 							is_foreign_national: false,

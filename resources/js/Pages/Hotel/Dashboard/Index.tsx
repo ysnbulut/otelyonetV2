@@ -1,19 +1,22 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router} from '@inertiajs/react'
 import {PageProps} from './types'
 import Lucide from '@/Components/Lucide'
 import OccupancyWeeklyChart from './components/weeklyLineChart'
 import RoomStatusTodayDonutChartCard from './components/RoomStatusDonutChartCard'
 import GeneralReports from './components/GeneralReports'
-import Button from '@/Components/Button'
 import route from 'ziggy-js'
-import {useRef} from 'react'
-import TinySlider, {TinySliderElement} from '@/Components/TinySlider'
 import {twMerge} from 'tailwind-merge'
 import UpcomingBokingsSection from './components/UpcomingBokingsSection'
+import React, {useEffect, useState} from 'react'
+import Clock from 'react-clock'
+import CurrencyInput from 'react-currency-input-field'
+import Select from 'react-select'
+import axios from 'axios'
 
 export default function Index({
-	auth,
+	is_tenant,
+	eur_exchange_rate,
 	room_count,
 	booked_rooms,
 	booked_rooms_percent,
@@ -31,13 +34,55 @@ export default function Index({
 	booked_rooms_weekly,
 	transactions,
 }: PageProps) {
-	const importantNotesRef = useRef<TinySliderElement>()
-	const prevImportantNotes = () => {
-		importantNotesRef.current?.tns.goTo('prev')
-	}
-	const nextImportantNotes = () => {
-		importantNotesRef.current?.tns.goTo('next')
-	}
+	const [clock, setClock] = useState(new Date())
+	//['EUR','USD', 'GBP', 'SAR', 'AUD', 'CHF', 'CAD', 'KWD', 'JPY', 'DKK', 'SEK', 'NOK']
+	const currencies = [
+		{value: 'EUR', label: 'EUR'},
+		{value: 'USD', label: 'USD'},
+		{value: 'GBP', label: 'GBP'},
+		{value: 'SAR', label: 'SAR'},
+		{value: 'AUD', label: 'AUD'},
+		{value: 'CHF', label: 'CHF'},
+		{value: 'CAD', label: 'CAD'},
+		{value: 'KWD', label: 'KWD'},
+		{value: 'JPY', label: 'JPY'},
+		{value: 'DKK', label: 'DKK'},
+		{value: 'SEK', label: 'SEK'},
+		{value: 'NOK', label: 'NOK'},
+	]
+	const [currency, setCurrency] = useState(currencies[0])
+	const [currencyRate, setCurrencyRate] = useState(eur_exchange_rate)
+	const [amount, setAmount] = useState<number>(1)
+	useEffect(() => {
+		const interval = setInterval(() => setClock(new Date()), 1000)
+
+		return () => {
+			clearInterval(interval)
+		}
+	}, [])
+
+	useEffect(() => {
+		axios
+			.post(route('amount.exchange'), {
+				currency: currency.value,
+				amount: amount,
+			})
+			.then(
+				(response: {
+					data: {
+						exchange_rate: number
+						currency: string
+						amount: number
+					}
+				}) => {
+					setCurrencyRate(response.data.exchange_rate)
+				},
+			)
+			.catch((error) => {
+				console.error(error)
+			})
+	}, [currency, amount])
+
 	return (
 		<>
 			<Head title="Dashboard" />
@@ -103,6 +148,71 @@ export default function Index({
 						<div className="grid grid-cols-12 gap-x-6 gap-y-6 2xl:gap-x-0 2xl:pl-6">
 							{/* BEGIN: Transactions */}
 							<div className="col-span-12 mt-3 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-8">
+								<div className="box flex items-center justify-center gap-4 p-4">
+									<Clock
+										className="rounded-full bg-slate-100 dark:bg-darkmode-700"
+										value={clock}
+										size={100}
+										minuteMarksWidth={1}
+										hourHandWidth={5}
+										hourMarksLength={14}
+										hourMarksWidth={4}
+									/>
+									<span className="min-w-[90px] rounded-md bg-slate-100 px-2 py-1 text-center text-lg font-semibold dark:bg-darkmode-700">
+										{clock.toLocaleTimeString()}
+									</span>
+								</div>
+							</div>
+							<div className="col-span-12 mt-1 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-2">
+								<div className="intro-x flex h-10 items-center">
+									<h2 className="mr-5 truncate text-lg font-medium">Kurlar</h2>
+								</div>
+								<div className="box flex flex-col gap-1 p-4">
+									<div className="flex gap-1">
+										<Select
+											id="currency"
+											name="currency"
+											options={currencies}
+											className="remove-all my-select-container w-44"
+											classNamePrefix="my-select"
+											styles={{
+												input: (base) => ({
+													...base,
+													'input:focus': {
+														boxShadow: 'none',
+													},
+												}),
+											}}
+											value={currency}
+											onChange={(e: any) =>
+												e && setCurrency(currencies.find((c) => c.value === e.value) || currencies[0])
+											}
+										/>
+										<CurrencyInput
+											id="input-example"
+											name="input-name"
+											suffix={` ${currency.label}`}
+											allowDecimals={true}
+											decimalsLimit={2}
+											allowNegativeValue={false}
+											decimalSeparator=","
+											decimalScale={2}
+											value={amount}
+											onValueChange={(value, name, values) => values && setAmount(values.float || 1)}
+											className="w-full rounded-md border-slate-200 text-right text-sm shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
+										/>
+									</div>
+									<div className="flex flex-col items-end justify-center">
+										<div className="text-gray-500">
+											1 {currency.value} = {currencyRate} TRY
+										</div>
+										<div className="font-bold text-success">
+											{amount} {currency.value} = {(amount * currencyRate).toFixed(2)} EUR
+										</div>
+									</div>
+								</div>
+							</div>
+							<div className="z-0 col-span-12 mt-3 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-2">
 								<div className="intro-x flex h-10 items-center">
 									<h2 className="mr-5 truncate text-lg font-medium">Son 10 İşlem</h2>
 								</div>
@@ -118,7 +228,7 @@ export default function Index({
 														: route('hotel.bookings.show', transaction.id)
 												}
 												className="box zoom-in mb-3 flex items-center px-5 py-3">
-												<div className="image-fit flex h-10 w-10 items-center overflow-hidden rounded-full">
+												<div className="image-fit flex items-center overflow-hidden rounded-full">
 													{transaction.type === 'Ödeme' ? (
 														<Lucide
 															icon={'Banknote'}
@@ -144,209 +254,6 @@ export default function Index({
 								</div>
 							</div>
 							{/* END: Transactions */}
-							{/* BEGIN: Important Notes */}
-							<div className="col-span-12 mt-3 md:col-span-6 xl:col-span-12 xl:col-start-1 xl:row-start-1 2xl:col-start-auto 2xl:row-start-auto">
-								<div className="intro-x flex h-10 items-center">
-									<h2 className="mr-auto truncate text-lg font-medium">Important Notes</h2>
-									<Button
-										data-carousel="important-notes"
-										data-target="prev"
-										className="mr-2 border-slate-300 px-2 text-slate-600 dark:text-slate-300"
-										onClick={prevImportantNotes}>
-										<Lucide
-											icon="ChevronLeft"
-											className="h-4 w-4"
-										/>
-									</Button>
-									<Button
-										data-carousel="important-notes"
-										data-target="next"
-										className="mr-2 border-slate-300 px-2 text-slate-600 dark:text-slate-300"
-										onClick={nextImportantNotes}>
-										<Lucide
-											icon="ChevronRight"
-											className="h-4 w-4"
-										/>
-									</Button>
-								</div>
-								<div className="intro-x mt-5">
-									<div className="box zoom-in">
-										<TinySlider
-											getRef={(el) => {
-												importantNotesRef.current = el
-											}}>
-											<div className="p-5">
-												<div className="truncate text-base font-medium">Lorem Ipsum is simply dummy text</div>
-												<div className="mt-1 text-slate-400">20 Hours ago</div>
-												<div className="mt-1 text-justify text-slate-500">
-													Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
-													been the industry's standard dummy text ever since the 1500s.
-												</div>
-												<div className="mt-5 flex font-medium">
-													<Button
-														variant="secondary"
-														type="button"
-														className="px-2 py-1">
-														View Notes
-													</Button>
-													<Button
-														variant="outline-secondary"
-														type="button"
-														className="ml-auto px-2 py-1">
-														Dismiss
-													</Button>
-												</div>
-											</div>
-											<div className="p-5">
-												<div className="truncate text-base font-medium">Lorem Ipsum is simply dummy text</div>
-												<div className="mt-1 text-slate-400">20 Hours ago</div>
-												<div className="mt-1 text-justify text-slate-500">
-													Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
-													been the industry's standard dummy text ever since the 1500s.
-												</div>
-												<div className="mt-5 flex font-medium">
-													<Button
-														variant="secondary"
-														type="button"
-														className="px-2 py-1">
-														View Notes
-													</Button>
-													<Button
-														variant="outline-secondary"
-														type="button"
-														className="ml-auto px-2 py-1">
-														Dismiss
-													</Button>
-												</div>
-											</div>
-											<div className="p-5">
-												<div className="truncate text-base font-medium">Lorem Ipsum is simply dummy text</div>
-												<div className="mt-1 text-slate-400">20 Hours ago</div>
-												<div className="mt-1 text-justify text-slate-500">
-													Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has
-													been the industry's standard dummy text ever since the 1500s.
-												</div>
-												<div className="mt-5 flex font-medium">
-													<Button
-														variant="secondary"
-														type="button"
-														className="px-2 py-1">
-														View Notes
-													</Button>
-													<Button
-														variant="outline-secondary"
-														type="button"
-														className="ml-auto px-2 py-1">
-														Dismiss
-													</Button>
-												</div>
-											</div>
-										</TinySlider>
-									</div>
-								</div>
-							</div>
-							{/* END: Important Notes */}
-							{/* BEGIN: Schedules */}
-							<div className="col-span-12 mt-3 md:col-span-6 xl:col-span-4 xl:col-start-1 xl:row-start-2 2xl:col-span-12 2xl:col-start-auto 2xl:row-start-auto">
-								<div className="intro-x flex h-10 items-center">
-									<h2 className="mr-5 truncate text-lg font-medium">Schedules</h2>
-									<a
-										href=""
-										className="ml-auto flex items-center truncate text-primary">
-										<Lucide
-											icon="Plus"
-											className="mr-1 h-4 w-4"
-										/>{' '}
-										Add New Schedules
-									</a>
-								</div>
-								<div className="mt-5">
-									<div className="intro-x box">
-										<div className="p-5">
-											<div className="flex">
-												<Lucide
-													icon="ChevronLeft"
-													className="h-5 w-5 text-slate-500"
-												/>
-												<div className="mx-auto text-base font-medium">April</div>
-												<Lucide
-													icon="ChevronRight"
-													className="h-5 w-5 text-slate-500"
-												/>
-											</div>
-											<div className="mt-5 grid grid-cols-7 gap-4 text-center">
-												<div className="font-medium">Su</div>
-												<div className="font-medium">Mo</div>
-												<div className="font-medium">Tu</div>
-												<div className="font-medium">We</div>
-												<div className="font-medium">Th</div>
-												<div className="font-medium">Fr</div>
-												<div className="font-medium">Sa</div>
-												<div className="relative rounded py-0.5 text-slate-500">29</div>
-												<div className="relative rounded py-0.5 text-slate-500">30</div>
-												<div className="relative rounded py-0.5 text-slate-500">31</div>
-												<div className="relative rounded py-0.5">1</div>
-												<div className="relative rounded py-0.5">2</div>
-												<div className="relative rounded py-0.5">3</div>
-												<div className="relative rounded py-0.5">4</div>
-												<div className="relative rounded py-0.5">5</div>
-												<div className="relative rounded bg-success/20 py-0.5 dark:bg-success/30">6</div>
-												<div className="relative rounded py-0.5">7</div>
-												<div className="relative rounded bg-primary py-0.5 text-white">8</div>
-												<div className="relative rounded py-0.5">9</div>
-												<div className="relative rounded py-0.5">10</div>
-												<div className="relative rounded py-0.5">11</div>
-												<div className="relative rounded py-0.5">12</div>
-												<div className="relative rounded py-0.5">13</div>
-												<div className="relative rounded py-0.5">14</div>
-												<div className="relative rounded py-0.5">15</div>
-												<div className="relative rounded py-0.5">16</div>
-												<div className="relative rounded py-0.5">17</div>
-												<div className="relative rounded py-0.5">18</div>
-												<div className="relative rounded py-0.5">19</div>
-												<div className="relative rounded py-0.5">20</div>
-												<div className="relative rounded py-0.5">21</div>
-												<div className="relative rounded py-0.5">22</div>
-												<div className="relative rounded bg-pending/20 py-0.5 dark:bg-pending/30">23</div>
-												<div className="relative rounded py-0.5">24</div>
-												<div className="relative rounded py-0.5">25</div>
-												<div className="relative rounded py-0.5">26</div>
-												<div className="relative rounded bg-primary/10 py-0.5 dark:bg-primary/50">27</div>
-												<div className="relative rounded py-0.5">28</div>
-												<div className="relative rounded py-0.5">29</div>
-												<div className="relative rounded py-0.5">30</div>
-												<div className="relative rounded py-0.5 text-slate-500">1</div>
-												<div className="relative rounded py-0.5 text-slate-500">2</div>
-												<div className="relative rounded py-0.5 text-slate-500">3</div>
-												<div className="relative rounded py-0.5 text-slate-500">4</div>
-												<div className="relative rounded py-0.5 text-slate-500">5</div>
-												<div className="relative rounded py-0.5 text-slate-500">6</div>
-												<div className="relative rounded py-0.5 text-slate-500">7</div>
-												<div className="relative rounded py-0.5 text-slate-500">8</div>
-												<div className="relative rounded py-0.5 text-slate-500">9</div>
-											</div>
-										</div>
-										<div className="border-t border-slate-200/60 p-5">
-											<div className="flex items-center">
-												<div className="mr-3 h-2 w-2 rounded-full bg-pending"></div>
-												<span className="truncate">UI/UX Workshop</span>
-												<span className="font-medium xl:ml-auto">23th</span>
-											</div>
-											<div className="mt-4 flex items-center">
-												<div className="mr-3 h-2 w-2 rounded-full bg-primary"></div>
-												<span className="truncate">VueJs Frontend Development</span>
-												<span className="font-medium xl:ml-auto">10th</span>
-											</div>
-											<div className="mt-4 flex items-center">
-												<div className="mr-3 h-2 w-2 rounded-full bg-warning"></div>
-												<span className="truncate">Laravel Rest API</span>
-												<span className="font-medium xl:ml-auto">31th</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							{/* END: Schedules */}
 						</div>
 					</div>
 				</div>

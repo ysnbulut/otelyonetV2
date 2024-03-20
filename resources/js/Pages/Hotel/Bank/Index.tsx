@@ -1,4 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import React, {useState} from 'react'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'

@@ -1,6 +1,6 @@
 import React from 'react'
 import {Head, router, useForm} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {PageProps} from './types/edit'
 import {FormInput, FormLabel, FormSelect} from '@/Components/Form'
 import Button from '@/Components/Button'
@@ -10,6 +10,7 @@ import Lucide from '@/Components/Lucide'
 import Tippy from '@/Components/Tippy'
 import LoadingIcon from '@/Components/LoadingIcon'
 import Litepicker from '@/Components/Litepicker'
+import Select from 'react-select'
 import dayjs from 'dayjs'
 
 function Edit(props: PageProps) {
@@ -17,13 +18,16 @@ function Edit(props: PageProps) {
 	const {data, setData, put, processing, errors} = useForm({
 		name: props.guest.name,
 		surname: props.guest.surname,
-		date_of_birth: props.guest.date_of_birth,
-		nationality: props.guest.nationality,
+		birthday: props.guest.birthday,
+		citizen_id: props.guest.citizen_id,
+		is_foreign_national: props.guest.is_foreign_national,
 		gender: props.guest.gender,
 		identification_number: props.guest.identification_number,
 		phone: props.guest.phone,
 		email: props.guest.email,
 	})
+
+	const citizens = props.citizens.map((citizen) => ({value: citizen.id, label: citizen.name}))
 
 	const Toast = MySwal.mixin({
 		toast: true,
@@ -39,6 +43,9 @@ function Edit(props: PageProps) {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
+		if (data.citizen_id === 1001 || data.citizen_id === 0) {
+			setData((data) => ({...data, is_foreign_national: false}))
+		}
 		put(route('hotel.guests.update', props.guest.id), {
 			preserveScroll: true,
 			onSuccess: (response: any) => {
@@ -57,7 +64,7 @@ function Edit(props: PageProps) {
 	}
 	return (
 		<>
-			<Head title="Müşteriler" />
+			<Head title="Misafirler" />
 			<div className="flex items-center justify-between">
 				<h2 className="intro-y my-5 text-lg font-medium">
 					Misafir: {props.guest.gender === 'male' ? 'Bay' : 'Bayan'} {props.guest.full_name}
@@ -127,25 +134,39 @@ function Edit(props: PageProps) {
 					<div className="flex w-full flex-col gap-2 lg:flex-row">
 						<div className="input-form my-2 w-full lg:w-1/2">
 							<FormLabel
-								htmlFor="guest-nationality"
+								htmlFor="guest-citizen"
 								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
 								Uyruk
 								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, Minimum 2 karakter giriniz
+									Gerekli, Lütfen Seçiniz
 								</span>
 							</FormLabel>
-							<FormInput
-								id="guest-nationality"
-								type="text"
-								placeholder="Uyruk"
-								minLength={1}
-								required={true}
-								name="nationality"
-								value={data.nationality}
-								onChange={(e) => setData((data) => ({...data, nationality: e.target.value}))}
-								className="w-full"
+							<Select
+								options={citizens}
+								defaultValue={citizens.find((citizen) => citizen.value === data.citizen_id)}
+								className="remove-all my-select-container"
+								isClearable
+								classNamePrefix="my-select"
+								value={citizens.find((citizen) => citizen.value === data.citizen_id)}
+								styles={{
+									input: (base) => ({
+										...base,
+										'input:focus': {
+											boxShadow: 'none',
+										},
+									}),
+								}}
+								onChange={(e: any, action: any) => {
+									if (action.action === 'select-option') {
+										e && setData((data) => ({...data, citizen_id: e.value}))
+									} else if (action.action === 'clear') {
+										setData((data) => ({...data, citizen_id: 0}))
+									} else {
+										setData((data) => ({...data, citizen_id: 0}))
+									}
+								}}
 							/>
-							{errors.nationality && <div className="text-theme-6 mt-2 text-danger">{errors.nationality}</div>}
+							{errors.citizen_id && <div className="text-theme-6 mt-2 text-danger">{errors.citizen_id}</div>}
 						</div>
 						<div className="input-form my-2 w-full lg:w-1/2">
 							<FormLabel
@@ -175,7 +196,7 @@ function Edit(props: PageProps) {
 					<div className="flex w-full flex-col gap-2 lg:flex-row">
 						<div className="input-form my-2 w-full lg:w-1/2">
 							<FormLabel
-								htmlFor="date_of_birth"
+								htmlFor="birthday"
 								className="flex w-full flex-nowrap justify-between gap-2 whitespace-nowrap">
 								Doğum Tarihi
 								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
@@ -183,8 +204,9 @@ function Edit(props: PageProps) {
 								</span>
 							</FormLabel>
 							<Litepicker
-								name="date_of_birth"
-								id="date_of_birth"
+								name="birthday"
+								id="birthday"
+								value={dayjs(data.birthday, 'YYYY-MM-DD').format('DD.MM.YYYY')}
 								options={{
 									singleMode: true,
 									numberOfColumns: 1,

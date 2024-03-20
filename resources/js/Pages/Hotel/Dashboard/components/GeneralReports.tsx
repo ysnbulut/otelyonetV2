@@ -18,15 +18,15 @@ function GeneralReports(props: Props) {
 		<div className="col-span-12 mt-8">
 			<div className="intro-y flex h-10 items-center">
 				<h2 className="mr-5 truncate text-lg font-medium">Oda Raporu (Günlük)</h2>
-				<a
-					href=""
-					className="ml-auto flex items-center text-primary">
-					<Lucide
-						icon="RefreshCcw"
-						className="mr-3 h-4 w-4"
-					/>{' '}
-					Reload Data
-				</a>
+				{/*<a*/}
+				{/*	href=""*/}
+				{/*	className="ml-auto flex items-center text-primary">*/}
+				{/*	<Lucide*/}
+				{/*		icon="RefreshCcw"*/}
+				{/*		className="mr-3 h-4 w-4"*/}
+				{/*	/>*/}
+				{/*	Reload Data*/}
+				{/*</a>*/}
 			</div>
 			<div className="mt-5 grid grid-cols-12 gap-6">
 				<div className="intro-y col-span-12 sm:col-span-6 xl:col-span-3">

@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware(['api'])->post('/currency/exchange', [CurrencyController::class, 'exchange'])->name('currency.exchange');
+
+//Route::middleware(['api'])->post('/currency/exchange', [CurrencyController::class, 'exchange'])->name('mb.currency.exchange');
 
 Route::middleware(['api'])->post('/exchange/amount', [CurrencyController::class, 'amountConvert'])->name('amount.exchange');

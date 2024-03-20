@@ -73,12 +73,13 @@ function One(props: StepOneProps) {
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		props.setStepOneResults(undefined)
+		props.setCheckinRequired(false)
 		axios
 			.post<StepOneResponseProps>(route('hotel.booking_create.step.one'), firstStepData)
 			.then((response) => {
 				props.setStepOneResults(response.data)
 				props.setStep(2)
-				if (firstStepData.check_in === dayjs().format('DD.MM.YYYY')) {
+				if (dayjs(firstStepData.check_in, 'DD.MM.YYYY').isSame(dayjs(), 'day')) {
 					props.setCheckinRequired(true)
 				}
 				props.setCheckedRooms(undefined)

@@ -26,8 +26,8 @@ class StoreGuestRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['required', 'string', 'max:255'],
             'is_foreign_national' => ['required', 'boolean'],
-            'nationality' => ['required', 'string', 'max:255'],
-            'date_of_birth' => ['required', 'date'],
+            'citizen_id' => ['required', 'integer', 'exists:citizens,id'],
+            'birthday' => ['required', 'date'],
             'identification_number' => ['required', 'string', 'max:255'], //, 'unique:guests,identification_number'
             'phone' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255'],

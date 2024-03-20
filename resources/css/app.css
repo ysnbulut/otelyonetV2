@@ -128,3 +128,20 @@ input[type=number] {
 .dropzone .dz-preview .dz-details .dz-filename {
     @apply text-wrap;
 }
+
+.react-clock__face {
+    @apply border-none;
+}
+
+.react-clock__hand__body {
+    @apply dark:bg-primary bg-primary;
+}
+
+.react-clock__second-hand__body {
+    @apply dark:bg-danger bg-danger
+}
+
+
+.react-clock__mark__body {
+    @apply dark:bg-slate-200;
+}

@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import {Head, router, useForm} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {FeatureProps, PageProps} from './types'
 import {FormInput, FormLabel, FormSwitch} from '@/Components/Form'
 import Item from './components/Item'

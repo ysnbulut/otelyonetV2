@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Teknomavi\Tcmb\Doviz;
 
 class DashboardController extends Controller
 {
@@ -21,6 +22,7 @@ class DashboardController extends Controller
     {
         $this->settings = new PricingPolicySettings();
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -117,7 +119,10 @@ class DashboardController extends Controller
                     'info' => $info,
                 ];
             });
-        return Inertia::render('Hotel/Dashboard/Index',[
+        $doviz = new Doviz();
+        $kur = $doviz->kurAlis('EUR', Doviz::TYPE_EFEKTIFALIS);
+        return Inertia::render('Hotel/Dashboard/Index', [
+            'eur_exchange_rate' => $kur,
             'room_count' => $rooms->count(),
             'booked_rooms' => $booked_rooms->count(),
             'booked_rooms_percent' => '%' . round($rooms->count() > 0 ? ($booked_rooms->count() / $rooms->count() *
@@ -159,54 +164,5 @@ class DashboardController extends Controller
             'booked_rooms_weekly' => $booked_rooms_weekly,
             'transactions' => $transactions,
         ]);
-    }
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

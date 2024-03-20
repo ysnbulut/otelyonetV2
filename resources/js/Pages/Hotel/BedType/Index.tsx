@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {PageProps, BedTypeProps} from './types'
 import {Head, useForm} from '@inertiajs/react'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
+import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {FormInput, FormLabel, FormTextarea} from '@/Components/Form'
 import Button from '@/Components/Button'
 import Item from '@/Pages/Hotel/BedType/components/Item'
