@@ -15,6 +15,7 @@
         "spatie/laravel-medialibrary": "^10.15",
         "spatie/laravel-permission": "^6.2",
         "spatie/laravel-settings": "^3.2",
+        "sqids/sqids": "^0.4.1",
         "stancl/tenancy": "^3.7",
         "teknomavi/tcmb": "^1.0",
         "tightenco/ziggy": "^1.0"

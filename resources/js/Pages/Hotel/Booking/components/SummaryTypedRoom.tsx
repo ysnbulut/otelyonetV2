@@ -11,18 +11,22 @@ interface SummaryTypedRoomProps {
 	room: {
 		name: string
 		count: number
-		price: string
-		total_price: string
+		price: number
+		total_price: number
 	}
 	grandTotal: number
 	setGrandTotal: React.Dispatch<React.SetStateAction<number>>
 }
 
 function SummaryTypedRoom(props: SummaryTypedRoomProps) {
-	const [price, setPrice] = useState<number>(parseFloat(props.room.price))
-	const [totalPrice, setTotalPrice] = useState<number>(parseFloat(props.room.total_price))
+	const [price, setPrice] = useState<number>(props.room.price)
+	const [totalPrice, setTotalPrice] = useState<number>(props.room.total_price * props.room.count)
 	// const [priceFocus, setPriceFocus] = useState<boolean>(false)
 	// const [totalPriceFocus, setTotalPriceFocus] = useState<boolean>(false)
+
+	useEffect(() => {
+		setTotalPrice(props.room.total_price)
+	}, [props.room.count])
 
 	return (
 		<div className="rounded border p-2">

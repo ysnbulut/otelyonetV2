@@ -16,9 +16,7 @@ import image_dark from '../../../../../images/image_dark.jpg'
 function AvailableRooms(props: AvailableRoomsProps) {
 	const darkMode = useAppSelector(selectDarkMode)
 	const [roomCount, setRoomCount] = useState<number>(0)
-	const [calcTotalPrice, setCalcTotalPrice] = useState(
-		props.item.price.total_price && parseFloat(props.item.price.total_price.replace(/,/g, '')),
-	)
+	const [calcTotalPrice, setCalcTotalPrice] = useState(props.item.price.total_price.price)
 	const formatToTurkishLira = (amount: any): string => {
 		return new Intl.NumberFormat('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(amount)
 	}
@@ -47,15 +45,13 @@ function AvailableRooms(props: AvailableRoomsProps) {
 	const accommodationType = accommodationTypes[props.accommodationType] || 'Sadece Oda'
 
 	useEffect(() => {
-		setCalcTotalPrice(props.item.price.total_price && parseFloat(props.item.price.total_price.replace(/,/g, '')))
+		setCalcTotalPrice(props.item.price.total_price.price)
 	}, [props.request])
 
 	useEffect(() => {
 		if (props.checkedRooms !== undefined && props.checkedRooms[props.item.id] !== undefined) {
-			const totalPrice = props.item.price.total_price && parseFloat(props.item.price.total_price.replace(/,/g, ''))
-			const newPrice = totalPrice && totalPrice * props.checkedRooms[props.item.id].length
+			const newPrice = props.item.price.total_price.price * props.checkedRooms[props.item.id].length
 			const newRoomCount = props.checkedRooms[props.item.id].length
-
 			if (
 				totalElementCount(props.checkedRooms) > 0 &&
 				props.checkedRooms[props.item.id].length > 0 &&
@@ -77,6 +73,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						generateD[parseInt(key)][room].push({
 							name: '',
 							surname: '',
+							citizen_id: '',
 							birthday: '',
 							gender: '',
 							identification_number: '',
@@ -86,7 +83,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			})
 			props.setRoomsGuests((prevState) => ({...prevState, ...generateD}))
 		} else {
-			const newPrice = props.item.price.total_price && parseFloat(props.item.price.total_price.replace(/,/g, ''))
+			const newPrice = props.item.price.total_price.price
 			if (newPrice !== calcTotalPrice) {
 				setCalcTotalPrice(newPrice)
 			}
@@ -95,7 +92,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 				setRoomCount(0)
 			}
 		}
-	}, [props.checkedRooms, props.request, props.item.price.total_price, props.item.id])
+	}, [props.checkedRooms, props.request, props.item.price.total_price.price, props.item.id])
 
 	return (
 		<div className="box w-full p-5">

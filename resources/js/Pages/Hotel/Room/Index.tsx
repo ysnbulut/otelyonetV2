@@ -17,15 +17,12 @@ import {twMerge} from 'tailwind-merge'
 function Index(props: PageProps) {
 	const MySwal = withReactContent(Swal)
 	const [formVisible, setFormVisible] = useState<boolean>(false)
-	const [filter, setFilter] = useState({
-		search: props.filters.search || '',
-		per_page: props.rooms.per_page || 12,
-	})
+	const [search, setSearch] = useState(props.filters.search || '')
 	const {data, setData, post, processing, errors, reset, setError, clearErrors} = useForm({
 		name: '',
 		type_has_view_id: '',
 	})
-	const [rooms, setRooms] = useState<RoomDataProps[] | []>(props.rooms.data)
+	const [rooms, setRooms] = useState<RoomDataProps[] | []>(props.rooms)
 
 	const Toast = MySwal.mixin({
 		toast: true,
@@ -41,25 +38,23 @@ function Index(props: PageProps) {
 
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
-			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-			router.get(route('hotel.rooms.index'), query, {
-				replace: false,
-				preserveState: true,
-				only: ['rooms'],
-			})
+			// @ts-ignore
+			router.get(
+				route('hotel.rooms.index'),
+				{search: search},
+				{
+					replace: true,
+					preserveState: true,
+					onSuccess: (response: any): void => {
+						setRooms(response.props.rooms)
+						Toast.fire({
+							icon: 'success',
+							title: 'Arama başarılı',
+						})
+					},
+				},
+			)
 		}
-	}
-
-	const handlePerPage = (e: any): void => {
-		router.get(
-			route('hotel.rooms.index'),
-			{per_page: e.target.value},
-			{
-				replace: true,
-				preserveState: false,
-			},
-		)
-		setFilter((filter) => ({...filter, per_page: e.target.value}))
 	}
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -95,14 +90,15 @@ function Index(props: PageProps) {
 								placeholder="Search..."
 								onChange={(e) => {
 									e.preventDefault()
-									setFilter((filter) => ({...filter, search: e.target.value}))
+									setSearch(e.target.value)
 								}}
 								onKeyDown={handleKeyDown}
 								name={'search'}
-								value={filter.search}
+								value={search}
 							/>
 							<Lucide
 								icon="Search"
+								onClick={() => handleKeyDown({key: 'Enter'})}
 								className="absolute inset-y-0 right-0 my-auto mr-3 h-4 w-4"
 							/>
 						</div>
@@ -189,7 +185,7 @@ function Index(props: PageProps) {
 						</form>
 					</fieldset>
 				)}
-				{props.rooms.data.map((room) => (
+				{rooms.map((room) => (
 					<div
 						key={room.id}
 						className="intro-x col-span-12 sm:col-span-6 md:col-span-6 lg:col-span-4 xl:col-span-4 2xl:col-span-3">
@@ -200,9 +196,9 @@ function Index(props: PageProps) {
 						<div
 							className={twMerge(
 								'flex items-center justify-center rounded-md p-5 shadow-lg',
-								room.is_clean
-									? 'border bg-slate-100 dark:bg-darkmode-400'
-									: 'border border-danger/40 bg-danger/20' + ' dark:bg-danger/10',
+								!room.is_clean
+									? 'border bg-white dark:bg-darkmode-400'
+									: 'border-pending/40 bg-pending/15 dark:bg-pending/10',
 							)}>
 							<div>
 								<h3 className="text-center text-3xl font-extrabold text-slate-600 dark:text-slate-400">{room.name}</h3>
@@ -214,66 +210,6 @@ function Index(props: PageProps) {
 						</div>
 					</div>
 				))}
-				<div className="intro-y col-span-12 flex flex-col lg:flex-row">
-					<Pagination className="w-full flex-shrink">
-						<Pagination.Link href={props.rooms.first_page_url}>
-							<Lucide
-								icon="ChevronsLeft"
-								className="h-4 w-4"
-							/>
-						</Pagination.Link>
-						<Pagination.Link
-							href={props.rooms.prev_page_url !== null ? props.rooms.prev_page_url : '#'}
-							preserveScroll>
-							<Lucide
-								icon="ChevronLeft"
-								className="h-4 w-4"
-							/>
-						</Pagination.Link>
-						<Pagination.Link href={'#'}>...</Pagination.Link>
-						{props.rooms.links.map((link, key) => {
-							if (key > 0 && key < props.rooms.links.length - 1) {
-								if (props.rooms.current_page - 2 <= key && key <= props.rooms.current_page + 2) {
-									return (
-										<Pagination.Link
-											key={key}
-											href={link.url !== null ? link.url : '#'}
-											active={link.active}>
-											{link.label}
-										</Pagination.Link>
-									)
-								}
-							}
-						})}
-						<Pagination.Link href={'#'}>...</Pagination.Link>
-						<Pagination.Link href={props.rooms.next_page_url !== null ? props.rooms.next_page_url : '#'}>
-							<Lucide
-								icon="ChevronRight"
-								className="h-4 w-4"
-							/>
-						</Pagination.Link>
-						<Pagination.Link href={props.rooms.last_page_url}>
-							<Lucide
-								icon="ChevronsRight"
-								className="h-4 w-4"
-							/>
-						</Pagination.Link>
-					</Pagination>
-					<FormSelect
-						onChange={handlePerPage}
-						className="!box ml-auto mt-2 w-20 lg:mt-0">
-						{[12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144].map((item, key) => (
-							<option
-								key={key}
-								selected={filter.per_page === item}>
-								{item}
-							</option>
-						))}
-					</FormSelect>
-				</div>
-				<div className="col-span-12 -mt-3 flex items-center justify-center text-slate-300 dark:text-darkmode-300">
-					{`${props.rooms.total} kayıttan ${props.rooms.from} ile ${props.rooms.to} arası gösteriliyor`}
-				</div>
 			</div>
 		</>
 	)

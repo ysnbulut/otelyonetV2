@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGuestRequest;
 use App\Http\Requests\UpdateGuestRequest;
-use App\Models\BookingRooms;
+use App\Models\BookingRoom;
 use App\Models\Citizen;
 use App\Models\Guest;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +20,7 @@ class GuestController extends Controller
 
     public function test()
     {
-        $bguest = BookingRooms::find(5);
+        $bguest = BookingRoom::find(5);
         return $bguest->guests;
     }
 

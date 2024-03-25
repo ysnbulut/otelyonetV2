@@ -27,14 +27,6 @@ const initialState: SideMenuState = {
 			title: 'Oteller',
 			pathname: 'admin.hotels.index',
 			permission: ['admin.hotels.index'],
-			subMenu: [
-				{
-					icon: 'GitPullRequestCreateArrow',
-					title: 'Otel Ekle',
-					pathname: 'admin.hotels.create',
-					permission: ['admin.hotels.create'],
-				},
-			],
 		},
 	],
 }

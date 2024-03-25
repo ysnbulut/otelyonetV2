@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|BedType query()
  * @method static Builder|BedType withTrashed()
  * @method static Builder|BedType withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomType> $roomTypes
+ * @property-read int|null $room_types_count
  * @mixin Eloquent
  */
 class BedType extends Model

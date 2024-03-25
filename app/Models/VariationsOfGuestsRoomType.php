@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\VariationsOfGuestsRoomType
  *
- * @property-read Collection<int, ChildAgeRanges> $childAgeRanges
+ * @property-read Collection<int, ChildAgeRange> $childAgeRanges
  * @property-read int|null $child_age_ranges_count
  * @property-read VariationMultiplier|null $multiplier
  * @property-read RoomType|null $roomType
@@ -41,6 +41,6 @@ class VariationsOfGuestsRoomType extends Model
 
  public function childAgeRanges(): \Illuminate\Database\Eloquent\Relations\HasMany
  {
-  return $this->hasMany(ChildAgeRanges::class, 'variation_id', 'id');
+  return $this->hasMany(ChildAgeRange::class, 'variation_id', 'id');
  }
 }

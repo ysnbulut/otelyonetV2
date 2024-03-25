@@ -101,7 +101,6 @@ class Kernel extends HttpKernel
         'role' => RoleMiddleware::class,
         'permission' => PermissionMiddleware::class,
         'role_or_permission' => RoleOrPermissionMiddleware::class,
-        'booking_request' => BookingRequest::class,
         'customer_payment_request' => CustomerPaymentRequest::class,
         'season_request' => SeasonRequest::class,
         'CustomerPayment' => CustomerPaymentRequest::class,

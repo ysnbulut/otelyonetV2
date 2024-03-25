@@ -297,7 +297,7 @@
 
 
 .fc-datagrid-cell-cushion.fc-sticky {
-    @apply text-2xl font-extrabold rotate-90 min-w-max whitespace-nowrap !important;
+    @apply text-xl font-semibold min-w-max whitespace-nowrap !important;
 }
 
 .context-menu {

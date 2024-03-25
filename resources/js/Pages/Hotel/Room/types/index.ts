@@ -14,29 +14,13 @@ export interface RoomDataProps {
 	status: string
 }
 
-interface Rooms {
-	current_page: number
-	data: RoomDataProps[] | []
-	first_page_url: string
-	from: number
-	last_page: number
-	last_page_url: string
-	links: Links[]
-	next_page_url: string | null
-	path: string | null
-	per_page: number
-	prev_page_url: string | null
-	to: number
-	total: number
-}
-
 interface TypeHasViews {
 	id: number
 	name: string
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
-	rooms: Rooms
+	rooms: RoomDataProps[] | []
 	typeHasViews: TypeHasViews[]
 	filters: {
 		search: string

@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|BookingGuests query()
  * @method static Builder|BookingGuests withTrashed()
  * @method static Builder|BookingGuests withoutTrashed()
+ * @property-read \App\Models\BookingRoom|null $booking_room
  * @mixin Eloquent
  */
 class BookingGuests extends Model
@@ -45,12 +46,12 @@ class BookingGuests extends Model
 
     public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(BookingRooms::class);
+        return $this->belongsTo(BookingRoom::class);
     }
 
     public function booking(): \Illuminate\Database\Eloquent\Relations\hasOneThrough
     {
-        return $this->hasOneThrough(Booking::class, BookingRooms::class, 'id', 'id', 'booking_room_id', 'booking_id');
+        return $this->hasOneThrough(Booking::class, BookingRoom::class, 'id', 'id', 'booking_room_id', 'booking_id');
     }
 
     public function guest(): \Illuminate\Database\Eloquent\Relations\BelongsTo

@@ -8,9 +8,11 @@ use App\Http\Requests\BookingStepOneRequest;
 use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Models\Booking;
+use App\Models\BookingDailyPrice;
 use App\Models\BookingGuests;
-use App\Models\BookingRooms;
-use App\Models\CaseAndBanks;
+use App\Models\BookingRoom;
+use App\Models\BookingTotalPrice;
+use App\Models\CaseAndBank;
 use App\Models\Citizen;
 use App\Models\Customer;
 use App\Models\Guest;
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Sqids\Sqids;
 
 class BookingController extends Controller
 {
@@ -55,7 +58,7 @@ class BookingController extends Controller
     public function upcoming()
     {
         //->where('check_in', '>', Carbon::now())
-        return Booking::orderBy('id', 'desc')->with(['customer', 'rooms', 'amount'])
+        return Booking::orderBy('id', 'desc')->with(['customer', 'rooms', 'total_price'])
             ->cursorPaginate(10)
             ->withQueryString()
             ->through(fn($booking) => [
@@ -69,10 +72,10 @@ class BookingController extends Controller
                 'rooms_count' => $booking->rooms->count(),
                 'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
                 'number_of_children' => $booking->rooms->sum('pivot.number_of_children'),
-                'amount' => $booking->amount ? $booking->amount->grand_total : null,
-                'amount_formatted' => $booking->amount ? number_format($booking->amount->grand_total, 2, '.', ',') . ' ' . $this->settings->currency['value'] : null,
-                'remaining_balance' => $booking->amount ? $booking->remainingBalance() : null,
-                'remaining_balance_formatted' => $booking->amount ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $this->settings->currency['value'] : null,
+                'amount' => $booking->total_price ? $booking->total_price->grand_total : null,
+                'amount_formatted' => $booking->total_price ? number_format($booking->total_price->grand_total, 2, '.', ',') . ' ' . $this->settings->currency['value'] : null,
+                'remaining_balance' => $booking->total_price ? $booking->remainingBalance() : null,
+                'remaining_balance_formatted' => $booking->total_price ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $this->settings->currency['value'] : null,
             ]);
     }
 
@@ -193,49 +196,45 @@ class BookingController extends Controller
             'view',
             'rooms' => function ($query) use ($unavailableRoomsIds) {
                 $query->whereNotIn('id', $unavailableRoomsIds);
-            },
-        ])
-            ->whereHas('rooms', function ($query) use ($unavailableRoomsIds) {
-                $query->whereNotIn('id', $unavailableRoomsIds);
-            })
-            ->whereHas('type', function ($query) use ($request) {
-                $query->with(['beds', 'features'])->where('adult_capacity', '>=', $request->number_of_adults)->where('child_capacity', '>=', $request->number_of_children);
-            })
-            ->get()
-            ->map(function ($typeHasViews) use ($request, $priceCalculator, $nightCount) {
-                return [
-                    'id' => $typeHasViews->id,
-                    'name' => $typeHasViews->type->name . ' ' . $typeHasViews->view->name,
-                    'photos' => $typeHasViews->type->getMedia('room_type_photos')->map(fn($media) => $media->getUrl()),
-                    'size' => $typeHasViews->type->size,
-                    'room_count' => $typeHasViews->type->room_count,
-                    'available_room_count' => $typeHasViews->rooms->count(),
-                    'adult_capacity' => $typeHasViews->type->adult_capacity,
-                    'child_capacity' => $typeHasViews->type->child_capacity,
-                    'beds' => $typeHasViews->type->beds->map(
-                        fn($bed) => [
-                            'name' => $bed->name,
-                            'person_num' => $bed->person_num,
-                            'count' => $bed->pivot->count,
-                        ]
-                    ),
-                    'features' => $typeHasViews->type->features->map(fn($feature) => $feature->name),
-                    'rooms' => $typeHasViews->rooms->count() > 0 ? $typeHasViews->rooms->map(
-                        fn($room) => [
-                            'id' => $room->id,
-                            'name' => $room->name,
-                        ]
-                    ) : false,
-                    'price' => $priceCalculator->getNormalPrices(
-                        $typeHasViews->id,
-                        $request->check_in,
-                        $request->check_out,
-                        $request->number_of_adults,
-                        $request->number_of_children,
-                        $request->children_ages
-                    )->first(),
-                ];
-            });
+            }
+        ])->whereHas('rooms', function ($query) use ($unavailableRoomsIds) {
+            $query->whereNotIn('id', $unavailableRoomsIds);
+        })->whereHas('type', function ($query) use ($request) {
+            $query->with(['beds', 'features'])->where('adult_capacity', '>=', $request->number_of_adults)->where('child_capacity', '>=', $request->number_of_children);
+        })->get()->map(function ($typeHasViews) use ($request, $priceCalculator, $nightCount) {
+            return [
+                'id' => $typeHasViews->id,
+                'name' => $typeHasViews->type->name . ' ' . $typeHasViews->view->name,
+                'photos' => $typeHasViews->type->getMedia('room_type_photos')->map(fn($media) => $media->getUrl()),
+                'size' => $typeHasViews->type->size,
+                'room_count' => $typeHasViews->type->room_count,
+                'available_room_count' => $typeHasViews->rooms->count(),
+                'adult_capacity' => $typeHasViews->type->adult_capacity,
+                'child_capacity' => $typeHasViews->type->child_capacity,
+                'beds' => $typeHasViews->type->beds->map(
+                    fn($bed) => [
+                        'name' => $bed->name,
+                        'person_num' => $bed->person_num,
+                        'count' => $bed->pivot->count,
+                    ]
+                ),
+                'features' => $typeHasViews->type->features->map(fn($feature) => $feature->name),
+                'rooms' => $typeHasViews->rooms->count() > 0 ? $typeHasViews->rooms->map(
+                    fn($room) => [
+                        'id' => $room->id,
+                        'name' => $room->name,
+                    ]
+                ) : false,
+                'price' => $priceCalculator->prices(
+                    $typeHasViews->id,
+                    $request->check_in,
+                    $request->check_out,
+                    $request->number_of_adults,
+                    $request->number_of_children,
+                    $request->children_ages
+                )->first(),
+            ];
+        });
         return [
             'currency' => $this->settings->currency['value'],
             'request' => $request->all(),
@@ -258,7 +257,17 @@ class BookingController extends Controller
         $data = $request->validated();
         $check_in_required = $data['checkin_required'];
         $selected_room_count = collect($data['booking_result']['typed_rooms'])->sum('count');
+        $sqids = new Sqids('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 9);
+        do {
+            try {
+                $uniqueNumber = str_pad(random_int(0, 999999999), 9, '0', STR_PAD_LEFT);
+            } catch (\Exception $e) {
+                // random_int failed. Fall back to mt_rand
+                $uniqueNumber = str_pad(mt_rand(0, 999999999), 9, '0', STR_PAD_LEFT);
+            }
+        } while (Booking::where('booking_code', 'O'.$sqids->encode([$uniqueNumber]))->exists());
         $booking_data = [
+            'booking_code' => 'O'.$sqids->encode([$uniqueNumber]),
             'customer_id' => $data['customer_id'],
             'check_in' => Carbon::createFromFormat('d.m.Y', $data['booking_result']['check_in'])->format('Y-m-d'),
             'check_out' => Carbon::createFromFormat('d.m.Y', $data['booking_result']['check_out'])->format('Y-m-d'),
@@ -271,29 +280,52 @@ class BookingController extends Controller
         $number_of_adults = $data['booking_result']['number_of_adults_total'] / $selected_room_count || $data['number_of_adults'];
         $number_of_children = $data['booking_result']['number_of_children_total'] / $selected_room_count || $data['number_of_children'];
         $children_ages = $number_of_children > 0 ? $data['children_ages'] : null;
-        collect($data['checked_rooms'])->each(function ($room) use (
-            $booking, $number_of_adults, $number_of_children,
-            $children_ages
-        ) {
-            $booking->rooms()->attach($room, ['number_of_adults' => $number_of_adults, 'number_of_children' =>
-                $number_of_children, 'children_ages' => json_encode($children_ages), 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
-        });
-        $amount_data = [
-            'price' => $data['grand_total'],
-            'campaign' => 0,
+        $discountRate = $data['discount'] / $data['grand_total'];
+        $tax = round($data['grand_total'] - ($data['grand_total'] / (1 +
+                    ($this->settings->tax_rate['value'] /
+                        100))), 2);
+        $bookingTotalPrice = BookingTotalPrice::create([
+            'booking_id' => $booking->id,
+            'price' => $discountRate > 0 ? $data['grand_total'] / (1 - $discountRate) : $data['grand_total'],
             'discount' => $data['discount'],
             'total_price' => $data['grand_total'],
-            'tax' => round($data['grand_total'] - ($data['grand_total'] / (1 +
-                        ($this->settings->tax_rate['value'] /
-                            100))), 2),
-            'grand_total' => $data['grand_total'],
-        ];
-//        dd($amount_data);
-        $booking->amount()->create($amount_data);
+            'tax' => $tax,
+            'grand_total' => $data['grand_total'] + $tax,
+            'currency' => $this->settings->currency['value'],
+        ]);
+        foreach ($data['checked_rooms'] as $room) {
+            foreach ($room as $room_id) {
+                $bookingRoom = BookingRoom::create([
+                    'booking_id' => $booking->id,
+                    'room_id' => $room_id,
+                    'number_of_adults' => $number_of_adults,
+                    'number_of_children' => $number_of_children,
+                    'children_ages' => json_encode($children_ages),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+                foreach ($data['daily_prices'] as $dailyPrice) {
+                    foreach ($dailyPrice as $price) {
+                        BookingDailyPrice::firstOrCreate([
+                            'booking_total_price_id' => $bookingTotalPrice->id,
+                            'booking_room_id' => $bookingRoom->id,
+                            'date' => $price['date'],
+                        ], [
+                            'original_price' => round($price['price'] * $discountRate) + round($price['price']),
+                            'discount' => round($price['price'] * $discountRate),
+                            'price' => round($price['price']),
+                            'currency' => $this->settings->currency['value'],
+                        ]);
+                    }
+
+                }
+
+            }
+        }
         collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking, $check_in_required) {
             collect($room_ytpe)->each(function ($guest, $key) use ($booking, $check_in_required) {
                 foreach ($guest as $value) {
-                    if($value['name'] != null && $value['surname'] != null &&  $value['citizen_id'] != null ) {
+                    if ($value['name'] != null && $value['surname'] != null && $value['citizen_id'] != null) {
                         $guest = Guest::create(
                             [
                                 'name' => $value['name'],
@@ -304,7 +336,7 @@ class BookingController extends Controller
                                 'identification_number' => $value['identification_number'],
                             ]
                         );
-                        BookingRooms::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()
+                        BookingRoom::where('booking_id', $booking->id)->where('room_id', $key)->first()->guests()
                             ->attach($guest, ['check_in' => $check_in_required, 'status'
                             => $check_in_required ? 'check_in' : 'pending', 'check_in_date' => $check_in_required ?
                                 Carbon::now() : null, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now()]);
@@ -339,7 +371,7 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         $availableDatesCountArr = [];
-        return Inertia::render('Hotel/Booking/Show',[
+        return Inertia::render('Hotel/Booking/Show', [
             'currency' => $this->settings->currency['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
             'citizens' => Citizen::select(['id', 'name'])->get(),
@@ -354,7 +386,7 @@ class BookingController extends Controller
                 'open_booking' => $booking->check_out === null,
                 'stay_duration_days' => $booking->stayDurationDay(),
                 'stay_duration_nights' => $booking->stayDurationNight(),
-                'rooms' => $booking->rooms->map(function($room) use (&$availableDatesCountArr, $booking) {
+                'rooms' => $booking->rooms->map(function ($room) use (&$availableDatesCountArr, $booking) {
                     $checkinDates = $room->bookings->map(fn($booking) => $booking->check_in)->toArray();
                     $availableDatesCount = 0;
                     for ($i = 1; $i < 8; $i++) {
@@ -370,7 +402,7 @@ class BookingController extends Controller
                     $availableDatesCountArr[] = $availableDatesCount;
                     $bookingGuests = BookingGuests::where('booking_room_id', $room->pivot->id)->get();
                     $canBeCheckoutArr = [];
-                    $bookingGuests->each(function($booking_guest) use (&$canBeCheckoutArr) {
+                    $bookingGuests->each(function ($booking_guest) use (&$canBeCheckoutArr) {
                         if ($booking_guest->check_in && !$booking_guest->check_out) {
                             $canBeCheckoutArr[] = true;
                         } else {
@@ -390,8 +422,7 @@ class BookingController extends Controller
                             null,
                         'can_be_check_in' => in_array(false, $canBeCheckoutArr),
                         'can_be_check_out' => in_array(true, $canBeCheckoutArr),
-                        'guests' => $bookingGuests->map(fn
-                        ($booking_guest) => [
+                        'guests' => $bookingGuests->map(fn($booking_guest) => [
                             'booking_guests_id' => $booking_guest->id,
                             'id' => $booking_guest->guest->id,
                             'name' => $booking_guest->guest->name,
@@ -445,26 +476,26 @@ class BookingController extends Controller
                 ]
             ),
             'amount' => [
-                'id' => $booking->amount->id,
-                'price' => $booking->amount->price,
-                'price_formatted' => number_format($booking->amount->price, 2, '.', ',') . ' ' . $this->settings->currency['value'],
-                'campaign' => $booking->amount->campaign,
-                'discount' => $booking->amount->discount,
-                'discount_formatted' => number_format($booking->amount->discount, 2, '.', ',') . ' ' . $this->settings->currency['value'],
-                'total_price' => $booking->amount->total_price,
-                'total_price_formatted' => number_format($booking->amount->total_price, 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                'id' => $booking->total_price->id,
+                'price' => $booking->total_price->price,
+                'price_formatted' => number_format($booking->total_price->price, 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                'campaign' => $booking->total_price->campaign,
+                'discount' => $booking->total_price->discount,
+                'discount_formatted' => number_format($booking->total_price->discount, 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                'total_price' => $booking->total_price->total_price,
+                'total_price_formatted' => number_format($booking->total_price->total_price, 2, '.', ',') . ' ' . $this->settings->currency['value'],
                 'tax_rate' => $this->settings->tax_rate['value'],
-                'tax' => $booking->amount->tax,
-                'tax_formatted' => number_format($booking->amount->tax, 2, '.', ',') . ' ' . $this->settings->currency['value'],
-                'grand_total' => $booking->amount->grand_total,
-                'grand_total_formatted' => number_format($booking->amount->grand_total, 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                'tax' => $booking->total_price->tax,
+                'tax_formatted' => number_format($booking->total_price->tax, 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                'grand_total' => $booking->total_price->grand_total,
+                'grand_total_formatted' => number_format($booking->total_price->grand_total, 2, '.', ',') . ' ' . $this->settings->currency['value'],
             ],
             'extendable_number_of_days' => min($availableDatesCountArr),
-            'case_and_banks' => CaseAndBanks::select(['id', 'name'])->get(),
+            'case_and_banks' => CaseAndBank::select(['id', 'name'])->get(),
             'remaining_balance' => round($booking->remainingBalance(), 2),
             'remaining_balance_formatted' => number_format($booking->remainingBalance(), 2, '.', ',') . ' ' .
                 $this->settings->currency['value'],
-            'booking_messages' => $booking->messages,
+            'booking_messages' => $booking->notes,
         ]);
     }
 
@@ -489,6 +520,7 @@ class BookingController extends Controller
      */
     public function destroy(Booking $booking)
     {
-        //
+        $booking->delete();
+        return redirect()->route('hotel.bookings.index')->with('success', 'Rezervasyon başarıyla silindi.');
     }
 }

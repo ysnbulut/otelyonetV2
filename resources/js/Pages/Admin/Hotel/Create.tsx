@@ -100,7 +100,7 @@ function Create(props: PageProps) {
 				<h2 className="intro-y my-5 text-lg font-medium">Otel Ekle</h2>
 				<Tippy
 					as={Button}
-					onClick={() => router.visit(route('hotel.hotels.index'))}
+					onClick={() => router.visit(route('admin.hotels.index'))}
 					variant="soft-pending"
 					className="intro-x"
 					content="Geri">

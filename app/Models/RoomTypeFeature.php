@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|RoomTypeFeature query()
  * @method static Builder|RoomTypeFeature withTrashed()
  * @method static Builder|RoomTypeFeature withoutTrashed()
+ * @method static Builder|RoomTypeFeature ordered()
  * @mixin Eloquent
  */
 class RoomTypeFeature extends Model

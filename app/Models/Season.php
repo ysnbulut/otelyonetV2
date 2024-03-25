@@ -21,6 +21,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Season unitPrices()
  * @method static Builder|Season withTrashed()
  * @method static Builder|Season withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPrice> $unitPrices
+ * @property-read int|null $unit_prices_count
  * @mixin Eloquent
  */
 class Season extends Model

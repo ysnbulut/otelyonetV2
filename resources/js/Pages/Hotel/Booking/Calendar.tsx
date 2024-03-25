@@ -19,6 +19,8 @@ import moment from 'moment'
 import {PageProps} from '@/Pages/Hotel/Booking/types/calendar'
 import {Head} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
+import {ResourceInput} from '@fullcalendar/resource'
+import Tippy from '@/Components/Tippy'
 
 moment.locale('tr')
 dayjs.extend(utc)
@@ -43,6 +45,35 @@ function Calendar(props: PageProps) {
 		},
 	})
 
+	const events = props.bookings.map((booking) => {
+		return {
+			id: booking.id,
+			url: route('hotel.bookings.show', booking.id),
+			resourceId: booking.resourceId,
+			start: booking.start,
+			title: booking.title,
+			end: booking.end,
+			backgroundColor: booking.backgroundColor,
+			borderColor: booking.borderColor,
+			textColor: booking.textColor,
+			startEditable: false,
+			resourceEditable: false,
+			durationEditable: false,
+			allDay: false,
+		}
+	})
+
+	const resources = props.rooms.map((room) => {
+		return {
+			id: room.id,
+			title: room.title,
+			building: room.building,
+			floor: room.floor,
+			type_and_view: room.type_and_view,
+			type_id: room.type_id,
+		}
+	})
+
 	return (
 		<>
 			<Head title="Müşteriler" />
@@ -65,7 +96,7 @@ function Calendar(props: PageProps) {
 					views={{
 						resourceTimeline: {
 							duration: {
-								days: 45,
+								days: 7,
 							},
 							slotDuration: {
 								hours: 24,
@@ -88,6 +119,16 @@ function Calendar(props: PageProps) {
 						},
 					]}
 					resourceAreaWidth={'150px'}
+					resourceGroupLabelContent={(arg) => {
+						return (
+							<Tippy content={arg.groupValue}>
+								{arg.groupValue
+									.split(' ')
+									.map((word: any) => word.charAt(0))
+									.join('')}
+							</Tippy>
+						)
+					}}
 					slotLabelFormat={[
 						{month: 'long', year: 'numeric'},
 						{weekday: 'short'},
@@ -113,7 +154,7 @@ function Calendar(props: PageProps) {
 								}
 							case 3:
 								return {
-									html: `<div class="flex text-xs"><div class="border-r-2 border-slate-900 px-1">${props.check_out_time}</div><div class="px-1">${props.check_in_time}</div></div>`,
+									html: `<div class="flex text-xs"><div class="border-r-2 border-slate-900 px-1">${props.check_out_time}:00</div><div class="px-1">${props.check_in_time}:00</div></div>`,
 								}
 						}
 					}}
@@ -152,7 +193,7 @@ function Calendar(props: PageProps) {
 					selectMirror={true}
 					dayMaxEvents={true}
 					headerToolbar={{
-						left: 'prevYear,nextYear today',
+						left: 'prev,next today',
 						center: 'title',
 						right: '',
 					}}
@@ -172,33 +213,8 @@ function Calendar(props: PageProps) {
 							editable: false,
 						},
 					]}
-					resources={props.rooms.map((room) => {
-						return {
-							id: room.id,
-							title: room.title,
-							building: room.building,
-							floor: room.floor,
-							type_and_view: room.type_and_view,
-							type_id: room.type_id,
-						}
-					})}
-					events={props.bookings.map((booking) => {
-						return {
-							id: booking.id,
-							url: route('hotel.bookings.show', booking.id),
-							resourceId: booking.resourceId,
-							start: booking.start,
-							title: booking.title,
-							end: booking.end,
-							backgroundColor: booking.backgroundColor,
-							borderColor: booking.borderColor,
-							textColor: booking.textColor,
-							startEditable: false,
-							resourceEditable: false,
-							durationEditable: false,
-							allDay: false,
-						}
-					})}
+					resources={resources as ResourceInput}
+					events={events as ResourceInput}
 					// eventContent={(e) => {
 					// 	return (
 					// 		<>

@@ -51,21 +51,26 @@ interface IdAndProps {
 	view_id: number
 }
 
-interface GroupPricesProps extends PriceProps {
-	text: string
+export interface DailyPriceProps {
+	date: string
+	price: number
+	fprice: string
+	fprice_with_currency: string
 }
 
-interface GroupPricePorps extends IdAndProps {
-	prices?: GroupPricesProps[]
+interface TotalPriceProps {
+	price: number
+	fprice: string
+	fprice_with_currency: string
 }
 
 interface PriceProps extends IdAndProps {
-	total_price?: string
-	total_price_formatter?: string
-	multiplier?: number
+	exchange_rate: number
+	currency: string
+	daily_prices: DailyPriceProps[]
+	multiplier: number
+	total_price: TotalPriceProps
 }
-
-export interface MergeProps extends PriceProps, GroupPricePorps {}
 
 export interface StepOneDataProps {
 	id: number
@@ -78,7 +83,7 @@ export interface StepOneDataProps {
 	child_capacity: number
 	beds: BedProps[]
 	rooms: RoomProps[]
-	price: MergeProps
+	price: PriceProps
 }
 
 export interface CustomerProps {

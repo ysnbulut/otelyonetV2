@@ -13,6 +13,7 @@ import Clock from 'react-clock'
 import CurrencyInput from 'react-currency-input-field'
 import Select from 'react-select'
 import axios from 'axios'
+import DashboardClock from '@/Pages/Hotel/Dashboard/components/DashboardClock'
 
 export default function Index({
 	is_tenant,
@@ -34,7 +35,6 @@ export default function Index({
 	booked_rooms_weekly,
 	transactions,
 }: PageProps) {
-	const [clock, setClock] = useState(new Date())
 	//['EUR','USD', 'GBP', 'SAR', 'AUD', 'CHF', 'CAD', 'KWD', 'JPY', 'DKK', 'SEK', 'NOK']
 	const currencies = [
 		{value: 'EUR', label: 'EUR'},
@@ -53,13 +53,6 @@ export default function Index({
 	const [currency, setCurrency] = useState(currencies[0])
 	const [currencyRate, setCurrencyRate] = useState(eur_exchange_rate)
 	const [amount, setAmount] = useState<number>(1)
-	useEffect(() => {
-		const interval = setInterval(() => setClock(new Date()), 1000)
-
-		return () => {
-			clearInterval(interval)
-		}
-	}, [])
 
 	useEffect(() => {
 		axios
@@ -148,20 +141,7 @@ export default function Index({
 						<div className="grid grid-cols-12 gap-x-6 gap-y-6 2xl:gap-x-0 2xl:pl-6">
 							{/* BEGIN: Transactions */}
 							<div className="col-span-12 mt-3 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-8">
-								<div className="box flex items-center justify-center gap-4 p-4">
-									<Clock
-										className="rounded-full bg-slate-100 dark:bg-darkmode-700"
-										value={clock}
-										size={100}
-										minuteMarksWidth={1}
-										hourHandWidth={5}
-										hourMarksLength={14}
-										hourMarksWidth={4}
-									/>
-									<span className="min-w-[90px] rounded-md bg-slate-100 px-2 py-1 text-center text-lg font-semibold dark:bg-darkmode-700">
-										{clock.toLocaleTimeString()}
-									</span>
-								</div>
+								<DashboardClock />
 							</div>
 							<div className="col-span-12 mt-1 md:col-span-6 xl:col-span-4 2xl:col-span-12 2xl:mt-2">
 								<div className="intro-x flex h-10 items-center">

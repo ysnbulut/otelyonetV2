@@ -23,9 +23,8 @@ class RoomController extends Controller
             'rooms' => Room::orderBy('id')
                 ->filter(Request::only('search', 'trashed'))
                 ->with(['roomType', 'roomView', 'floor'])
-                ->paginate(24)
-                ->withQueryString()
-                ->through(function ($room) {
+                ->get()
+                ->map(function ($room) {
                     return [
                         'id' => $room->id,
                         'name' => $room->name,
@@ -53,10 +52,16 @@ class RoomController extends Controller
         $data = $request->validated();
         $data['building_id'] = 1;
         $data['floor_id'] = 1;
-        Room::create($data);
-        return redirect()
-            ->back()
-            ->with('success', 'Oda ekleme başarılı.');
+        $room = Room::create($data);
+        return [
+            'id' => $room->id,
+            'name' => $room->name,
+            'type' => $room->roomType->name,
+            'view' => $room->roomView->name,
+            'floor' => $room->floor->name,
+            'is_clean' => $room->is_clean,
+            'status' => $room->status,
+        ];
     }
 
     /**

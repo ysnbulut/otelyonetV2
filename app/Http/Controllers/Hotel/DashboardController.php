@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\BookingPayments;
+use App\Models\BookingPayment;
 use App\Models\Guest;
 use App\Models\Room;
 use App\Settings\PricingPolicySettings;
@@ -77,17 +77,17 @@ class DashboardController extends Controller
         $booked_rooms_weekly = $booking_data_weekly_get->count() > 1 ? array_map('array_sum', $booking_data_weekly_map) : $booking_data_weekly_map;
         $transactions = Booking::select(['id', 'customer_id', 'check_in as date', 'type' => DB::raw("'booking'")])
             ->union(
-                BookingPayments::select(['id', 'customer_id', 'payment_date as date', 'type' => DB::raw("'payment'")])
+                BookingPayment::select(['id', 'customer_id', 'payment_date as date', 'type' => DB::raw("'payment'")])
             )->orderBy('date', 'desc')
             ->take(10)->get()->map(function ($transaction) {
                 $info = '';
                 if ($transaction->booking === 'booking') {
                     $booking = Booking::where('id', $transaction->id)->first();
-                    $amount = $booking->amount->grand_total;
+                    $amount = $booking->total_price->grand_total;
                     $currency = $this->settings->currency['value'];
                     $info .= $booking->rooms->pluck('name')->implode(', ') . ' - ' . $booking->stayDurationNight() . ' (' . $booking->number_of_rooms . 'Oda' . $booking->number_of_adults . 'Yetişkin ' . $booking->number_of_children . ' Çocuk)';
                 } else {
-                    $payment = BookingPayments::where('id', $transaction->id)->first();
+                    $payment = BookingPayment::where('id', $transaction->id)->first();
                     if ($payment->payment_method == 'cash') {
                         $payment_method = 'Nakit';
                     } elseif ($payment->payment_method == 'credit_card') {

@@ -37,6 +37,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static Builder|RoomType query()
  * @method static Builder|RoomType withTrashed()
  * @method static Builder|RoomType withoutTrashed()
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read Collection<int, \App\Models\UnitPrice> $unitPrices
  * @mixin Eloquent
  */
 class RoomType extends Model implements HasMedia

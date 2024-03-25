@@ -34,6 +34,7 @@ use function number_format;
  * @method static Builder|TypeHasView singlePriceCalculator($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren)
  * @method static Builder|TypeHasView withTrashed()
  * @method static Builder|TypeHasView withoutTrashed()
+ * @property-read Collection<int, \App\Models\UnitPrice> $unitPrices
  * @mixin Eloquent
  */
 class TypeHasView extends Model

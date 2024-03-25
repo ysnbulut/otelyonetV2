@@ -9,11 +9,14 @@ import route from 'ziggy-js'
 import GuestStatusColors from '@/Pages/Hotel/Booking/components/GuestStatusColors'
 import BookingRoomGuestsTable from '@/Pages/Hotel/Booking/components/BookingRoomGuestsTable'
 import ShowRoomGuestAdd from '@/Pages/Hotel/Booking/components/ShowRoomGuestAdd'
+import {CheckedRoomsProps} from '@/Pages/Hotel/Booking/types/steps'
 
 interface BookingRoomsProps {
 	room: RoomsProps
 	citizens: CitizenProps[]
-	booking_rooms: RoomsProps[]
+	bookingRooms: RoomsProps[]
+	setBookingRooms: React.Dispatch<React.SetStateAction<RoomsProps[]>>
+	setBalance: React.Dispatch<React.SetStateAction<number>>
 	check_in: string
 }
 
@@ -24,7 +27,8 @@ function BookingRooms(props: BookingRoomsProps) {
 		axios
 			.delete(route('hotel.booking_rooms.destroy', bookingRoomId))
 			.then((response) => {
-				console.log(response)
+				props.setBookingRooms((prev) => prev.filter((room) => room.booking_room_id !== bookingRoomId))
+				props.setBalance((prev) => parseFloat((prev - response.data.total_price).toFixed(2)))
 			})
 			.catch((error) => {
 				console.log(error)
@@ -64,7 +68,7 @@ function BookingRooms(props: BookingRoomsProps) {
 			<legend className="rounded-lg border-4  border-primary bg-primary px-3 py-1 text-lg font-extrabold text-white">
 				{props.room.name}
 			</legend>
-			{props.booking_rooms.length > 1 && dayjs(props.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
+			{props.bookingRooms.length > 1 && dayjs(props.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
 				<Tippy
 					content="Odayı Rezervasyondan Çıkart"
 					className="absolute -top-9 right-3">

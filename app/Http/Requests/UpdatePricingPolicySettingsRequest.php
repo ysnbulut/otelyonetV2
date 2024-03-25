@@ -25,7 +25,7 @@ class UpdatePricingPolicySettingsRequest extends FormRequest
             'pricing_currency' => ['required', 'in:TRY,USD,EUR,GBP,SAR,AUD,CHF,CAD,KWD,JPY,DKK,SEK,NOK'],
             'check_in_time_policy' => ['required', 'string', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
             'check_out_time_policy' => ['required', 'string', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
-            'accommodation_types' => ['required', 'string', 'in:only_room,room_and_breakfast,half_board,full_board,all_inclusive,ultra_all_inclusive'],
+            'accommodation_type' => ['required', 'string', 'in:only_room,room_and_breakfast,half_board,full_board,all_inclusive,ultra_all_inclusive'],
         ];
     }
 

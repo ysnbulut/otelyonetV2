@@ -12,10 +12,10 @@ return new class extends Migration {
 	{
 		Schema::create('bookings', function (Blueprint $table) {
 			$table->id();
+            $table->string('booking_code')->unique();
 			$table
 				->foreignId('customer_id')
-				->constrained('customers')
-				->onDelete('cascade');
+				->constrained('customers');
 			$table->date('check_in');
 			$table->date('check_out')->nullable();
             $table->foreignId('channel_id')->constrained('booking_channels');

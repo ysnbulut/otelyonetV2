@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Room query()
  * @method static Builder|Room withTrashed()
  * @method static Builder|Room withoutTrashed()
+ * @method static Builder|Room filter(array $filters)
  * @mixin Eloquent
  */
 class Room extends Model
@@ -66,7 +67,7 @@ class Room extends Model
 
     public function bookings(): HasManyThrough
     {
-        return $this->hasManyThrough(Booking::class, BookingRooms::class, 'room_id', 'id', 'id', 'booking_id');
+        return $this->hasManyThrough(Booking::class, BookingRoom::class, 'room_id', 'id', 'id', 'booking_id');
     }
 
     /**

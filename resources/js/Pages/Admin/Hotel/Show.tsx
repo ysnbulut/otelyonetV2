@@ -36,6 +36,7 @@ interface HotelProps {
 	phone: string | null
 	email: string | null
 	panel_url: string
+	webhook_url: string
 }
 
 interface OptionProps {
@@ -60,6 +61,7 @@ interface ApiSettingsProps {
 interface TypeHasViewProps {
 	value: number
 	label: string
+	count: number
 }
 interface SettingProps {
 	channel_manager: ChannelManagerProps
@@ -136,8 +138,8 @@ function Show(props: PageProps) {
 			.put(route('admin.hotels.channe_manager', props.hotel.id), data)
 			.then((response) => {
 				Toast.fire({
-					icon: 'success',
-					title: 'Otelin kanal yöneticisi başarıyla güncellendi',
+					icon: response.data.status === 'success' ? 'success' : 'error',
+					title: response.data.message,
 				})
 				setRooms(response.data.rooms)
 			})
@@ -154,7 +156,7 @@ function Show(props: PageProps) {
 				<h2 className="intro-y my-5 text-lg font-medium">Otel {props.hotel.name}</h2>
 				<Tippy
 					as={Button}
-					onClick={() => router.visit(route('hotel.hotels.index'))}
+					onClick={() => router.visit(route('admin.hotels.index'))}
 					variant="soft-pending"
 					className="intro-x"
 					content="Geri">
@@ -226,6 +228,15 @@ function Show(props: PageProps) {
 						<span>{props.hotel.phone}</span>
 					</div>
 				</div>
+			</div>
+			<div className="box mt-5 flex flex-col gap-1 p-5 lg:flex-row lg:gap-10">
+				<FormInput
+					id="webhook_url"
+					name="webhook_url"
+					type="text"
+					value={props.hotel.webhook_url}
+					disabled
+				/>
 			</div>
 			<form
 				onSubmit={(e) => handleSubmit(e)}
@@ -343,6 +354,7 @@ function Show(props: PageProps) {
 				<div>
 					{rooms.map((room, index) => (
 						<ChannelManagerRooms
+							hotel_id={props.hotel.id}
 							room={room}
 							key={index}
 							type_has_views={props.tenant.type_has_views}

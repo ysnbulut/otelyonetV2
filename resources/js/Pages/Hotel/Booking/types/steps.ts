@@ -39,8 +39,8 @@ export interface BookingResultProps {
 		id: number
 		name: string
 		count: number
-		price: string
-		total_price: string
+		price: number
+		total_price: number
 	}[]
 	grand_total_price?: string
 }

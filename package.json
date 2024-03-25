@@ -99,6 +99,7 @@
     "react-sortablejs": "^6.1.4",
     "react-transition-group": "^4.4.5",
     "react-use": "^17.5.0",
+    "react-yearly-calendar": "^1.2.6",
     "simplebar": "^6.2.5",
     "sortablejs": "^1.15.1",
     "sqids": "^0.3.0",

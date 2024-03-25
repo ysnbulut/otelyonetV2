@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{hotel}', [HotelController::class, 'show'])->name('admin.hotels.show');
         Route::post('/', [HotelController::class, 'store'])->name('admin.hotels.store');
         Route::put('/{hotel}/channel_manager', [HotelController::class, 'channel_manager'])->name('admin.hotels.channe_manager');
+        Route::post('/{hotel}/cmroom', [HotelController::class, 'CmRoomsStore'])->name('admin.hotels.cmroomstore');
         Route::get('/test', function () {
             $tenant = Tenant::find('5304c071-ff04-49d4-b701-d2c0fab2f5db');
             $tenant->run(function () {

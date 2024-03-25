@@ -5,6 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\SalesChannel
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitChannelProductPrice> $unitPrices
+ * @property-read int|null $unit_prices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SalesUnit> $units
+ * @property-read int|null $units_count
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel query()
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|SalesChannel withoutTrashed()
+ * @mixin \Eloquent
+ */
 class SalesChannel extends Model
 {
     use softDeletes;
@@ -18,18 +33,18 @@ class SalesChannel extends Model
     {
         return $this->hasManyThrough(
             SalesUnit::class,
-            SalesUnitChannels::class,
-            'sales_channel_id', // Foreign key on SalesUnitChannels table
+            SalesUnitChannel::class,
+            'sales_channel_id', // Foreign key on SalesUnitChannel table
             'id', // Foreign key on SalesUnit table
             'id', // Local key on SalesChannel table
-            'sales_unit_id'); // Local key on SalesUnitChannels table)
+            'sales_unit_id'); // Local key on SalesUnitChannel table)
     }
 
     public function unitPrices()
     {
         return $this->hasManyThrough(
             UnitChannelProductPrice::class,
-            SalesUnitChannels::class,
+            SalesUnitChannel::class,
             'sales_channel_id', // Foreign key in SalesUnitChannel table
             'sales_unit_channel_id', // Foreign key in UnitChannelProductPrice table
             'id', // Local key on SalesChannel table

@@ -40,7 +40,7 @@ class TenantPricingPolicySettingsSeeder extends Seeder
             'options' => $currencies, 'value' => 'TRY',];
         //Selectbox olmalı...
         $pricingCurrency = ['label' => 'Fiyatlandırma Para Birimi', 'description' => 'Otelinizin fiyatlandırma para birimini belirler. Örn: TL, USD, EUR gibi...', 'name' => 'pricing_currency', 'type' => 'select', //text, number, select, boolean
-            'options' => $currencies, 'value' => 'EUR',];
+            'options' => $currencies, 'value' => 'TRY',];
         //Selectbox olmalı...
         $checkInTimePolicy = ['label' => 'Check in Saat Politikası', 'description' => 'Otelinizde check in saat politikasını belirler. Örn: 14:00 yazıldığında check in saati 14:00 olarak belirlenir. Check in saati politikası oteldeki check in saatini belirler.', 'name' => 'check_in_time_policy', 'type' => 'select', //text, number, select, boolean
             'options' => [['label' => '00:30', 'value' => '00:30'], ['label' => '11:00', 'value' => '11:00'], ['label' => '11:30', 'value' => '11:30'], ['label' => '12:00', 'value' => '12:00'], ['label' => '12:30', 'value' => '12:30'], ['label' => '13:00', 'value' => '13:00'], ['label' => '13:30', 'value' => '13:30'], ['label' => '14:00', 'value' => '14:00'], ['label' => '14:30', 'value' => '14:30'], ['label' => '15:00', 'value' => '15:00'], ['label' => '15:30', 'value' => '15:30'], ['label' => '16:00', 'value' => '16:00'],], 'value' => '14:00',];
@@ -60,7 +60,6 @@ class TenantPricingPolicySettingsSeeder extends Seeder
         $this->migrator->add('pricing_policy.pricing_currency', $pricingCurrency); //person_based -  unit_based
         $this->migrator->add('pricing_policy.check_in_time_policy', $checkInTimePolicy);
         $this->migrator->add('pricing_policy.check_out_time_policy', $checkOutTimePolicy);
-        $this->migrator->add('pricing_policy.accommodation_type', $accommodationTypes);
         $this->migrator->add('pricing_policy.accommodation_type', $accommodationTypes);
     }
 }

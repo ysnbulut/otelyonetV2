@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HotelChannelManagerStoreRequest;
+use App\Http\Requests\StoreCMRoomRequest;
 use App\Http\Requests\StoreHotelsRequest;
 use App\Http\Requests\UpdateHotelsRequest;
+use App\Models\CaseAndBank;
+use App\Models\CMRoom;
 use App\Models\District;
 use App\Models\Hotel;
 use App\Models\Province;
@@ -15,6 +18,7 @@ use App\Models\TypeHasView;
 use App\Settings\HotelSettings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 use App\Helpers\ChannelManagers;
 
@@ -25,8 +29,40 @@ class HotelController extends Controller
      */
     public function index()
     {
-        Inertia::render('Admin/Hotel/Index', [
-            'hotels' => Hotel::all(),
+        return Inertia::render('Admin/Hotel/Index',[
+            'filters' => Request::all('search', 'trashed'),
+            'hotels' => Hotel::select([
+                'id',
+                'tenant_id',
+                'status',
+                'name',
+                'register_date',
+                'renew_date',
+                'price',
+                'renew_price',
+                'title',
+                'address',
+                'province_id',
+                'district_id',
+                'location',
+                'tax_office_id',
+                'tax_number',
+                'phone',
+                'email',
+            ])->orderBy('id', 'desc')
+                ->filter(Request::only('search', 'trashed'))
+                ->paginate(Request::get('per_page') ?? 10)
+                ->withQueryString()
+                ->through(function ($hotel) {
+                    return [
+                        ...$hotel->toArray(),
+                        'province' => $hotel->province->name,
+                        'district' => $hotel->district->name,
+                        'tax_office' => $hotel->tax_office->tax_office,
+                        'panel_url' => 'https://' . $hotel->tenant->domains->first()->domain . '/',
+                        'webhook_url' => 'https://otelyonet.com/api/'.$hotel->tenant->id.'/webhook/booking',
+                    ];
+                }),
         ]);
     }
 
@@ -43,6 +79,12 @@ class HotelController extends Controller
             Artisan::call('db:seed', ['--class' => 'TenantChannelManagerSeeder']);
             Artisan::call('db:seed', ['--class' => 'TenantCitizenSeeder']);
             Artisan::call('db:seed', ['--class' => 'TenantPricingPolicySettingsSeeder']);
+            Artisan::call('db:seed', ['--class' => 'TenantHotelSettingsSeeder']);
+            Artisan::call( 'permission:generate-permissions');
+            CaseAndBank::create(['name' => 'Nakit Kasa', 'currency' => 'TRY', 'type' => 'case']);
+            CaseAndBank::create(['name' => 'POS Kasa', 'currency' => 'TRY', 'type' => 'bank']);
+            CaseAndBank::create(['name' => 'Havale Kasa', 'currency' => 'TRY', 'type' => 'bank']);
+            CaseAndBank::create(['name' => 'Online Kasa', 'currency' => 'TRY', 'type' => 'case']);
         });
         $data['status'] = 'active';
         $data['register_date'] = Carbon::parse($data['register_date'])->format('Y-m-d');
@@ -63,7 +105,7 @@ class HotelController extends Controller
             'phone' => $data['phone'],
             'email' => $data['email'],
         ]);
-        return redirect()->route('admin.hotels.index')->with('success', 'Müşteri oluşturuldu.');
+        return redirect()->route('admin.hotels.index')->with('success', 'Otel oluşturuldu.');
     }
 
     /**
@@ -97,6 +139,7 @@ class HotelController extends Controller
                 'district' => $hotel->district->name,
                 'tax_office' => $hotel->tax_office->tax_office,
                 'panel_url' => 'https://' . $hotel->tenant->domains->first()->domain . '/',
+                'webhook_url' => 'https://otelyonet.com/api/'.$hotel->tenant->id.'/webhook/booking',
             ],
             'tenant' => [
                 ...$hotel->tenant->toArray(),
@@ -105,7 +148,8 @@ class HotelController extends Controller
                 'type_has_views' => $typeHasViews->map(function ($typeHasView) {
                     return [
                         'value' => $typeHasView->id,
-                        'label' => $typeHasView->type->name . ' '. $typeHasView->view->name.' - '.$typeHasView->rooms->count().' Oda'
+                        'label' => $typeHasView->type->name . ' '. $typeHasView->view->name,
+                        'count' => $typeHasView->rooms->count(),
                     ];
                 })->toArray(),
             ],
@@ -136,18 +180,54 @@ class HotelController extends Controller
             $settings->fill($settingsData);
             $settings->save();
         });
-        $channelManagers = new ChannelManagers($request->channel_manager, ['token' => $request->api_token, 'hr_id' => $request->api_hr_id]);
-        return $channelManagers->getRooms();
+        if($request->channel_manager === 'closed') {
+            return [
+                'status' => 'success',
+                'message' => 'Kanal yöneticisi kapatıldı.',
+                'rooms' => [],
+            ];
+        } else {
+            if($request->api_token !== null && $request->api_hr_id !== null) {
+                $channelManagers = new ChannelManagers($request->channel_manager, ['token' => $request->api_token, 'hr_id' => $request->api_hr_id]);
+                return [
+                    'status' => 'success',
+                    'message' => 'Kanal yöneticisi başarıyla güncellendi.',
+                    'rooms' => $channelManagers->getRooms()->rooms,
+                ];
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'Kanal yöneticisi güncellenirken bir hata oluştu.',
+                    'rooms' => [],
+                ];
+            }
+        }
     }
 
-    public function channel_manager_rooms(Hotel $hotel)
+    public function CmRoomsStore(Hotel $hotel, StoreCMRoomRequest $request)
     {
+        $request->validated();
         $tenant = $hotel->tenant;
-        $settings = null;
-        $tenant->run(function () use (&$settings) {
-            $settings = new HotelSettings();
+        $request->cm_room_code = str_replace('HR:', '', $request->cm_room_code);
+        $tenant->run(function () use ($request) {
+            $cmRoom = CMRoom::where('type_has_view_id', $request->type_has_view_id)
+                ->orWhere('room_code', $request->cm_room_code)
+                ->first();
+            if ($cmRoom) {
+                $cmRoom->update([
+                    'type_has_view_id' => $request->type_has_view_id,
+                    'room_code' => $request->cm_room_code,
+                    'stock' => $request->stock,
+                ]);
+            } else {
+                CMRoom::create([
+                    'type_has_view_id' => $request->type_has_view_id,
+                    'room_code' => $request->cm_room_code,
+                    'stock' => $request->stock,
+                ]);
+            }
         });
-
+        return redirect()->route('admin.hotels.show', $hotel->id)->with('success', 'Oda ataması eklendi.');
     }
 
     /**

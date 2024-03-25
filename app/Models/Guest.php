@@ -24,6 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Guest query()
  * @method static Builder|Guest withTrashed()
  * @method static Builder|Guest withoutTrashed()
+ * @property-read Collection<int, \App\Models\BookingRoom> $booking_room
+ * @property-read int|null $booking_room_count
  * @mixin Eloquent
  */
 class Guest extends Model
@@ -61,6 +63,6 @@ class Guest extends Model
 
     public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(BookingRooms::class, 'booking_guests', 'guest_id', 'booking_room_id');
+        return $this->belongsToMany(BookingRoom::class, 'booking_guests', 'guest_id', 'booking_room_id');
     }
 }

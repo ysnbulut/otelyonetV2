@@ -2,7 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Helpers\ChannelManagers;
+use App\Helpers\Helper;
+use App\Helpers\PriceCalculator;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\BookingWebhookController;
 use App\Http\Controllers\Hotel\BedTypeController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\BookingGuestsController;
@@ -29,6 +33,7 @@ use App\Http\Controllers\Hotel\UserController;
 use App\Http\Controllers\MediaController;
 use App\Models\SalesUnit;
 use App\Models\Season;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -54,19 +59,28 @@ Route::middleware([
 
     require __DIR__.'/auth.php';
 
-    Route::post('upload-media', MediaController::class)->middleware('auth:sanctum')->name('upload-media');
-//    Route::get('/test', [UnitPriceController::class, 'test'])->name('test.test');
-//    Route::get('/test1', function () {
-//        $unitPrice = \App\Models\UnitPrice::with('season')->where('id', 12)->get();
-//        return $unitPrice;
-//    })->name('test.test1');
+    Route::post('upload-media', MediaController::class)->middleware(['auth:sanctum'])->name('upload-media');
+    Route::get('/test', function () {
+//        $helper = new Helper();
+//        return $helper->datesBetween('2024-03-28', '2024-03-31', true, true);
+        $priceCalculator = new PriceCalculator();
+        return $priceCalculator->prices(
+            1,
+            '2024-03-28',
+            '2024-03-31',
+            2,
+            0,
+            []
+        )->first();
+    })->name('test');
 
 
 
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('hotel.dashboard.index');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web','auth', 'verified'])->name
+    ('hotel.dashboard.index');
     //users
-    Route::prefix('users')->middleware('auth')->group(function () {
+    Route::prefix('users')->middleware(['web','auth'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('hotel.users.index');
         Route::get('/create', [UserController::class, 'create'])->name('hotel.users.create');
         Route::post('/', [UserController::class, 'store'])->name('hotel.users.store');
@@ -119,7 +133,6 @@ Route::middleware([
 
     //room_types
     Route::prefix('room_types')->middleware('auth')->group(function () {
-        Route::get('/test', [RoomTypeController::class, 'test'])->name('hotel.room_types.test');
         Route::get('/', [RoomTypeController::class, 'index'])->name('hotel.room_types.index');
         Route::get('/create', [RoomTypeController::class, 'create'])->name('hotel.room_types.create');
         Route::post('/', [RoomTypeController::class, 'store'])->middleware('precognitive')->name('hotel.room_types.store');

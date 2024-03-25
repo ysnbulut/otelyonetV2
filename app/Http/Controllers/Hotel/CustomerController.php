@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
-use App\Models\CaseAndBanks;
+use App\Models\CaseAndBank;
 use App\Models\Customer;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
@@ -120,7 +120,7 @@ class CustomerController extends Controller
     public function create()
     {
         return Inertia::render('Hotel/Customer/Create', [
-            'case_and_banks' => CaseAndBanks::select(['id', 'name', 'type', 'currency'])->get(),
+            'case_and_banks' => CaseAndBank::select(['id', 'name', 'type', 'currency'])->get(),
         ]);
     }
 
@@ -146,7 +146,7 @@ class CustomerController extends Controller
                 'remaining_balance_formatted' => number_format(round(abs($customer->remainingBalance()), 2), 2) . ' ' .
                     $this->settings->currency['value'],
             ],
-            'case_and_banks' => CaseAndBanks::select(['id', 'name', 'type', 'currency'])->get(),
+            'case_and_banks' => CaseAndBank::select(['id', 'name', 'type', 'currency'])->get(),
         ]);
     }
 
@@ -164,7 +164,7 @@ class CustomerController extends Controller
                 $info = '';
                 if ($transaction->booking === 'booking') {
                     $booking = $customer->bookings()->where('id', $transaction->id)->first();
-                    $amount = $booking->amount->grand_total;
+                    $amount = $booking->total_price->grand_total;
                     $currency = $this->settings->currency['value'];
                     $info .= $booking->rooms->pluck('name')->implode(', ') . ' - ' . $booking->stayDurationNight() . ' (' . $booking->rooms->sum('pivot.number_of_adults') . ' Yetişkin ' . $booking->rooms->sum('pivot.number_of_children') . ' Çocuk)';
                 } else {

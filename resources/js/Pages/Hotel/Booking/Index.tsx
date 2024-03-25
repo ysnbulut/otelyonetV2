@@ -163,7 +163,16 @@ function Index(props: PageProps) {
 										<Table.Td
 											dataLabel="Aksiyon"
 											className="w-full rounded-b-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
-											eklenecek
+											<div className="flex items-center justify-center gap-2">
+												<Link
+													className="border-none p-1 shadow-none focus:ring-0"
+													href={route('hotel.bookings.show', booking.id)}>
+													<Lucide
+														icon="MousePointerSquareDashed"
+														className="h-5 w-5 text-dark dark:text-white"
+													/>
+												</Link>
+											</div>
 										</Table.Td>
 									</Table.Tr>
 								))}

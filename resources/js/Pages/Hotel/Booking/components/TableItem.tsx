@@ -12,6 +12,7 @@ interface TableItemProps {
 		surname: string
 		birthday: string
 		citizen: string
+		citizen_id: string
 		identification_number: string
 		status: string
 		check_in_date: string

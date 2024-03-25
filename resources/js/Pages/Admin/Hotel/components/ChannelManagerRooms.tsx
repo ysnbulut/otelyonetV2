@@ -1,9 +1,10 @@
-import React, {Fragment, useState} from 'react'
+import React, {Fragment, useEffect, useState} from 'react'
 import {FormInput, FormLabel} from '@/Components/Form'
 import {useForm} from '@inertiajs/react'
 import Select from 'react-select'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
+import axios from 'axios'
 
 interface RoomPorps {
 	adult_capacity: number
@@ -36,9 +37,11 @@ interface RoomPorps {
 interface TypeHasView {
 	value: number
 	label: string
+	count: number
 }
 
 interface Props {
+	hotel_id: number
 	room: RoomPorps
 	type_has_views: TypeHasView[]
 }
@@ -46,17 +49,30 @@ interface Props {
 function ChannelManagerRooms(props: Props) {
 	const [typeHasView, setTypeHasView] = useState<TypeHasView | null>(null)
 	const {data, setData, post, processing, errors, reset} = useForm({
-		channel_manager_room_code: props.room.code,
+		cm_room_code: props.room.code.toString(),
 		type_has_view_id: '',
-		stock: 0,
+		stock: '0',
 	})
+
+	useEffect(() => {
+		typeHasView !== null && setData((data) => ({...data, type_has_view_id: typeHasView.value.toString()}))
+		typeHasView !== null && setData((data) => ({...data, stock: typeHasView.count.toString()}))
+	}, [typeHasView])
 
 	const handleSubmit = (e: any) => {
 		e.preventDefault()
+		axios
+			.post(route('admin.hotels.cmroomstore', props.hotel_id), data)
+			.then((res) => {
+				console.log(res)
+			})
+			.catch((err) => {
+				console.log(err)
+			})
 	}
 
 	return (
-		<form className="box mb-3 flex flex-col p-5">
+		<div className="box mb-3 flex flex-col p-5">
 			<div className="flex w-full flex-col justify-between border-b pb-2 lg:flex-row lg:items-center">
 				<div>
 					<div className="flex gap-2">
@@ -124,7 +140,8 @@ function ChannelManagerRooms(props: Props) {
 				</div>
 				<Button
 					variant="soft-secondary"
-					type="submit"
+					type="button"
+					onClick={handleSubmit}
 					className="mt-7 flex w-32 gap-2">
 					Kaydet
 					<Lucide
@@ -133,7 +150,7 @@ function ChannelManagerRooms(props: Props) {
 					/>
 				</Button>
 			</div>
-		</form>
+		</div>
 	)
 }
 

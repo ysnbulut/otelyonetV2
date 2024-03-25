@@ -73,9 +73,8 @@ function Create(props: CreateProps) {
 												id: item.id,
 												name: item.name,
 												count: checkedRooms[item.id].length,
-												price: parseFloat(item.price.total_price?.replace(/,/g, '') || '0'),
-												total_price:
-													parseFloat(item.price.total_price?.replace(/,/g, '') || '0') * checkedRooms[item.id].length,
+												price: item.price.total_price.price,
+												total_price: item.price.total_price.price * checkedRooms[item.id].length,
 											},
 									  ]
 									: [
@@ -83,9 +82,8 @@ function Create(props: CreateProps) {
 												id: item.id,
 												name: item.name,
 												count: checkedRooms[item.id].length,
-												price: parseFloat(item.price.total_price?.replace(/,/g, '') || '0'),
-												total_price:
-													parseFloat(item.price.total_price?.replace(/,/g, '') || '0') * checkedRooms[item.id].length,
+												price: item.price.total_price.price,
+												total_price: item.price.total_price.price * checkedRooms[item.id].length,
 											},
 									  ],
 						}
@@ -102,7 +100,7 @@ function Create(props: CreateProps) {
 				setGrandTotal(0)
 			} else {
 				bookingResult.typed_rooms?.forEach((room) => {
-					total += parseFloat(room.total_price?.toString() || '0')
+					total += room.total_price || 0
 				})
 				setGrandTotal(total)
 			}
@@ -172,7 +170,6 @@ function Create(props: CreateProps) {
 							step={step}
 							setStep={setStep}
 							grandTotal={grandTotal}
-							setGrandTotal={setGrandTotal}
 							pricingCurrency={stepOneResults.currency}
 							customerId={customerId}
 							bookingCustomer={bookingCustomer}

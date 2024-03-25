@@ -2,24 +2,27 @@
 
 namespace App\Helpers;
 
+use Carbon\Carbon;
+
 class Helper
 {
-	public function guestVariations($maxAdultCount, $maxChildrenCount): array
-	{
-		$variations = [];
-		for ($adultCount = 1; $adultCount <= $maxAdultCount; $adultCount++) {
-			$maxChildren = ($adultCount > 2) ? $maxChildrenCount - ($adultCount - 2) : $maxChildrenCount;
+    public function guestVariations($maxAdultCount, $maxChildrenCount): array
+    {
+        $variations = [];
+        for ($adultCount = 1; $adultCount <= $maxAdultCount; $adultCount++) {
+            $maxChildren = ($adultCount > 2) ? $maxChildrenCount - ($adultCount - 2) : $maxChildrenCount;
 
-			for ($childrenCount = 0; $childrenCount <= $maxChildren; $childrenCount++) {
-				$variations[] = array('number_of_adults' => $adultCount, 'number_of_children' => $childrenCount);
-			}
-		}
-		return $variations;
-	}
+            for ($childrenCount = 0; $childrenCount <= $maxChildren; $childrenCount++) {
+                $variations[] = array('number_of_adults' => $adultCount, 'number_of_children' => $childrenCount);
+            }
+        }
+        return $variations;
+    }
 
-    public function gmapParse($link) {
-      $pattren = '/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/';
-      preg_match($pattren, $link, $matches);
+    public function gmapParse($link)
+    {
+        $pattren = '/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/';
+        preg_match($pattren, $link, $matches);
         // Google Maps URL'sinden enlem ve boylamı çıkarmak için bir düzenli ifade kullanın
         // İlk olarak, ilk link formatını kontrol edin
         $pattern_1 = '/@(-?\d+\.\d+),(-?\d+\.\d+)/';
@@ -55,6 +58,30 @@ class Helper
                     'message' => 'Google Maps URL\'sini analiz ederken bir hata oluştu'
                 ];
             }
+        }
+    }
+
+
+    public function datesBetween($startDate, $endDate, $carbon = false, $lastDate = false, $format = 'Y-m-d'): array
+    {
+        $start = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        $dates = [];
+
+        for ($date = $start; $date->lt($end); $date->addDay()) {
+            $dates[] = $date->format($format);
+        }
+
+        if ($lastDate) {
+            $dates[] = $end->format($format);
+        }
+
+        if($carbon) {
+            return array_map(function ($date) {
+                return Carbon::parse($date);
+            }, $dates);
+        } else {
+            return $dates;
         }
     }
 }

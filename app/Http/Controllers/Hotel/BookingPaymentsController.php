@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
-use App\Models\BookingPayments;
+use App\Models\BookingPayment;
 use App\Http\Requests\StoreCustomerPaymentsRequest;
 use App\Http\Requests\UpdateCustomerPaymentsRequest;
 use Illuminate\Support\Facades\Redirect;
@@ -32,7 +32,7 @@ class BookingPaymentsController extends Controller
      */
     public function store(StoreCustomerPaymentsRequest $request)
     {
-	    BookingPayments::create($request->validated());
+	    BookingPayment::create($request->validated());
 			if($request->has('booking_id')) {
 				return Inertia::render('Hotel/Booking/Show', [
           'booking' => $request->booking_id,
@@ -47,7 +47,7 @@ class BookingPaymentsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BookingPayments $customerPayments)
+    public function show(BookingPayment $customerPayments)
     {
         //
     }
@@ -55,7 +55,7 @@ class BookingPaymentsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(BookingPayments $customerPayments)
+    public function edit(BookingPayment $customerPayments)
     {
         //
     }
@@ -63,7 +63,7 @@ class BookingPaymentsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCustomerPaymentsRequest $request, BookingPayments $customerPayments)
+    public function update(UpdateCustomerPaymentsRequest $request, BookingPayment $customerPayments)
     {
         //
     }
@@ -71,7 +71,7 @@ class BookingPaymentsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BookingPayments $customerPayments)
+    public function destroy(BookingPayment $customerPayments)
     {
         //
     }

@@ -16,6 +16,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|RoomView query()
  * @method static Builder|RoomView withTrashed()
  * @method static Builder|RoomView withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RoomType> $roomTypes
+ * @property-read int|null $room_types_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $rooms
+ * @property-read int|null $rooms_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPrice> $unitPrices
+ * @property-read int|null $unit_prices_count
  * @mixin Eloquent
  */
 class RoomView extends Model

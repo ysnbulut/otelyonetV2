@@ -11,7 +11,7 @@ import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import 'react-datepicker/dist/react-datepicker.css'
 import SeasonsCalendar from './components/SeasonsCalendar'
 import SeasonAddSlide from '@/Pages/Hotel/Season/components/SeasonAddSlide'
-
+import {Calendar} from 'react-yearly-calendar'
 moment.locale('tr')
 dayjs.extend(utc)
 dayjs.extend(tz)
@@ -47,10 +47,41 @@ function Index(props: PageProps) {
 		})
 	}, [seasons])
 
+	const onDatePicked = (date: string) => {
+		console.log(date)
+	}
+
 	return (
 		<>
 			<Head title="Sezon Yönetimi" />
 			<h2 className="intro-y my-2 text-lg font-medium lg:my-5">Sezon Yönetimi</h2>
+			{/*<Calendar*/}
+			{/*	year={2024}*/}
+			{/*	showDaysOfWeek*/}
+			{/*	showWeekSeparators*/}
+			{/*	firstDayOfWeek={1}*/}
+			{/*	customClasses={{*/}
+			{/*		holidays: ['2024-04-25', '2024-05-01', '2024-06-02', '2024-08-15', '2024-11-01'],*/}
+			{/*		spring: {*/}
+			{/*			start: '2024-03-21',*/}
+			{/*			end: '2024-6-20',*/}
+			{/*		},*/}
+			{/*		summer: {*/}
+			{/*			start: '2024-06-21',*/}
+			{/*			end: '2024-09-22',*/}
+			{/*		},*/}
+			{/*		autumn: {*/}
+			{/*			start: '2024-09-23',*/}
+			{/*			end: '2024-12-21',*/}
+			{/*		},*/}
+			{/*		weekend: 'Sat,Sun',*/}
+			{/*		winter: function (day: any) {*/}
+			{/*			return day.isBefore(moment([2024, 2, 21])) || day.isAfter(moment([2024, 11, 21]))*/}
+			{/*		},*/}
+			{/*	}}*/}
+			{/*	showTodayButton*/}
+			{/*	onPickDate={onDatePicked}*/}
+			{/*/>*/}
 			<SeasonsCalendar
 				data={data}
 				setData={setData}
@@ -61,6 +92,7 @@ function Index(props: PageProps) {
 				setSeasons={setSeasons}
 				setSeasonsDays={setSeasonsDays}
 			/>
+
 			{/* BEGIN: Slide Over Content */}
 			<SeasonAddSlide
 				setDatas={setData}

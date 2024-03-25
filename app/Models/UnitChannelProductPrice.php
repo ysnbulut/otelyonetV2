@@ -4,6 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\UnitChannelProductPrice
+ *
+ * @property-read \App\Models\SalesChannel|null $channel
+ * @property-read \App\Models\Product|null $product
+ * @property-read \App\Models\SalesUnit|null $unit
+ * @method static \Illuminate\Database\Eloquent\Builder|UnitChannelProductPrice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UnitChannelProductPrice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|UnitChannelProductPrice query()
+ * @mixin \Eloquent
+ */
 class UnitChannelProductPrice extends Model
 {
     protected $fillable = [

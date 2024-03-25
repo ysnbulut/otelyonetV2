@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
-import {Head, Link, useForm} from '@inertiajs/react'
+import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
@@ -10,21 +10,26 @@ import {FormInput, FormLabel} from '@/Components/Form'
 import Litepicker from '@/Components/Litepicker'
 import TomSelect from '@/Components/TomSelect'
 import CurrencyInput from 'react-currency-input-field'
-import {BookingShowProps} from '@/Pages/Hotel/Booking/types/show'
+import {BookingShowProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import Sqids from 'sqids'
 import Tippy from '@/Components/Tippy'
 import BookingRooms from '@/Pages/Hotel/Booking/components/BookingRooms'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 dayjs.extend(customParseFormat)
 
 function Show(props: BookingShowProps) {
+	const MySwal = withReactContent(Swal)
 	const sqids = new Sqids({
 		minLength: 7,
 		alphabet: 'ABCDEFGHJKLMNPQRSTUVWXYZ',
 	})
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
+	const [bookingRooms, setBookingRooms] = useState<RoomsProps[]>(props.booking.rooms)
+	const [balance, setBalance] = useState<number>(props.remaining_balance)
 	const {data, setData, post, processing, errors} = useForm({
 		booking_id: props.booking.id,
 		customer_id: props.customer.id,
@@ -34,6 +39,18 @@ function Show(props: BookingShowProps) {
 		payment_method: '',
 		currency_amount: props.remaining_balance < 0 ? Math.abs(props.remaining_balance).toString() : '0',
 		description: '',
+	})
+
+	const Toast = MySwal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: true,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
+		},
 	})
 
 	// const booking_type = props.booking.check_out === null ? 'Açık' : 'Normal'
@@ -68,6 +85,18 @@ function Show(props: BookingShowProps) {
 		// })
 	}
 
+	const bookingCancel = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		router.delete(route('hotel.bookings.destroy', props.booking.id), {
+			onSuccess: () => {
+				Toast.fire({
+					icon: 'success',
+					title: 'Rezervasyon iptal edildi',
+				})
+			},
+		})
+	}
+
 	return (
 		<>
 			<Head title="Rezervasyon Oluştur" />
@@ -99,7 +128,7 @@ function Show(props: BookingShowProps) {
 									<span className="font-semibold">
 										Seçilen Oda Türleri :
 										<span className="ml-1 font-normal">
-											{props.booking.rooms.map((room) => room.room_type_full_name).join(', ')}
+											{bookingRooms.map((room) => room.room_type_full_name).join(', ')}
 										</span>
 									</span>
 								</Link>
@@ -120,20 +149,20 @@ function Show(props: BookingShowProps) {
 								</div>
 							</div>
 							<div className="mt-2 flex w-full justify-end gap-3">
-								{!props.booking.open_booking && (
-									<Button
-										variant="soft-success"
-										className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-										<Lucide
-											icon="CalendarPlus"
-											className="mr-1 h-5 w-5"
-										/>
-										SÜREYİ UZAT
-										<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
-											{props.extendable_number_of_days}
-										</span>
-									</Button>
-								)}
+								{/*	{!props.booking.open_booking && (*/}
+								{/*		<Button*/}
+								{/*			variant="soft-success"*/}
+								{/*			className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">*/}
+								{/*			<Lucide*/}
+								{/*				icon="CalendarPlus"*/}
+								{/*				className="mr-1 h-5 w-5"*/}
+								{/*			/>*/}
+								{/*			SÜREYİ UZAT*/}
+								{/*			<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">*/}
+								{/*				{props.extendable_number_of_days}*/}
+								{/*			</span>*/}
+								{/*		</Button>*/}
+								{/*	)}*/}
 								{props.booking.open_booking && (
 									<Button
 										variant="soft-pending"
@@ -148,6 +177,7 @@ function Show(props: BookingShowProps) {
 								{dayjs(props.booking.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
 									<Button
 										variant="soft-danger"
+										onClick={(e: any) => bookingCancel(e)}
 										className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
 										<Lucide
 											icon="CalendarX2"
@@ -198,12 +228,14 @@ function Show(props: BookingShowProps) {
 						<div className="col-span-12 border-b border-slate-200 bg-white px-4 py-5 dark:bg-darkmode-200/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Oda Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start gap-3 py-3 text-dark dark:text-light">
-								{props.booking.rooms.map((room, index) => (
+								{bookingRooms.map((room, index) => (
 									<BookingRooms
 										key={index}
 										room={room}
 										citizens={props.citizens}
-										booking_rooms={props.booking.rooms}
+										bookingRooms={bookingRooms}
+										setBookingRooms={setBookingRooms}
+										setBalance={setBalance}
 										check_in={props.booking.check_in}
 									/>
 								))}
@@ -219,18 +251,18 @@ function Show(props: BookingShowProps) {
 							<span
 								className={twMerge([
 									'font-sans font-bold xl:text-xl 2xl:text-3xl',
-									props.remaining_balance > 0 ? 'text-red-600' : 'text-green-700',
+									balance > 0 ? 'text-red-600' : 'text-green-700',
 								])}>
-								{props.remaining_balance_formatted}
+								{balance} {props.currency}
 							</span>
 						</div>
 						<div className="box mt-5 flex flex-col items-center justify-between gap-2 p-5">
 							<Button
-								variant={props.remaining_balance > 0 ? 'primary' : 'soft-dark'}
-								onClick={() => props.remaining_balance > 0 && setShowPaymentForm(!showPaymentForm)}
+								variant={balance > 0 ? 'primary' : 'soft-dark'}
+								onClick={() => balance > 0 && setShowPaymentForm(!showPaymentForm)}
 								className="w-full text-xl font-semibold shadow-md"
 								type="button"
-								disabled={props.remaining_balance == 0}>
+								disabled={balance == 0}>
 								TAHSİLAT EKLE
 							</Button>
 							<form

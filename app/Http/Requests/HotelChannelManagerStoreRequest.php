@@ -9,8 +9,8 @@ class HotelChannelManagerStoreRequest extends FormRequest
     {
         return [
             'channel_manager' => 'required',
-            'api_hr_id' => 'required',
-            'api_token' => 'required',
+            'api_hr_id' => ['nullable', 'required_if:channel_manager,!=,closed'],
+            'api_token' => ['nullable', 'required_if:channel_manager,!=,closed'],
         ];
     }
 

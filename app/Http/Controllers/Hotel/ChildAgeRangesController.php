@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
-use App\Models\ChildAgeRanges;
+use App\Models\ChildAgeRange;
 use App\Http\Requests\StoreChildAgeRangesRequest;
 use App\Http\Requests\UpdateChildAgeRangesRequest;
 
@@ -36,7 +36,7 @@ class ChildAgeRangesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ChildAgeRanges $childAgeRanges)
+    public function show(ChildAgeRange $childAgeRanges)
     {
         //
     }
@@ -44,7 +44,7 @@ class ChildAgeRangesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ChildAgeRanges $childAgeRanges)
+    public function edit(ChildAgeRange $childAgeRanges)
     {
         //
     }
@@ -52,7 +52,7 @@ class ChildAgeRangesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateChildAgeRangesRequest $request, ChildAgeRanges $childAgeRanges)
+    public function update(UpdateChildAgeRangesRequest $request, ChildAgeRange $childAgeRanges)
     {
         //
     }
@@ -60,7 +60,7 @@ class ChildAgeRangesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ChildAgeRanges $childAgeRanges)
+    public function destroy(ChildAgeRange $childAgeRanges)
     {
         //
     }

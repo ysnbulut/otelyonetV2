@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCaseAndBanksRequest;
 use App\Http\Requests\UpdateCaseAndBanksRequest;
-use App\Models\CaseAndBanks;
+use App\Models\CaseAndBank;
 use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 
@@ -18,7 +18,7 @@ class CaseAndBanksController extends Controller
   {
     return Inertia::render('Hotel/Bank/Index', [
       'filters' => Request::all('search', 'trashed'),
-      'banks' => CaseAndBanks::orderBy('id')
+      'banks' => CaseAndBank::orderBy('id')
         ->select('id', 'name', 'type', 'currency')
         ->paginate(Request::get('per_page') ?? 10)
         ->withQueryString()
@@ -41,7 +41,7 @@ class CaseAndBanksController extends Controller
    */
   public function store(StoreCaseAndBanksRequest $request)
   {
-    CaseAndBanks::create($request->validated());
+    CaseAndBank::create($request->validated());
     return redirect()
       ->route('hotel.case_and_banks.index')
       ->with('success', 'Kasa oluşturma başarılı.');
@@ -58,7 +58,7 @@ class CaseAndBanksController extends Controller
   /**
    * Display the specified resource.
    */
-  public function show(CaseAndBanks $caseAndBanks)
+  public function show(CaseAndBank $caseAndBanks)
   {
     //
   }
@@ -66,7 +66,7 @@ class CaseAndBanksController extends Controller
   /**
    * Show the form for editing the specified resource.
    */
-  public function edit(CaseAndBanks $caseAndBanks)
+  public function edit(CaseAndBank $caseAndBanks)
   {
     return view('hotel.pages.case-and-banks.edit', [
       'caseAndBanks' => $caseAndBanks,
@@ -76,7 +76,7 @@ class CaseAndBanksController extends Controller
   /**
    * Update the specified resource in storage.
    */
-  public function update(UpdateCaseAndBanksRequest $request, CaseAndBanks $caseAndBanks)
+  public function update(UpdateCaseAndBanksRequest $request, CaseAndBank $caseAndBanks)
   {
     $caseAndBanks->fill($request->validated());
     $caseAndBanks->update($caseAndBanks->getDirty());
@@ -88,7 +88,7 @@ class CaseAndBanksController extends Controller
   /**
    * Remove the specified resource from storage.
    */
-  public function destroy(CaseAndBanks $caseAndBanks)
+  public function destroy(CaseAndBank $caseAndBanks)
   {
     //
   }

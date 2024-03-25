@@ -4,7 +4,7 @@ import Tippy from '@/Components/Tippy'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
 import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
-import {CustomerProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
+import {CustomerProps, DailyPriceProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
 import CurrencyInput from 'react-currency-input-field'
 import SummarySelectedRoom from '@/Pages/Hotel/Booking/components/SummarySelectedRoom'
 import SummaryTypedRoom from '@/Pages/Hotel/Booking/components/SummaryTypedRoom'
@@ -23,7 +23,6 @@ interface BookingSummaryProps {
 	checkedRooms: CheckedRoomsProps | undefined
 	setCheckedRooms: React.Dispatch<React.SetStateAction<CheckedRoomsProps | undefined>>
 	grandTotal: number
-	setGrandTotal: React.Dispatch<React.SetStateAction<number>>
 	customerId: number | undefined
 	bookingCustomer: CustomerProps | undefined
 	data: StepOneDataProps[]
@@ -36,6 +35,10 @@ function BookingSummary(props: BookingSummaryProps) {
 	const mySwal = withReactContent(Swal)
 	const [nextStepDisabled, setNextStepDisabled] = useState(true)
 	const [grandTotal, setGrandTotal] = useState<number>(parseFloat(props.grandTotal.toFixed(2)))
+	const [dailyPrices, setDailyPrices] = useState<{[key: number]: DailyPriceProps[]}>(
+		props.data.map((item) => item.price.daily_prices),
+	)
+
 	const Toast = mySwal.mixin({
 		toast: true,
 		position: 'top-end',
@@ -86,6 +89,28 @@ function BookingSummary(props: BookingSummaryProps) {
 		setGrandTotal(parseFloat(props.grandTotal.toFixed(2)))
 	}, [props.grandTotal])
 
+	useEffect(() => {
+		const rate = grandTotal / props.grandTotal
+		console.log('rate', rate)
+		setDailyPrices((prevState) => {
+			props.data.forEach((item, index) => {
+				prevState[index] = {
+					...prevState[index],
+					...item.price.daily_prices.map((dailyPrice) => {
+						return {
+							...dailyPrice,
+							price: parseFloat((dailyPrice.price * rate).toFixed(2)),
+							fprice: parseFloat((dailyPrice.price * rate).toFixed(2)).toLocaleString('tr-TR'),
+							fprice_with_currency:
+								parseFloat((dailyPrice.price * rate).toFixed(2)).toLocaleString('tr-TR') + ' ' + props.pricingCurrency,
+						}
+					}),
+				}
+			})
+			return prevState
+		})
+	}, [grandTotal])
+
 	const handleSubmit = (e: any) => {
 		e.preventDefault()
 		if (props.step === 5 && props.bookingResult && props.checkedRooms && props.customerId && props.roomsGuests) {
@@ -93,6 +118,7 @@ function BookingSummary(props: BookingSummaryProps) {
 				booking_result: props.bookingResult,
 				checked_rooms: props.checkedRooms,
 				checkin_required: props.checkinRequired,
+				daily_prices: dailyPrices,
 				grand_total: grandTotal,
 				discount: props.grandTotal - grandTotal,
 				customer_id: props.customerId,

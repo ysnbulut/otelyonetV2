@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read Collection<int, BookingPayments> $payments
+ * @property-read Collection<int, BookingPayment> $payments
  * @property-read int|null $payments_count
  * @property mixed $tax_office
  * @method static Builder|Customer filter(array $filters)
@@ -37,9 +37,9 @@ class Customer extends Model
     public function scopeRemainingBalance()
     {
         $bookingAmount = $this->bookings()
-            ->join('booking_amounts', 'bookings.id', '=', 'booking_amounts.booking_id')
+            ->join('booking_total_prices', 'bookings.id', '=', 'booking_total_prices.booking_id')
             ->whereNull('bookings.deleted_at')
-            ->sum('booking_amounts.grand_total');
+            ->sum('booking_total_prices.grand_total');
         $paymentAmount = $this->payments()->sum('amount_paid');
         return $paymentAmount - $bookingAmount;
     }
@@ -51,7 +51,7 @@ class Customer extends Model
 
     public function payments(): HasMany
     {
-        return $this->hasMany(BookingPayments::class, 'customer_id', 'id');
+        return $this->hasMany(BookingPayment::class, 'customer_id', 'id');
     }
 
     public function scopeFilter($query, array $filters)

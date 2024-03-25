@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateUnitPriceRequest;
 use App\Models\Season;
 use App\Models\TypeHasView;
 use App\Models\UnitPrice;
-use App\Models\UnitPriceRoomTypeAndView;
 use App\Settings\PricingPolicySettings;
 use Inertia\Inertia;
 
@@ -21,59 +20,12 @@ class UnitPriceController extends Controller
         $this->settings = new PricingPolicySettings();
     }
 
-    public function test()
-    {
-        return [
-            'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
-                //TODO: Oda eklendiğinde burası görünecek oyuzden eventi notifiyi oda eklendiğinde tetikle
-                ->whereHas('rooms')
-                ->get()->map(function ($typeHasView) {
-                    $warning = false;
-                    $seasons = Season::avilableSeasons()
-                        ->get()
-                        ->map(
-                            function ($season) use ($typeHasView, &$warning) {
-                                $unit_price = $season
-                                    ->unitPrices()
-                                    ->where('type_has_view_id', $typeHasView->id)
-                                    ->first() ?? null;
-                                $warning = $unit_price === null || $unit_price->unit_price === null;
-                                return [
-                                    'id' => $season->id,
-                                    'name' => $season->seasonName,
-                                    'unit_price' => $unit_price,
-
-                                ];
-                            }
-                        );
-                    $off_season_unit_price =
-                        UnitPrice::select(['id', 'unit_price'])
-                            ->where('type_has_view_id', $typeHasView->id)
-                            ->where('season_id', null)
-                            ->first() ?? null;
-                    return [
-                        'id' => $typeHasView->id,
-                        'name' => $typeHasView->typeAndViewName,
-                        'roomCount' => $typeHasView->rooms->count(),
-                        'warning' => $warning || empty($seasons->toArray()) || $off_season_unit_price === null,
-                        'seasons' => $seasons,
-                        'off_season' => [
-                            'id' => null,
-                            'unit_price' => $off_season_unit_price,
-                        ],
-                    ];
-                }),
-            'pricingCurrency' => $this->settings->pricing_currency['value'],
-            'pricingPolicy' => $this->settings->pricing_policy['value'],
-        ];
-    }
-
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('Hotel/UnitPrice/Index',[
+        return Inertia::render('Hotel/UnitPrice/Index', [
             'roomTypesAndViews' => TypeHasView::with(['type', 'view'])
                 //TODO: Oda eklendiğinde burası görünecek oyuzden eventi notifiyi oda eklendiğinde tetikle
                 ->whereHas('rooms')
@@ -124,8 +76,17 @@ class UnitPriceController extends Controller
     public function store(StoreUnitPriceRequest $request)
     {
         $data = $request->validated();
-        $data['unit_price'] = (double) str_replace(',', '.', $data['unit_price']);
-        UnitPrice::create($data);
+        $data['unit_price'] = (double)str_replace(',', '.', $data['unit_price']);
+        if($data['season_id'] === null) {
+           $check = UnitPrice::where('type_has_view_id', $data['type_has_view_id'])->whereNull('season_id')->exists();
+        } else {
+            $check = UnitPrice::where('type_has_view_id', $data['type_has_view_id'])->where('season_id', $data['season_id'])->exists();
+        }
+        if($check) {
+            return response()->json(['message' => 'Bu fiyat zaten ekli.'], 400);
+        } else {
+           return UnitPrice::create($data);
+        }
     }
 
     /**

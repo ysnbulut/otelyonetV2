@@ -13,15 +13,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * App\Models\Booking
  *
- * @property-read BookingAmounts|null $amount
+ * @property-read BookingTotalPrice|null $total_price
  * @property-read Customer|null $customer
  * @property-read Collection<int, Guest> $guests
  * @property-read int|null $guests_count
- * @property-read Collection<int, BookingPayments> $payments
+ * @property-read Collection<int, BookingPayment> $payments
  * @property-read int|null $payments_count
  * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
@@ -36,14 +38,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Booking stayDurationNight()
  * @method static Builder|Booking withTrashed()
  * @method static Builder|Booking withoutTrashed()
+ * @property-read Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read int|null $messages_count
+ * @property-read Collection<int, \App\Models\BookingNote> $notes
+ * @property-read int|null $notes_count
  * @mixin Eloquent
  */
 class Booking extends Model
 {
-	use SoftDeletes;
+	use SoftDeletes, LogsActivity;
 
 
 	protected $fillable = [
+        'booking_code',
 		'customer_id',
 		'check_in',
 		'check_out',
@@ -51,8 +59,14 @@ class Booking extends Model
         'number_of_rooms',
 		'number_of_adults',
 		'number_of_children',
-		'payment_status',
 	];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['customer_id', 'check_in', 'check_out', 'channel_id', 'number_of_rooms', 'number_of_adults', 'number_of_children']);
+        // Chain fluent methods for configuration options
+    }
 
     private static function bookingFormat($booking): array
     {
@@ -68,11 +82,11 @@ class Booking extends Model
             'rooms_count' => $booking->rooms->count(),
             'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
             'number_of_children' => $booking->rooms->sum('pivot.number_of_children'),
-            'amount' => $booking->amount ? $booking->amount->grand_total : null,
-            'amount_formatted' => $booking->amount ? number_format($booking->amount->grand_total, 2, '.', ',') . ' '
+            'amount' => $booking->total_price ? $booking->total_price->grand_total : null,
+            'amount_formatted' => $booking->total_price ? number_format($booking->total_price->grand_total, 2, '.', ',') . ' '
                 . $settings->currency['value'] : null,
-            'remaining_balance' => $booking->amount ? $booking->remainingBalance() : null,
-            'remaining_balance_formatted' => $booking->amount ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $settings->currency['value'] : null,
+            'remaining_balance' => $booking->total_price ? $booking->remainingBalance() : null,
+            'remaining_balance_formatted' => $booking->total_price ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $settings->currency['value'] : null,
         ];
     }
 
@@ -80,7 +94,7 @@ class Booking extends Model
 	{
 
 		return self::orderBy('id', 'desc')
-			->with(['customer', 'rooms', 'amount'])
+			->with(['customer', 'rooms', 'total_price'])
 			->paginate(10)
 			->withQueryString()
 			->through(fn($booking) => Booking::bookingFormat($booking));
@@ -115,7 +129,7 @@ class Booking extends Model
 
 	public function rooms(): BelongsToMany
 	{
-		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id', 'number_of_adults', 'number_of_children', 'children_ages');
+		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id', 'number_of_adults', 'number_of_children', 'children_ages')->wherePivotNull('deleted_at');
 	}
 
 	public function customer(): BelongsTo
@@ -125,22 +139,22 @@ class Booking extends Model
 
 	public function scopeRemainingBalance($query)
 	{
-		$balance = $this->amount->grand_total - $this->payments()->sum('amount_paid');
+		$balance = $this->total_price->grand_total - $this->payments()->sum('amount_paid');
 		return $balance < 1 ? 0 : $balance;
 	}
 
 	public function payments(): HasMany
 	{
-		return $this->hasMany(BookingPayments::class, 'booking_id', 'id');
+		return $this->hasMany(BookingPayment::class, 'booking_id', 'id');
 	}
 
-	public function amount(): HasOne
+	public function total_price(): HasOne
 	{
-		return $this->hasOne(BookingAmounts::class);
+		return $this->hasOne(BookingTotalPrice::class);
 	}
 
-    public function messages(): HasMany {
-        return $this->hasMany(BookingMessage::class, 'booking_id', 'id');
+    public function notes(): HasMany {
+        return $this->hasMany(BookingNote::class, 'booking_id', 'id');
     }
 
 	public function scopeStayDurationNight(): string
