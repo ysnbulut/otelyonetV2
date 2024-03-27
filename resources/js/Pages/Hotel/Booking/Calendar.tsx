@@ -119,13 +119,20 @@ function Calendar(props: PageProps) {
 						},
 					]}
 					resourceAreaWidth={'150px'}
-					resourceGroupLabelContent={(arg) => {
+					resourceGroupLabelContent={(arg: {groupValue: any; fieldValue: any}) => {
 						return (
-							<Tippy content={arg.groupValue}>
-								{arg.groupValue
-									.split(' ')
-									.map((word: any) => word.charAt(0))
-									.join('')}
+							<Tippy content={arg.groupValue ? arg.groupValue : arg.fieldValue}>
+								{arg.groupValue !== undefined && typeof arg.groupValue === 'string'
+									? arg.groupValue
+											.split(' ')
+											.map((word: any) => word.charAt(0))
+											.join('')
+									: arg.fieldValue !== undefined && typeof arg.fieldValue === 'string'
+									  ? arg.fieldValue
+												.split(' ')
+												.map((word: any) => word.charAt(0))
+												.join('')
+									  : ''}
 							</Tippy>
 						)
 					}}

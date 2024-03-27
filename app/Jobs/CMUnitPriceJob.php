@@ -54,8 +54,13 @@ class CMUnitPriceJob implements ShouldQueue, ShouldBeUnique
             $cm = new ChannelManagers($hotelSettings->channel_manager['value'], ['token' => $hotelSettings->api_settings['token'],
                 'hr_id' => $hotelSettings->api_settings['hr_id']]);
             $cmRoom = CMRoom::where('type_has_view_id', $this->unitPrice->type_has_view_id)->first();
-            $cm->updateRoomDateRange('HR:'.$cmRoom->room_code, $start_date, $this->unitPrice->season->end_date,
-                $this->unitPrice->unit_price);
+            if($cmRoom === null) {
+                Log::error('CMRoom not found for unit price id: ' . $this->unitPrice->id);
+            } else {
+                $cm->updateRoomDateRange('HR:'.$cmRoom->room_code, $start_date, $this->unitPrice->season->end_date,
+                    $this->unitPrice->unit_price);
+            }
+
         }
     }
 }

@@ -28,9 +28,9 @@ class DatabaseSeeder extends Seeder
         $user = User::factory()->create(['name' => 'Admin', 'email' => 'admin@otelyonet.com', 'password' => bcrypt('admin'),]);
         $user->assignRole($role);
 
-        $building = Building::create(['name' => 'Ana Bina', 'description' => 'Otelin Ana Binası']);
-
-        Floor::create(['building_id' => $building->id, 'name' => 'Zemin Kat',]);
+//        $building = Building::create(['name' => 'Ana Bina', 'description' => 'Otelin Ana Binası']);
+//
+//        Floor::create(['building_id' => $building->id, 'name' => 'Zemin Kat',]);
 
     }
 }

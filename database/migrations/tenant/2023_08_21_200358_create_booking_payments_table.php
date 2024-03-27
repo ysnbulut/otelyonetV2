@@ -17,7 +17,7 @@ return new class extends Migration {
     ->foreignId('booking_id')
     ->nullable()
     ->constrained();
-   $table->foreignId('case_and_banks_id')->constrained();
+   $table->foreignId('case_and_bank_id')->constrained();
 	 $table->date('payment_date');
    $table->enum('currency', [
     'TRY',

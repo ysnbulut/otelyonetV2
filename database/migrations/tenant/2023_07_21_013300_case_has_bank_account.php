@@ -12,7 +12,7 @@ return new class extends Migration {
  {
   Schema::create('case_has_bank_account', function (Blueprint $table) {
    $table->id();
-   $table->foreignId('case_and_banks_id')->constrained();
+   $table->foreignId('case_and_bank_id')->constrained();
    $table->foreignId('bank_account_information_id')->constrained('bank_account_information');
    $table->timestamps();
 	  $table->softDeletes();

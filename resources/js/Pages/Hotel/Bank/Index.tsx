@@ -95,14 +95,14 @@ function Index(props: PageProps) {
 									<div className="mt-4 flex lg:mt-0">
 										<Button
 											as="a"
-											href={route('hotel.case_and_banks.edit', bank.id)}
+											href={'#'}
 											className="mr-2 px-2 py-1"
 											variant="primary">
 											Detay
 										</Button>
 										<Button
 											as="a"
-											href={route('hotel.case_and_banks.edit', bank.id)}
+											href={'#'}
 											variant="outline-secondary"
 											className="px-2 py-1">
 											Düzenle

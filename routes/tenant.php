@@ -61,17 +61,17 @@ Route::middleware([
 
     Route::post('upload-media', MediaController::class)->middleware(['auth:sanctum'])->name('upload-media');
     Route::get('/test', function () {
-//        $helper = new Helper();
-//        return $helper->datesBetween('2024-03-28', '2024-03-31', true, true);
-        $priceCalculator = new PriceCalculator();
-        return $priceCalculator->prices(
-            1,
-            '2024-03-28',
-            '2024-03-31',
-            2,
-            0,
-            []
-        )->first();
+        $routes = Route::getRoutes()->getRoutes();
+        $return = [];
+        foreach ($routes as $route) {
+            $return[] = [
+                'name' => $route->getName(),
+                'uri' => $route->uri(),
+                'methods' => $route->methods(),
+                'action' => $route->getAction(),
+            ];
+        }
+        return $return;
     })->name('test');
 
 

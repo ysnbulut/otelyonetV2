@@ -191,7 +191,11 @@ function Show(props: PageProps) {
 
 					<div className="flex flex-wrap gap-2">
 						<span className="w-36 font-semibold">Panel Link :</span>
-						<Link href={props.hotel.panel_url}>{props.hotel.panel_url}</Link>
+						<a
+							target="_blank"
+							href={props.hotel.panel_url}>
+							{props.hotel.panel_url}
+						</a>
 					</div>
 					<div className="flex flex-wrap gap-2">
 						<span className="w-36 font-semibold">E-posta :</span>

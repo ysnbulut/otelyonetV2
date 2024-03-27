@@ -108,39 +108,39 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 							<div className="box w-[450px] p-5">
 								<div className="mb-2 font-medium">Pages</div>
 								<div className="mb-5">
-									<a
-										href=""
-										className="flex items-center">
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/20 text-success dark:bg-success/10">
-											<Lucide
-												icon="Inbox"
-												className="h-4 w-4"
-											/>
-										</div>
-										<div className="ml-3">Mail Settings</div>
-									</a>
-									<a
-										href=""
-										className="mt-2 flex items-center">
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-pending/10 text-pending">
-											<Lucide
-												icon="Users"
-												className="h-4 w-4"
-											/>
-										</div>
-										<div className="ml-3">Users & Permissions</div>
-									</a>
-									<a
-										href=""
-										className="mt-2 flex items-center">
-										<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/80 dark:bg-primary/20">
-											<Lucide
-												icon="CreditCard"
-												className="h-4 w-4"
-											/>
-										</div>
-										<div className="ml-3">Transactions Report</div>
-									</a>
+									{/*<a*/}
+									{/*	href=""*/}
+									{/*	className="flex items-center">*/}
+									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/20 text-success dark:bg-success/10">*/}
+									{/*		<Lucide*/}
+									{/*			icon="Inbox"*/}
+									{/*			className="h-4 w-4"*/}
+									{/*		/>*/}
+									{/*	</div>*/}
+									{/*	<div className="ml-3">Mail Settings</div>*/}
+									{/*</a>*/}
+									{/*<a*/}
+									{/*	href=""*/}
+									{/*	className="mt-2 flex items-center">*/}
+									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-pending/10 text-pending">*/}
+									{/*		<Lucide*/}
+									{/*			icon="Users"*/}
+									{/*			className="h-4 w-4"*/}
+									{/*		/>*/}
+									{/*	</div>*/}
+									{/*	<div className="ml-3">Users & Permissions</div>*/}
+									{/*</a>*/}
+									{/*<a*/}
+									{/*	href=""*/}
+									{/*	className="mt-2 flex items-center">*/}
+									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/80 dark:bg-primary/20">*/}
+									{/*		<Lucide*/}
+									{/*			icon="CreditCard"*/}
+									{/*			className="h-4 w-4"*/}
+									{/*		/>*/}
+									{/*	</div>*/}
+									{/*	<div className="ml-3">Transactions Report</div>*/}
+									{/*</a>*/}
 								</div>
 								<div className="mb-2 font-medium">Users</div>
 								<div className="mb-5">
@@ -203,46 +203,46 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 					)}
 				</Button>
 				{/* BEGIN: Notifications */}
-				<Popover className="intro-x mr-auto sm:mr-6">
-					<Popover.Button
-						className="
-              relative block text-slate-600 outline-none
-              before:absolute before:right-0 before:top-[-2px] before:h-[8px] before:w-[8px] before:rounded-full before:bg-danger before:content-['']
-            ">
-						<Lucide
-							icon="Bell"
-							className="h-5 w-5 dark:text-slate-500"
-						/>
-					</Popover.Button>
-					<Popover.Panel className="mt-2 w-[280px] p-5 sm:w-[350px]">
-						<div className="mb-5 font-medium">Notifications</div>
-						{_.take(fakerData, 5).map((faker, fakerKey) => (
-							<div
-								key={fakerKey}
-								className={clsx(['relative flex cursor-pointer items-center', {'mt-5': fakerKey}])}>
-								<div className="image-fit relative mr-1 h-12 w-12 flex-none">
-									<img
-										alt="Midone Tailwind HTML Admin Template"
-										className="rounded-full"
-										src={faker.photos[0]}
-									/>
-									<div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-success dark:border-darkmode-600"></div>
-								</div>
-								<div className="ml-2 overflow-hidden">
-									<div className="flex items-center">
-										<a
-											href=""
-											className="mr-5 truncate font-medium">
-											{faker.users[0].name}
-										</a>
-										<div className="ml-auto whitespace-nowrap text-xs text-slate-400">{faker.times[0]}</div>
-									</div>
-									<div className="mt-0.5 w-full truncate text-slate-500">{faker.news[0].shortContent}</div>
-								</div>
-							</div>
-						))}
-					</Popover.Panel>
-				</Popover>
+				{/*<Popover className="intro-x mr-auto sm:mr-6">*/}
+				{/*	<Popover.Button*/}
+				{/*		className="*/}
+				{/*      relative block text-slate-600 outline-none*/}
+				{/*      before:absolute before:right-0 before:top-[-2px] before:h-[8px] before:w-[8px] before:rounded-full before:bg-danger before:content-['']*/}
+				{/*    ">*/}
+				{/*		<Lucide*/}
+				{/*			icon="Bell"*/}
+				{/*			className="h-5 w-5 dark:text-slate-500"*/}
+				{/*		/>*/}
+				{/*	</Popover.Button>*/}
+				{/*	<Popover.Panel className="mt-2 w-[280px] p-5 sm:w-[350px]">*/}
+				{/*		<div className="mb-5 font-medium">Notifications</div>*/}
+				{/*		{_.take(fakerData, 5).map((faker, fakerKey) => (*/}
+				{/*			<div*/}
+				{/*				key={fakerKey}*/}
+				{/*				className={clsx(['relative flex cursor-pointer items-center', {'mt-5': fakerKey}])}>*/}
+				{/*				<div className="image-fit relative mr-1 h-12 w-12 flex-none">*/}
+				{/*					<img*/}
+				{/*						alt="Midone Tailwind HTML Admin Template"*/}
+				{/*						className="rounded-full"*/}
+				{/*						src={faker.photos[0]}*/}
+				{/*					/>*/}
+				{/*					<div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-success dark:border-darkmode-600"></div>*/}
+				{/*				</div>*/}
+				{/*				<div className="ml-2 overflow-hidden">*/}
+				{/*					<div className="flex items-center">*/}
+				{/*						<a*/}
+				{/*							href=""*/}
+				{/*							className="mr-5 truncate font-medium">*/}
+				{/*							{faker.users[0].name}*/}
+				{/*						</a>*/}
+				{/*						<div className="ml-auto whitespace-nowrap text-xs text-slate-400">{faker.times[0]}</div>*/}
+				{/*					</div>*/}
+				{/*					<div className="mt-0.5 w-full truncate text-slate-500">{faker.news[0].shortContent}</div>*/}
+				{/*				</div>*/}
+				{/*			</div>*/}
+				{/*		))}*/}
+				{/*	</Popover.Panel>*/}
+				{/*</Popover>*/}
 				{/* END: Notifications  */}
 				{/* BEGIN: Account Menu */}
 				<Menu>
@@ -253,26 +253,26 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 						/>
 					</Menu.Button>
 					<Menu.Items className="mt-px w-56 bg-primary text-white">
-						<Menu.Header className="font-normal">
-							<div className="font-medium">{fakerData[0].users[0].name}</div>
-							<div className="mt-0.5 text-xs text-white/70 dark:text-slate-500">{fakerData[0].jobs[0]}</div>
-						</Menu.Header>
-						<Menu.Divider className="bg-white/[0.08]" />
-						<Menu.Item className="hover:bg-white/5">
-							<Lucide
-								icon="User"
-								className="mr-2 h-4 w-4"
-							/>
-							Profile
-						</Menu.Item>
-						<Menu.Item className="hover:bg-white/5">
-							<Lucide
-								icon="Lock"
-								className="mr-2 h-4 w-4"
-							/>
-							Reset Password
-						</Menu.Item>
-						<Menu.Divider className="bg-white/[0.08]" />
+						{/*<Menu.Header className="font-normal">*/}
+						{/*	<div className="font-medium">{fakerData[0].users[0].name}</div>*/}
+						{/*	<div className="mt-0.5 text-xs text-white/70 dark:text-slate-500">{fakerData[0].jobs[0]}</div>*/}
+						{/*</Menu.Header>*/}
+						{/*<Menu.Divider className="bg-white/[0.08]" />*/}
+						{/*<Menu.Item className="hover:bg-white/5">*/}
+						{/*	<Lucide*/}
+						{/*		icon="User"*/}
+						{/*		className="mr-2 h-4 w-4"*/}
+						{/*	/>*/}
+						{/*	Profile*/}
+						{/*</Menu.Item>*/}
+						{/*<Menu.Item className="hover:bg-white/5">*/}
+						{/*	<Lucide*/}
+						{/*		icon="Lock"*/}
+						{/*		className="mr-2 h-4 w-4"*/}
+						{/*	/>*/}
+						{/*	Reset Password*/}
+						{/*</Menu.Item>*/}
+						{/*<Menu.Divider className="bg-white/[0.08]" />*/}
 						<Menu.Item
 							onClick={(e: any) => logout(e)}
 							className="hover:bg-white/5">

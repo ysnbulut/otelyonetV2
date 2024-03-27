@@ -29,7 +29,7 @@ class BookingPayment extends Model
 	protected $fillable = [
 		'customer_id',
 		'booking_id',
-		'case_and_banks_id',
+		'case_and_bank_id',
 		'payment_date',
 		'currency',
 		'payment_method',
@@ -50,6 +50,6 @@ class BookingPayment extends Model
 
 	public function case(): BelongsTo
 	{
-		return $this->belongsTo(CaseAndBank::class, 'case_and_banks_id', 'id');
+		return $this->belongsTo(CaseAndBank::class, 'case_and_bank_id', 'id');
 	}
 }

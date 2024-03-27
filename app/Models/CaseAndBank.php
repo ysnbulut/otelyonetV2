@@ -27,6 +27,7 @@ class CaseAndBank extends Model
 {
   use SoftDeletes;
 
+  protected $table = 'case_and_banks';
 
   protected $fillable = ['name', 'currency', 'type'];
 

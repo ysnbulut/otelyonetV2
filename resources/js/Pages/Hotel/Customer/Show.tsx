@@ -19,7 +19,7 @@ function Show({...props}: PageProps) {
 	const {data, setData, post, processing, errors} = useForm({
 		customer_id: props.customer.id,
 		payment_date: dayjs().format('DD.MM.YYYY'),
-		case_and_banks_id: '',
+		case_and_bank_id: '',
 		currency: 'TRY',
 		payment_method: '',
 		currency_amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
@@ -57,7 +57,7 @@ function Show({...props}: PageProps) {
 				setData((data) => ({
 					...data,
 					payment_date: dayjs().format('DD.MM.YYYY'),
-					case_and_banks_id: '',
+					case_and_bank_id: '',
 					currency: 'TRY',
 					payment_method: '',
 					currency_amount:
@@ -200,13 +200,13 @@ function Show({...props}: PageProps) {
 									<FormLabel htmlFor="case">Kasa / Banka</FormLabel>
 									<TomSelect
 										id="case"
-										name="case_and_banks_id"
+										name="case_and_bank_id"
 										className="w-full"
 										options={{
 											placeholder: 'Kasa / Banka Seçiniz',
 										}}
-										value={data.case_and_banks_id}
-										onChange={(e) => setData((data) => ({...data, case_and_banks_id: e.toString()}))}>
+										value={data.case_and_bank_id}
+										onChange={(e) => setData((data) => ({...data, case_and_bank_id: e.toString()}))}>
 										<option>Seçiniz</option>
 										{props.case_and_banks.map((case_and_bank) => (
 											<option
@@ -216,8 +216,8 @@ function Show({...props}: PageProps) {
 											</option>
 										))}
 									</TomSelect>
-									{errors.case_and_banks_id && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.case_and_banks_id}</div>
+									{errors.case_and_bank_id && (
+										<div className="text-theme-6 mt-2 text-danger">{errors.case_and_bank_id}</div>
 									)}
 								</div>
 
