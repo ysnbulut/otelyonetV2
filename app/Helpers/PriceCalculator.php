@@ -6,6 +6,8 @@ use App\Models\TypeHasView;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Teknomavi\Tcmb\Doviz;
+use Teknomavi\Tcmb\Exception\UnknownCurrencyCode;
+use Teknomavi\Tcmb\Exception\UnknownPriceType;
 
 class PriceCalculator
 {
@@ -20,6 +22,10 @@ class PriceCalculator
         $this->doviz = $doviz;
     }
 
+    /**
+     * @throws UnknownCurrencyCode
+     * @throws UnknownPriceType
+     */
     public function prices($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren, $chilrenAges = null)
     {
         if (!empty($chilrenAges)) {
@@ -54,21 +60,22 @@ class PriceCalculator
                         ->whereHas('season', function ($query) use ($checkIn, $checkOut) {
                             $query
                                 ->where(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('start_date', '>=', $checkIn)->where('start_date', '<=', $checkOut);
+                                    $query->whereDate('start_date', '>=', $checkIn)->whereDate('start_date', '<=',
+                                        $checkOut);
                                 })
                                 ->orWhere(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('end_date', '>=', $checkIn)->where('end_date', '<=', $checkOut);
+                                    $query->whereDate('end_date', '>=', $checkIn)->whereDate('end_date', '<=', $checkOut);
                                 })
                                 ->orWhere(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('start_date', '<', $checkIn)->where('end_date', '>', $checkOut);
+                                    $query->whereDate('start_date', '<', $checkIn)->whereDate('end_date', '>', $checkOut);
                                 });
                         })
                         ->with([
                             'season' => function ($query) use ($checkIn, $checkOut) {
                                 $query
                                     ->select('id', 'start_date', 'end_date')
-                                    ->where('start_date', '<=', $checkOut)
-                                    ->where('end_date', '>=', $checkIn);
+                                    ->whereDate('start_date', '<=', $checkOut)
+                                    ->whereDate('end_date', '>=', $checkIn);
                             },
                         ]);
                     $query->with([
@@ -88,7 +95,7 @@ class PriceCalculator
             ])
             ->where('id', $id)
             ->get()
-            ->map(function ($unit) use ($dates, $kur) {
+            ->map(function ($unit) use ($dates, $kur, $checkIn, $checkOut) {
                 $returnData['id'] = $unit->id;
                 $returnData['type_id'] = $unit->type_id;
                 $returnData['view_id'] = $unit->view_id;
@@ -96,9 +103,9 @@ class PriceCalculator
                 $returnData['currency'] = $this->settings->currency['value'];
                 $returnData['daily_prices'] = [];
                 $multiplier = 1;
-                foreach ($dates as $dkey => $date) {
-                    $returnData['daily_prices'][$dkey]['date'] = $date->format('Y-m-d');
-                    foreach ($unit->unitPrices as $unitPrice) {
+                foreach ($unit->unitPrices as $ukey => $unitPrice) {
+                    foreach ($dates as $dkey => $date) {
+                        $returnData['daily_prices'][$dkey]['date'] = $date->format('Y-m-d');
                         if ($unitPrice->typeHasView->type != null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0) {
                             if ($this->settings->pricing_policy['value'] == 'person_based') {
                                 $multiplier = ($unitPrice->typeHasView->type->variationsOfGuests->first() === null
@@ -112,149 +119,45 @@ class PriceCalculator
                         } else {
                             $multiplier = 1;
                         }
-                        $price = round($unitPrice->unit_price * $kur * $multiplier);
-                        $fprice = number_format($price, 2, '.', ',');
                         if ($unitPrice->season !== null) {
                             $carbonSeasonStartDate = Carbon::parse($unitPrice->season->start_date);
                             $carbonseasonEndDate = Carbon::parse($unitPrice->season->end_date);
                             if ($date->between($carbonSeasonStartDate, $carbonseasonEndDate)) {
+                                $price = round($unitPrice->unit_price * $kur * $multiplier);
+                                $fprice = number_format($price, 2, '.', ',');
                                 $returnData['daily_prices'][$dkey]['price'] = $price;
                                 $returnData['daily_prices'][$dkey]['fprice'] = $fprice;
                                 $returnData['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
                                     $this->settings->currency['value'];
-
                             }
                         } else {
-                            $returnData['daily_prices'][$dkey]['price'] = $price;
-                            $returnData['daily_prices'][$dkey]['fprice'] = $fprice;
-                            $returnData['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
-                                $this->settings->currency['value'];
+                            if (!array_key_exists('price', $returnData['daily_prices'][$dkey])) {
+                                $price = round($unitPrice->unit_price * $kur * $multiplier);
+                                $fprice = number_format($price, 2, '.', ',');
+                                $returnData['daily_prices'][$dkey]['price'] = $price;
+                                $returnData['daily_prices'][$dkey]['fprice'] = $fprice;
+                                $returnData['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
+                                    $this->settings->currency['value'];
+                            }
                         }
+
                     }
                 }
                 $returnData['multiplier'] = $multiplier;
                 $totalPrice = 0;
-                foreach ($returnData['daily_prices'] as $key => $dPrice) {
-                    $totalPrice += $dPrice['price'];
+                $returnData['test'] = $returnData['daily_prices'];
+                if (count($returnData['daily_prices']) > 0) {
+                    foreach ($returnData['daily_prices'] as $key => $dPrice) {
+                        if (array_key_exists('price', $dPrice)) {
+                            $totalPrice += $dPrice['price'];
+                        }
+                    }
                 }
                 $ftotalPrice = number_format($totalPrice, 2, '.', ',');
                 $returnData['total_price']['price'] = $totalPrice;
                 $returnData['total_price']['fprice'] = $ftotalPrice;
                 $returnData['total_price']['fprice_with_currency'] = $ftotalPrice . ' ' . $this->settings->currency['value'];
                 return $returnData;
-            });
-    }
-
-    public function old_prices($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren, $chilrenAges = null)
-    {
-        if (!empty($chilrenAges)) {
-            $i = 1;
-            foreach ($chilrenAges as $age) {
-                if ($age >= $this->settings->free_child_or_baby_max_age['value']) {
-                    $numberOfAdults++;
-                    $numberOfChildren--;
-                } else {
-                    if ($i <= $this->settings->free_child_or_baby_max_number['value']) {
-                        $numberOfChildren--;
-                        $i++;
-                    }
-                }
-            }
-        }
-        return TypeHasView::select('id', 'type_id', 'view_id')
-            ->with([
-                'unitPrices' => function ($query) use ($checkIn, $checkOut, $numberOfAdults, $numberOfChildren) {
-                    $query
-                        ->select('id', 'type_has_view_id', 'season_id', 'unit_price')
-                        ->whereHas('season', function ($query) use ($checkIn, $checkOut) {
-                            $query
-                                ->where(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('start_date', '>=', $checkIn)->where('start_date', '<=', $checkOut);
-                                })
-                                ->orWhere(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('end_date', '>=', $checkIn)->where('end_date', '<=', $checkOut);
-                                })
-                                ->orWhere(function ($query) use ($checkIn, $checkOut) {
-                                    $query->where('start_date', '<', $checkIn)->where('end_date', '>', $checkOut);
-                                });
-                        })
-                        ->with([
-                            'season' => function ($query) use ($checkIn, $checkOut) {
-                                $query
-                                    ->select('id', 'start_date', 'end_date')
-                                    ->where('start_date', '<=', $checkOut)
-                                    ->where('end_date', '>=', $checkIn);
-                            },
-                        ]);
-                    $query->with([
-                        'typeHasView.type.variationsOfGuests' => function ($query) use (
-                            $numberOfAdults,
-                            $numberOfChildren
-                        ) {
-                            $query
-                                ->select('id', 'room_type_id', 'number_of_adults', 'number_of_children')
-                                ->with(['multiplier'])
-                                ->where('number_of_adults', $numberOfAdults)
-                                ->where('number_of_children', $numberOfChildren);
-                        },
-                    ]);
-                    $query->orWhere('season_id', null);
-                },
-            ])
-            ->where('id', $id)
-            ->get()
-            ->map(function ($unit) use ($checkIn, $checkOut) {
-                $carbonCheckIn = new Carbon($checkIn);
-                $carbonCheckOut = new Carbon($checkOut);
-                $totalPrice = 0;
-                $offSeasonDays = $carbonCheckIn->diffInDays($carbonCheckOut);
-                $offSeasonPrice = 0;
-                $multiplier = 1;
-                foreach ($unit->unitPrices as $unitPrice) {
-                    if ($unitPrice->season !== null) {
-                        $carbonSeasonStartDate = new Carbon($unitPrice->season->start_date);
-                        $carbonseasonEndDate = new Carbon($unitPrice->season->end_date);
-                        $seasonStartDate = $carbonSeasonStartDate->greaterThan($carbonCheckIn) ? $carbonSeasonStartDate : $carbonCheckIn;
-                        $seasonEndDate = $carbonseasonEndDate->lessThan($carbonCheckOut) ? $carbonseasonEndDate : $carbonCheckOut;
-                        $numberOfDays = $seasonStartDate->diffInDays($seasonEndDate);
-                        $offSeasonDays -= $numberOfDays;
-                        $totalPrice += $numberOfDays * $unitPrice->unit_price;
-                    } else {
-                        $offSeasonPrice = $unitPrice->unit_price;
-                    }
-                    if ($unitPrice->typeHasView->type != null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0) {
-                        if ($this->settings->pricing_policy['value'] == 'person_based') {
-                            $multiplier = ($unitPrice->typeHasView->type->variationsOfGuests->first() === null
-                                ? 1
-                                : $unitPrice->typeHasView->type->variationsOfGuests->first()->multiplier !== null)
-                                ? $unitPrice->typeHasView->type->variationsOfGuests->first()->multiplier->multiplier
-                                : 1;
-                        } else {
-                            $multiplier = 1;
-                        }
-                    } else {
-                        $multiplier = 1;
-                    }
-                }
-                $unit->totalPrice = $totalPrice + $offSeasonDays * $offSeasonPrice;
-                $unit->totalPrice = $unit->totalPrice * $multiplier;
-                $unit->multiplier = $multiplier;
-
-                if ($this->settings->pricing_currency['value'] != 'TRY') {
-                    if ($unit->totalPrice > 0) {
-                        $kur = $this->doviz->kurAlis($this->settings->pricing_currency['value'], Doviz::TYPE_EFEKTIFALIS);
-                        $unit->totalPrice = number_format($unit->totalPrice * $kur, 2, '.', '');
-                    }
-                }
-                return [
-                    'id' => $unit->id,
-                    'type_id' => $unit->type_id,
-                    'view_id' => $unit->view_id,
-                    'total_price' => number_format($unit->totalPrice, 2, '.', ','),
-                    'total_price_formatter' => number_format($unit->totalPrice, 2, '.', ',') . ' ' .
-                        $this->settings->currency['value'],
-                    'multiplier' => $unit->multiplier,
-                ];
             });
     }
 }

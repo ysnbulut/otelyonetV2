@@ -56,7 +56,7 @@ function Four(props: StepFourProps) {
 																			surname: '',
 																			birthday: '',
 																			gender: '',
-																			citizen_id: '',
+																			citizen_id: '1',
 																			identification_number: '',
 																			is_foreign_national: false,
 																		},

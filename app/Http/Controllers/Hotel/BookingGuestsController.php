@@ -62,15 +62,22 @@ class BookingGuestsController extends Controller
 
     public function checkIn(UpdateBookingGuestsCheckInOutRequest $request)
     {
-        $request->validated();
         foreach ($request->booking_guests as $bookingGuestId) {
             $bookingGuest = BookingGuests::find($bookingGuestId);
+            $bookingGuest->status = 'check_in';
+            $bookingGuest->check_in = true;
+            $bookingGuest->check_in_date = Carbon::now()->format('Y-m-d');
+           if($bookingGuest->isDirty(['status','check_in', 'check_in_date']) && $bookingGuest->getOriginal('status')
+               === 'pending'){
+               $bookingGuest->update($bookingGuest->getDirty());
+           }
             $bookingGuest->update([
                 'status' => 'check_in',
                 'check_in' => true,
                 'check_in_date' => Carbon::now()->format('Y-m-d'),
             ]);
         }
+        return redirect()->back()->with('success', 'Guests checked in successfully');
     }
 
     public function checkOut(UpdateBookingGuestsCheckInOutRequest $request)

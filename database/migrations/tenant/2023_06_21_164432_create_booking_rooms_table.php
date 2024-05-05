@@ -12,8 +12,16 @@ return new class extends Migration {
 	{
 		Schema::create('booking_rooms', function (Blueprint $table) {
 			$table->id();
-			$table->foreignId('booking_id')->constrained();
-			$table->foreignId('room_id')->constrained();
+			$table->foreignId('booking_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+			$table->foreignId('room_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->dateTime('check_in');
+            $table->dateTime('check_out');
             $table->integer('number_of_adults')->default(1);
             $table->integer('number_of_children')->default(0);
             $table->json('children_ages')->nullable();

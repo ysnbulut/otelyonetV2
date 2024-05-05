@@ -35,7 +35,7 @@ class CurrencyController extends Controller
                     'currency' => $request->currency,
                     'amount' => $request->amount,
                     'exchange_rate' => $kur,
-                    'total' => round($request->amount * $kur, 2),
+                    'total' => round($request->amount / $kur, 2),
                 ];
             } else {
                 return [

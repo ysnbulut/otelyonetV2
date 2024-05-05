@@ -15,7 +15,7 @@ function Create(props: any) {
 				<h2 className="intro-y my-5 text-lg font-medium">Kasa Ekle</h2>
 				<Tippy
 					as={Button}
-					onClick={() => router.visit(route('hotel.case_and_banks.index'))}
+					onClick={() => router.visit(route('hotel.banks.index'))}
 					variant="soft-pending"
 					className="intro-x"
 					content="Geri">
@@ -42,12 +42,12 @@ Create.layout = (page: any) => (
 			},
 			{
 				title: 'Kasa ve Bankalar',
-				href: route('hotel.case_and_banks.index'),
+				href: route('hotel.banks.index'),
 			},
 
 			{
 				title: 'Kasa Olustur',
-				href: route('hotel.case_and_banks.create'),
+				href: route('hotel.banks.create'),
 			},
 		]}>
 		{page}

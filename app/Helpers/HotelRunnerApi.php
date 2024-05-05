@@ -80,6 +80,7 @@ class HotelRunnerApi
             'query' => [
                 'token' => $this->token,
                 'hr_id' => $this->hr_id,
+                // TODO: Bu kısım yazılmalı
 //                'from_date' => 'YYYY-MM-DD',
 //                'from_last_update_date' => 'YYYY-MM-DD',
 //                'per_page' => 100,

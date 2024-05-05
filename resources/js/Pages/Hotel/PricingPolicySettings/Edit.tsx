@@ -8,6 +8,7 @@ import _ from 'lodash'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import Button from '@/Components/Button'
+import SelectBox from '@/Pages/Hotel/PricingPolicySettings/components/SelactBox'
 
 function Edit(props: PageProps) {
 	const MySwal = withReactContent(Swal)
@@ -63,33 +64,17 @@ function Edit(props: PageProps) {
 						</FormLabel>
 						<div className="col-span-2 flex flex-col lg:col-span-1">
 							{setting.type === 'select' && (
-								<Select
-									ref={ref}
-									id={setting.name}
-									defaultValue={setting.options.find((option) => option.value === data[setting.name])}
-									onChange={(e: any, action: any) => {
-										if (action.action === 'select-option') {
-											console.log(e)
-											e && setData((data) => ({...data, [setting.name]: e.value}))
-										} else if (action.action === 'clear') {
-											setData((data) => ({...data, [setting.name]: ''}))
-										} else {
-											setData((data) => ({...data, [setting.name]: ''}))
-										}
-									}}
-									options={setting.options}
-									className="remove-all my-select-container"
-									classNamePrefix="my-select"
-									styles={{
-										input: (base) => ({
-											...base,
-											'input:focus': {
-												boxShadow: 'none',
-											},
-										}),
-									}}
-									isClearable
-									placeholder={`${setting.label} Seçiniz`}
+								<SelectBox
+									dynamicOptions={
+										setting.type === 'select'
+											? setting.options.type === 'dynamic'
+												? props[setting.options.values as string]
+												: setting.options.values
+											: []
+									}
+									setting={setting}
+									data={data}
+									setData={setData}
 								/>
 							)}
 							{setting.type === 'text' && (

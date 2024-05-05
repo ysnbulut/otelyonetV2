@@ -96,6 +96,9 @@ export default {
 					},
 				},
 			},
+			cursor: ['disabled'],
+			backgroundColor: ['disabled', 'dark'],
+			opacity: ['disabled', 'dark'],
 		},
 	},
 	plugins: [

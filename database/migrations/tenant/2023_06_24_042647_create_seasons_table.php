@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('uid', 20)->unique();
             $table->date('start_date');
             $table->date('end_date');
-            $table->string('name');
+            $table->string('name', 75);
             $table->string('description')->nullable();
             $table->timestamps();
             $table->softDeletes();

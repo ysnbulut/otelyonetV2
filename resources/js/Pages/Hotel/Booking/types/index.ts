@@ -4,7 +4,6 @@ interface BookingDataProps {
 	id: number
 	check_in: string
 	check_out: string | null
-	open_booking: boolean
 	customer_id: number
 	customer: string
 	rooms: string

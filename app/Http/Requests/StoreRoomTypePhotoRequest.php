@@ -9,7 +9,7 @@ class StoreRoomTypePhotoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photo' => 'required|image|max:1024',
+            'image' => 'required|image|max:1024',
         ];
     }
 

@@ -12,9 +12,17 @@ return new class extends Migration {
     {
         Schema::create('unit_prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('type_has_view_id')->constrained('type_has_views')->cascadeOnDelete();
-            $table->foreignId('season_id')->nullable()->default(null)->constrained()->cascadeOnDelete();
-            $table->double('unit_price');
+            $table->foreignId('type_has_view_id')
+                ->constrained('type_has_views')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->foreignId('season_id')
+                ->nullable()
+                ->default(null)
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->double('unit_price', 15, 4);
             $table->timestamps();
             $table->softDeletes();
         });

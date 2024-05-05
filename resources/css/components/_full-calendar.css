@@ -216,6 +216,7 @@
     .fc-daygrid-more-link {
         padding-left: theme("spacing.2");
     }
+
 }
 
 .dark {
@@ -255,8 +256,24 @@
     }
 }
 
+.resource-label > .fc-datagrid-cell-frame {
+    @apply h-[4rem] flex items-center justify-center !important;
+}
+
+.fc-timeline-lane-frame {
+    @apply h-[4rem] !important;
+}
+
+.fc-event {
+    @apply h-[4rem] !important;
+}
+
 .fc-scrollgrid {
     @apply border-slate-200 dark:border-darkmode-500 !important;
+}
+
+.fc-datagrid-body {
+    @apply -mb-3 !important;
 }
 
 .fc-scroller::-webkit-scrollbar-track {
@@ -268,7 +285,7 @@
 }
 
 .holidays {
-    @apply bg-red-500/20 dark:bg-red-500/30 dark:opacity-20 opacity-30 !important;
+    @apply bg-red-500/20 dark:bg-red-500/30 dark:opacity-20 opacity-30 h-full !important;
 }
 
 .holidays > .text-center {
@@ -299,6 +316,11 @@
 .fc-datagrid-cell-cushion.fc-sticky {
     @apply text-xl font-semibold min-w-max whitespace-nowrap !important;
 }
+
+.fc-datagrid-cell-cushion.fc-scrollgrid-sync-inner {
+    @apply text-center !important;
+}
+
 
 .context-menu {
     @apply absolute z-50 bg-white dark:bg-gray-800 shadow rounded-md p-2 text-sm font-semibold overflow-hidden !important;

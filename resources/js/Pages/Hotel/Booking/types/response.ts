@@ -64,7 +64,7 @@ interface TotalPriceProps {
 	fprice_with_currency: string
 }
 
-interface PriceProps extends IdAndProps {
+export interface PriceProps extends IdAndProps {
 	exchange_rate: number
 	currency: string
 	daily_prices: DailyPriceProps[]

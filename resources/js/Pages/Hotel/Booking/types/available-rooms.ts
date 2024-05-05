@@ -1,5 +1,10 @@
-import {MergeProps, StepOneRequestProps, StepTwoResponseProps} from '@/Pages/Hotel/Booking/types/response'
-import {StepsProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
+import {PriceProps, StepOneRequestProps} from '@/Pages/Hotel/Booking/types/response'
+import {
+	StepsProps,
+	CheckedRoomsProps,
+	RoomTypeRoomGuestsProps,
+	CheckedRoomsDailyPriceProps,
+} from '@/Pages/Hotel/Booking/types/steps'
 
 interface BedProps {
 	name: string
@@ -23,7 +28,7 @@ interface ResultDataProps {
 	child_capacity: number
 	beds: BedProps[]
 	rooms: RoomProps[]
-	price: MergeProps
+	price: PriceProps
 }
 
 export interface AvailableRoomsProps extends StepsProps {
@@ -34,4 +39,5 @@ export interface AvailableRoomsProps extends StepsProps {
 	checkedRooms: CheckedRoomsProps | undefined
 	setCheckedRooms: React.Dispatch<React.SetStateAction<CheckedRoomsProps | undefined>>
 	setRoomsGuests: React.Dispatch<React.SetStateAction<RoomTypeRoomGuestsProps>>
+	setDailyPrices: React.Dispatch<React.SetStateAction<CheckedRoomsDailyPriceProps | undefined>>
 }

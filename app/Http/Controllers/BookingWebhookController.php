@@ -19,12 +19,68 @@ class BookingWebhookController extends Controller
     public function handleWebhook(Tenant $tenant, WebHookRequest $request)
     {
         $webhookData = json_decode($request->data, true);
-        if ($tenant === null) {
+        if($webhookData['reason'] === 'cancel') {
+            $booking = Booking::where('booking_code', $webhookData['hr_number'])->first();
+            if($booking !== null) {
+                $booking->delete();
+            }
             return [
-                'message' => 'Tenant not found',
+                'message' => 'Booking '.$webhookData['state'].' successfully',
+                'status' => 'ok',
                 'data' => $webhookData,
             ];
-        } else {
+        } else if ($webhookData['reason'] === 'modify') {
+            $booking = Booking::where('booking_code', $webhookData['hr_number'])->first();
+            if ($booking !== null) {
+                $booking->update([
+                    'check_in' => $webhookData['checkin_date'],
+                    'check_out' => $webhookData['checkout_date'],
+                    'number_of_rooms' => $webhookData['total_rooms'],
+                    'number_of_adults' => $webhookData['total_guests'],
+                ]);
+                $bookingTotalPrice = $booking->bookingTotalPrice;
+                $bookingTotalPrice->update([
+                    'price' => $webhookData['sub_total'],
+                    'grand_total' => $webhookData['total'],
+                    'tax' => $webhookData['tax_total'],
+                ]);
+                $unavailableRoomsIds = Booking::getUnavailableRoomsIds($webhookData['checkin_date'], $webhookData['checkout_date']);
+                $booking->bookingRooms->each(function ($bookingRoom) use ($unavailableRoomsIds) {
+                    $unavailableRoomsIds[] = $bookingRoom->room_id;
+                });
+                foreach ($webhookData['rooms'] as $room) {
+                    $cmRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['code']))->first();
+                    $randomRoom = TypeHasView::where('id', $cmRoom->type_has_view_id)->with(['rooms' => function ($query) use ($unavailableRoomsIds) {
+                        $query->whereNotIn('id', $unavailableRoomsIds);
+                    }])->whereHas('rooms')->first()->rooms->first();
+                    $bookingRoom = BookingRoom::withoutEvents(function () use ($booking, $randomRoom, $webhookData) {
+                        return BookingRoom::create([
+                            'booking_id' => $booking->id,
+                            'room_id' => $randomRoom->id,
+                            'number_of_adults' => $webhookData['total_guests'] / $webhookData['total_rooms'],
+                            'number_of_children' => 0,
+                            'children_ages' => json_encode(null),
+                            'created_at' => Carbon::now(),
+                            'updated_at' => Carbon::now(),
+                        ]);
+                    });
+                    $unavailableRoomsIds[] = $randomRoom->id;
+                    foreach ($room['daily_prices'] as $daily_price) {
+                        BookingDailyPrice::firstOrCreate([
+                            'booking_total_price_id' => $bookingTotalPrice->id,
+                            'booking_room_id' => $bookingRoom->id,
+                            'date' => $daily_price['date'],
+                        ], [
+                            'original_price' => $daily_price['original_price'],
+                            'discount' => $daily_price['discount'],
+                            'price' => $daily_price['price'],
+                            'currency' => $webhookData['currency'],
+                        ]);
+                    }
+                }
+
+            }
+        } else if ($webhookData['reason'] === 'confirm') {
             $tenant->run(function () use ($webhookData) {
                 $customerData = [
                     'title' => $webhookData['billing_address']['company'] === '' ? $webhookData['guest'] : $webhookData['billing_address']['company'],
@@ -99,10 +155,13 @@ class BookingWebhookController extends Controller
                     }
                 }
             });
+        } else {
             return [
-                'message' => 'Booking created successfully',
+                'message' => 'Booking ' . $webhookData['state'] . ' successfully',
+                'status' => 'ok',
                 'data' => $webhookData,
             ];
         }
+        return false; 
     }
 }

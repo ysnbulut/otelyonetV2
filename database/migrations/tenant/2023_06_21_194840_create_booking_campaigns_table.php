@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('booking_campaigns', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name', 50);
             $table->string('code')->unique()->index();
             $table->text('note');
-            $table->double('discount_percentage')->default(0);
+            $table->double('discount_percentage', 15, 4)->default(0);
+            $table->date('start_date');
+            $table->date('end_date');
             $table->timestamps();
             $table->softDeletes();
         });

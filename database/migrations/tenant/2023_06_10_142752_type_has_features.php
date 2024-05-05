@@ -15,14 +15,15 @@ return new class extends Migration {
 			$table
 				->foreignId('type_id')
 				->constrained('room_types')
-				->onDelete('cascade');
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->integer('order_no');
 			$table
 				->foreignId('feature_id')
 				->constrained('room_type_features')
-				->onDelete('cascade');
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->timestamps();
-            $table->softDeletes();
 		});
 	}
 

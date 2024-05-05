@@ -17,6 +17,7 @@ function Two(props: StepTwoProps) {
 						request={props.stepOneResults.request}
 						checkedRooms={props.checkedRooms}
 						setCheckedRooms={props.setCheckedRooms}
+						setDailyPrices={props.setDailyPrices}
 						setRoomsGuests={props.setRoomsGuests}
 						setStep={props.setStep}
 					/>

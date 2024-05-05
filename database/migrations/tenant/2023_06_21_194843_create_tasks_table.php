@@ -14,10 +14,13 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('role_id')->constrained();
-            $table->integer('user_id')->unsigned();
+            $table->foreignId('role_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->enum('type', ['check_in', 'check_out', 'cleaning', 'technical', 'other']);
-            $table->string('note');
+            $table->morphs('taskable');
+            $table->text('note');
             $table->enum('status', ['pending', 'in_progress', 'done']);
             $table->dateTime('start_date');
             $table->dateTime('due_date');

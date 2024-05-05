@@ -147,6 +147,10 @@ input[type=number] {
 }
 
 
+#nprogress .bar {
+    height: 8px !important;
+}
+
 
 /*table.calendar {*/
 /*    border-collapse: collapse;*/

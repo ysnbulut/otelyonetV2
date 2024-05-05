@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('booking_channels', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->string('name');
+            $table->string('name', 50);
             $table->timestamps();
             $table->softDeletes();
         });

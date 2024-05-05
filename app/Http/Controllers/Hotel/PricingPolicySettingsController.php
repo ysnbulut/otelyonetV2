@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdatePricingPolicySettingsRequest;
+use App\Models\Tax;
 use App\Settings\PricingPolicySettings;
 use Inertia\Inertia;
 
@@ -20,6 +21,7 @@ class PricingPolicySettingsController extends Controller
     {
         return Inertia::render('Hotel/PricingPolicySettings/Edit', [
             'settings' => $this->settings->toArray(),
+            'taxes' => Tax::where('enabled', true)->get(['id', 'name'])->map(fn ($tax) => ['value' => $tax->id, 'label' => $tax->name]),
         ]);
     }
 

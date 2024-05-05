@@ -28,7 +28,7 @@ function Features(props: FeaturesProps) {
 				// 	.then(() => console.log('success'))
 				// 	.catch(() => {})
 			}}
-			className="flex flex-wrap items-center justify-start gap-3 bg-slate-200/80 p-5 dark:bg-darkmode-700">
+			className="flex flex-wrap items-center justify-start gap-3 rounded bg-slate-200/80 p-5 dark:bg-darkmode-700">
 			{props.features.length > 0 &&
 				props.features.map((feature, key) => (
 					<div

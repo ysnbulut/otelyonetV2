@@ -14,8 +14,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property-read Collection<int, Booking> $bookings
  * @property-read int|null $bookings_count
- * @property-read Collection<int, BookingPayment> $payments
- * @property-read int|null $payments_count
  * @property mixed $tax_office
  * @method static Builder|Customer filter(array $filters)
  * @method static Builder|Customer newModelQuery()
@@ -26,6 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Customer search($searchTerm)
  * @method static Builder|Customer withTrashed()
  * @method static Builder|Customer withoutTrashed()
+ * @property-read Collection<int, \App\Models\Document> $documents
+ * @property-read int|null $documents_count
  * @mixin Eloquent
  */
 class Customer extends Model
@@ -34,27 +34,23 @@ class Customer extends Model
 
     protected $fillable = ['title', 'type', 'tax_office', 'tax_number', 'city', 'country', 'address', 'phone', 'email'];
 
-    public function scopeRemainingBalance()
-    {
-        $bookingAmount = $this->bookings()
-            ->join('booking_total_prices', 'bookings.id', '=', 'booking_total_prices.booking_id')
-            ->whereNull('bookings.deleted_at')
-            ->sum('booking_total_prices.grand_total');
-        $paymentAmount = $this->payments()->sum('amount_paid');
-        return $paymentAmount - $bookingAmount;
-    }
 
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'customer_id', 'id');
     }
 
-    public function payments(): HasMany
+    public function documents(): HasMany
     {
-        return $this->hasMany(BookingPayment::class, 'customer_id', 'id');
+        return $this->hasMany(Document::class, 'customer_id', 'id');
     }
 
-    public function scopeFilter($query, array $filters)
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'customer_id', 'id');
+    }
+
+    public function scopeFilter($query, array $filters): void
     {
         $query
             ->when($filters['search'] ?? null, function ($query, $search) {

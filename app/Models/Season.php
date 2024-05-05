@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -21,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Season unitPrices()
  * @method static Builder|Season withTrashed()
  * @method static Builder|Season withoutTrashed()
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPrice> $unitPrices
+ * @property-read Collection<int, UnitPrice> $unitPrices
  * @property-read int|null $unit_prices_count
  * @mixin Eloquent
  */
@@ -31,7 +33,7 @@ class Season extends Model
 
     protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
 
-    public function unitPrices() : \Illuminate\Database\Eloquent\Relations\HasMany
+    public function unitPrices() : HasMany
     {
         return $this->hasMany(UnitPrice::class);
     }
@@ -60,8 +62,8 @@ class Season extends Model
     {
         return $query
             ->orderBy('start_date')
-            ->where('start_date', '<=', date('Y-m-d'))
-            ->where('end_date', '>=', date('Y-m-d'))
-            ->orWhere('start_date', '>=', date('Y-m-d'));
+            ->whereDate('start_date', '<=', date('Y-m-d'))
+            ->whereDate('end_date', '>=', date('Y-m-d'))
+            ->orWhereDate('start_date', '>=', date('Y-m-d'));
     }
 }

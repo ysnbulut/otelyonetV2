@@ -1,11 +1,16 @@
 import React, {useEffect, useState} from 'react'
 import {Head} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
-import {CustomerProps, StepOneResponseProps} from '@/Pages/Hotel/Booking/types/response'
+import {CustomerProps, DailyPriceProps, StepOneResponseProps} from '@/Pages/Hotel/Booking/types/response'
 import One from '@/Pages/Hotel/Booking/Steps/One'
 import Two from '@/Pages/Hotel/Booking/Steps/Two'
 import Three from '@/Pages/Hotel/Booking/Steps/Three'
-import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
+import {
+	BookingResultProps,
+	CheckedRoomsDailyPriceProps,
+	CheckedRoomsProps,
+	RoomTypeRoomGuestsProps,
+} from '@/Pages/Hotel/Booking/types/steps'
 import Four from '@/Pages/Hotel/Booking/Steps/Four'
 import BookingSummary from '@/Pages/Hotel/Booking/components/BookingSummary'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
@@ -23,6 +28,8 @@ function Create(props: CreateProps) {
 	const [bookingType, setBookingType] = useState<string>('normal')
 	const [checkinRequired, setCheckinRequired] = useState<boolean>(false)
 	const [checkedRooms, setCheckedRooms] = useState<CheckedRoomsProps | undefined>(undefined)
+	const [dailyPrices, setDailyPrices] = useState<CheckedRoomsDailyPriceProps | undefined>(undefined)
+
 	const [bookingResult, setBookingResult] = useState<BookingResultProps | undefined>(undefined)
 	const [grandTotal, setGrandTotal] = useState<number>(0)
 	const [customerId, setCustomerId] = useState<number | undefined>()
@@ -121,6 +128,7 @@ function Create(props: CreateProps) {
 					setStep={setStep}
 					setCheckinRequired={setCheckinRequired}
 					setCheckedRooms={setCheckedRooms}
+					setDailyPrices={setDailyPrices}
 				/>
 			)}
 			{step > 1 && (
@@ -135,6 +143,7 @@ function Create(props: CreateProps) {
 									setStep={setStep}
 									checkedRooms={checkedRooms}
 									setCheckedRooms={setCheckedRooms}
+									setDailyPrices={setDailyPrices}
 									setRoomsGuests={setRoomsGuests}
 								/>
 							)}
@@ -167,6 +176,7 @@ function Create(props: CreateProps) {
 							bookingResult={bookingResult}
 							checkedRooms={checkedRooms}
 							setCheckedRooms={setCheckedRooms}
+							dailyPrices={dailyPrices}
 							step={step}
 							setStep={setStep}
 							grandTotal={grandTotal}

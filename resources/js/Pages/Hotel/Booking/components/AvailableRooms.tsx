@@ -6,8 +6,13 @@ import {AvailableRoomsProps} from '@/Pages/Hotel/Booking/types/available-rooms'
 import {twMerge} from 'tailwind-merge'
 import CurrencyInput from 'react-currency-input-field'
 import Button from '@/Components/Button'
-import {RoomGuestsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
-import {GuestProps} from '@/Pages/Hotel/Booking/types/response'
+import {
+	CheckedRoomsDailyPriceProps,
+	RoomDailyPriceProps,
+	RoomGuestsProps,
+	RoomTypeRoomGuestsProps,
+} from '@/Pages/Hotel/Booking/types/steps'
+import {DailyPriceProps, GuestProps} from '@/Pages/Hotel/Booking/types/response'
 import {useAppSelector} from '@/stores/hooks'
 import {selectDarkMode} from '@/stores/darkModeSlice'
 import image from '../../../../../images/image.jpg'
@@ -59,7 +64,6 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			) {
 				setCalcTotalPrice(newPrice)
 			}
-
 			if (newRoomCount !== roomCount) {
 				setRoomCount(newRoomCount)
 			}
@@ -73,7 +77,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						generateD[parseInt(key)][room].push({
 							name: '',
 							surname: '',
-							citizen_id: '',
+							citizen_id: '1',
 							birthday: '',
 							gender: '',
 							identification_number: '',
@@ -93,6 +97,20 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			}
 		}
 	}, [props.checkedRooms, props.request, props.item.price.total_price.price, props.item.id])
+
+	useEffect(() => {
+		if (props.checkedRooms !== undefined && props.checkedRooms[props.item.id] !== undefined) {
+			let generateDP: {[key: number]: any[]} = {} //burayı anlamadım
+			generateDP[props.item.id] = [] as RoomDailyPriceProps[]
+			props.checkedRooms &&
+				props.checkedRooms[props.item.id] &&
+				Object.values(props.checkedRooms[props.item.id]).forEach((room) => {
+					generateDP[props.item.id][room] = [] as DailyPriceProps[]
+					generateDP[props.item.id][room] = props.item.price.daily_prices
+				})
+			generateDP && generateDP[props.item.id] && props.setDailyPrices((prevState) => ({...prevState, ...generateDP}))
+		}
+	}, [props.checkedRooms])
 
 	return (
 		<div className="box w-full p-5">

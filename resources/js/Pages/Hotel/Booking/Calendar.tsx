@@ -74,10 +74,12 @@ function Calendar(props: PageProps) {
 		}
 	})
 
+	console.log(events)
+
 	return (
 		<>
 			<Head title="Müşteriler" />
-			<h2 className="intro-y mt-10 text-lg font-medium">Müşteriler</h2>
+			<h2 className="intro-y my-2 text-lg font-medium">Rezervasyon Takvimi</h2>
 			<div className="w-full">
 				<FullCalendar
 					ref={calendarRef}
@@ -96,12 +98,12 @@ function Calendar(props: PageProps) {
 					views={{
 						resourceTimeline: {
 							duration: {
-								days: 7,
+								days: 45,
 							},
 							slotDuration: {
 								hours: 24,
 							},
-							dayMaxEventRows: 2,
+							// dayMaxEventRows: 2,
 						},
 					}}
 					resourcesInitiallyExpanded={true}
@@ -110,7 +112,7 @@ function Calendar(props: PageProps) {
 							group: true,
 							field: 'type_and_view',
 							headerContent: 'Tip',
-							headerClassNames: ['text-xl font-extrabold text-center w-auto'],
+							headerClassNames: ['text-xl font-extrabold'],
 						},
 						{
 							field: 'title',
@@ -118,7 +120,9 @@ function Calendar(props: PageProps) {
 							headerClassNames: ['text-xl font-extrabold'],
 						},
 					]}
-					resourceAreaWidth={'150px'}
+					resourceAreaWidth={'12rem'}
+					// resourceAreaHeaderContent={'Oda Bilgileri'}
+					// resourceAreaHeaderClassNames={['text-xl font-extrabold']},
 					resourceGroupLabelContent={(arg: {groupValue: any; fieldValue: any}) => {
 						return (
 							<Tippy content={arg.groupValue ? arg.groupValue : arg.fieldValue}>
@@ -171,7 +175,6 @@ function Calendar(props: PageProps) {
 						'text-slate-600',
 						'dark:text-darkmode-50',
 					]}
-					viewClassNames={['']}
 					resourceGroupLabelClassNames={[
 						'relative',
 						'bg-slate-200',
@@ -187,16 +190,17 @@ function Calendar(props: PageProps) {
 						'text-lg',
 						'font-semibold',
 						'text-center',
+						'resource-label',
 					]}
-					resourceLaneClassNames={['']}
-					eventClassNames={['border-2', 'rounded-md', 'shadow-lg', 'my-auto']}
+					eventClassNames={['border-2', 'rounded-md', 'shadow-md']}
+					slotEventOverlap={false}
 					resourceOrder="type_id,title"
 					weekends
 					selectable
 					navLinks={false}
 					editable={false}
 					locale="tr"
-					height="720px"
+					height="auto"
 					selectMirror={true}
 					dayMaxEvents={true}
 					headerToolbar={{
@@ -209,7 +213,7 @@ function Calendar(props: PageProps) {
 					}}
 					initialDate={dayjs().subtract(4, 'days').format('YYYY-MM-DD')}
 					nowIndicator={true}
-					nowIndicatorClassNames={['now-indicator']} //todo bunun classını taşı
+					nowIndicatorClassNames={['now-indicator']}
 					dayCellClassNames={['zamunda']}
 					dayCellContent={(e) => e.dayNumberText}
 					eventSources={[
@@ -225,7 +229,7 @@ function Calendar(props: PageProps) {
 					// eventContent={(e) => {
 					// 	return (
 					// 		<>
-					// 			<div className="text-center">
+					// 			<div className="h-14 text-center">
 					// 				<div className="text-sm">{e.event.title}</div>
 					// 				{e.event.extendedProps.description}
 					// 			</div>

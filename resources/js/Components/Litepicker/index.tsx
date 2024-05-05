@@ -66,9 +66,9 @@ Litepicker.defaultProps = {
 		showWeekNumbers: true,
 		lang: 'tr-TR',
 		format: 'DD.MM.YYYY',
-		autoApply: true,
+		autoApply: false,
 		dropdowns: {
-			minYear: 1990,
+			minYear: 1850,
 			maxYear: null,
 			months: true,
 			years: true,

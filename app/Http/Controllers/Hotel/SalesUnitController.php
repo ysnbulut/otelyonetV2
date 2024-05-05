@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Hotel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSalesUnitRequest;
 use App\Http\Requests\UpdateSalesUnitRequest;
-use App\Models\Product;
+use App\Models\Item;
 use App\Models\SalesChannel;
 use App\Models\SalesUnit;
 use Inertia\Inertia;
@@ -39,7 +39,7 @@ class SalesUnitController extends Controller
     {
         return Inertia::render('Hotel/SalesUnit/Create', [
             'channels' => SalesChannel::all(['id', 'name']),
-            'products' => Product::all(['id', 'name']),
+            'items' => Item::all(['id', 'name']),
         ]);
     }
 

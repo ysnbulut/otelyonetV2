@@ -1,16 +1,15 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState, useRef} from 'react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
 import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
-import TransactionsSection from '@/Pages/Hotel/Customer/components/TransactionsSection'
 import {twMerge} from 'tailwind-merge'
 import {FormInput, FormLabel} from '@/Components/Form'
 import Litepicker from '@/Components/Litepicker'
 import TomSelect from '@/Components/TomSelect'
 import CurrencyInput from 'react-currency-input-field'
-import {BookingShowProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
+import {PageProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import Sqids from 'sqids'
@@ -18,10 +17,15 @@ import Tippy from '@/Components/Tippy'
 import BookingRooms from '@/Pages/Hotel/Booking/components/BookingRooms'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import Select, {SelectInstance} from 'react-select'
+import axios from 'axios'
+import {Page} from '@inertiajs/inertia'
+import {motion} from 'framer-motion'
 
 dayjs.extend(customParseFormat)
 
-function Show(props: BookingShowProps) {
+function Show(props: PageProps) {
+	const paymentTypeSelectRef = useRef<SelectInstance>(null)
 	const MySwal = withReactContent(Swal)
 	const sqids = new Sqids({
 		minLength: 7,
@@ -29,15 +33,32 @@ function Show(props: BookingShowProps) {
 	})
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
 	const [bookingRooms, setBookingRooms] = useState<RoomsProps[]>(props.booking.rooms)
-	const [balance, setBalance] = useState<number>(props.remaining_balance)
-	const {data, setData, post, processing, errors} = useForm({
-		booking_id: props.booking.id,
+	const [balance, setBalance] = useState<{number: number; formatted: string}>({
+		number: props.remaining_balance,
+		formatted: props.remaining_balance_formatted,
+	})
+	const [documentsBalance, setDocumentsBalance] = useState<{[key: number]: {number: number; formatted: string}}>(
+		props.booking.rooms
+			.map((room) =>
+				room.documents.map((document) => ({
+					[document.id]: {number: document.balance, formatted: document.balance_formatted},
+				})),
+			)
+			.flat()
+			.reduce((acc, val) => ({...acc, ...val}), {}),
+	)
+	const [paymentDocumentIndex, setPaymentDocumentIndex] = useState<number>(0)
+	const [maxAmount, setMaxAmount] = useState<number>(props.remaining_balance)
+	const [maxAmountErr, setMaxAmountErr] = useState<string>('Girilen tutar bakiyeden fazla olamaz!')
+	const {data, setData, post, processing, errors, setError} = useForm({
 		customer_id: props.customer.id,
+		type: 'income',
 		payment_date: dayjs().format('DD.MM.YYYY'),
-		case_and_bank_id: '',
+		bank_id: '',
 		currency: 'TRY',
+		currency_rate: 1, //todo buuuuu
 		payment_method: '',
-		currency_amount: props.remaining_balance < 0 ? Math.abs(props.remaining_balance).toString() : '0',
+		amount: props.remaining_balance > 0 ? Math.abs(props.remaining_balance).toString() : '0', //TODO bunları checket
 		description: '',
 	})
 
@@ -48,12 +69,63 @@ function Show(props: BookingShowProps) {
 		timer: 3000,
 		timerProgressBar: true,
 		didOpen: (toast) => {
-			toast.addEventListener('mouseenter', MySwal.stopTimer)
-			toast.addEventListener('mouseleave', MySwal.resumeTimer)
+			// toast.addEventListener('mouseenter', MySwal.stopTimer)
+			// toast.addEventListener('mouseleave', MySwal.resumeTimer)
 		},
 	})
 
-	// const booking_type = props.booking.check_out === null ? 'Açık' : 'Normal'
+	useEffect(() => {
+		setData((data) => ({...data, currency: 'TRY', bank_id: '', payment_method: '', description: ''}))
+		paymentTypeSelectRef.current?.selectOption(paymentTypeOptions[paymentDocumentIndex])
+		const document = props.booking.rooms.map((room) =>
+			room.documents.find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value),
+		)[0]
+		if (document) {
+			if (paymentDocumentIndex > 0) {
+				setData((data) => ({
+					...data,
+					document_id: paymentTypeOptions[paymentDocumentIndex].value,
+					amount: document.balance.toFixed(2),
+				}))
+				setMaxAmount(document.balance)
+				setMaxAmountErr('Girilen tutar seçilen folyo bakiyesinden fazla olamaz!')
+			} else {
+				setData((data) => ({...data, amount: props.remaining_balance.toFixed(2)}))
+				setMaxAmountErr('Girilen tutar bakiyeden fazla olamaz!')
+			}
+		} else {
+			setData((data) => ({...data, amount: props.remaining_balance.toFixed(2)}))
+			setMaxAmountErr('Girilen tutar bakiyeden fazla olamaz!')
+		}
+	}, [paymentDocumentIndex])
+
+	useEffect(() => {
+		setData((data) => ({...data, amount: '0'}))
+		if (data.currency !== 'TRY') {
+			axios
+				.post(route('amount.exchange'), {
+					amount: props.remaining_balance > 0 ? Math.abs(props.remaining_balance).toString() : '0',
+					currency: data.currency,
+				})
+				.then((response) => {
+					setData((data) => ({
+						...data,
+						amount: response.data.total,
+						currency_rate: response.data.exchange_rate,
+					}))
+					setMaxAmount(response.data.total)
+				})
+				.catch((error) => {
+					console.log(error)
+				})
+		} else {
+			setData((data) => ({
+				...data,
+				amount: props.remaining_balance > 0 ? Math.abs(props.remaining_balance).toString() : '0',
+				currency_rate: 1,
+			}))
+		}
+	}, [data.currency])
 
 	const accommodationTypes: {[key: string]: string} = {
 		only_room: 'Sadece Oda',
@@ -66,23 +138,48 @@ function Show(props: BookingShowProps) {
 
 	const accommodationType = accommodationTypes[props.accommodation_type] || 'Sadece Oda'
 
+	const paymentTypeOptions = [
+		{
+			value: 0,
+			label: 'Genel Tahsilat',
+		},
+	].concat(
+		props.booking.rooms.flatMap((room) =>
+			room.documents.map((document) => ({
+				value: document.id,
+				label: `${document.number}'nolu Folyo`,
+			})),
+		),
+	)
+
 	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		// post(route('hotel.customer_payments.store'), {
-		// 	onSuccess: () => {
-		// 		setShowPaymentForm(false)
-		// 		setData((data) => ({
-		// 			...data,
-		// 			payment_date: dayjs().format('DD.MM.YYYY'),
-		// 			case_and_bank_id: '',
-		// 			currency: 'TRY',
-		// 			payment_method: '',
-		// 			currency_amount:
-		// 				props.remaining_balance < 0 ? Math.abs(props.remaining_balance).toString() : '0',
-		// 			description: '',
-		// 		}))
-		// 	},
-		// })
+		post(route('hotel.bookings.transaction.store', props.booking.id), {
+			// @ts-ignore
+			onSuccess: (response: Page<PageProps>) => {
+				setBalance({number: response.props.remaining_balance, formatted: response.props.remaining_balance_formatted})
+				setDocumentsBalance(
+					response.props.booking.rooms
+						.map((room) =>
+							room.documents.map((document) => ({
+								[document.id]: {number: document.balance, formatted: document.balance_formatted},
+							})),
+						)
+						.flat()
+						.reduce((acc, val) => ({...acc, ...val}), {}),
+				)
+				setShowPaymentForm(false)
+				setData((data) => ({
+					...data,
+					payment_date: dayjs().format('DD.MM.YYYY'),
+					bank_id: '',
+					currency: 'TRY',
+					payment_method: '',
+					amount: response.props.remaining_balance > 0 ? Math.abs(response.props.remaining_balance).toString() : '0',
+					description: '',
+				}))
+			},
+		})
 	}
 
 	const bookingCancel = (e: React.FormEvent<HTMLFormElement>) => {
@@ -99,21 +196,32 @@ function Show(props: BookingShowProps) {
 
 	return (
 		<>
-			<Head title="Rezervasyon Oluştur" />
+			<Head title="Rezervasyon Detayı" />
 			<div className="flex grid-cols-12 flex-col-reverse gap-3 xl:flex-row">
 				<div className="w-full xl:w-2/3">
 					<div className="box relative mt-5 grid grid-cols-12">
-						<Tippy
-							content="Rezervasyon Kodu"
-							className="absolute right-0 top-0 h-11 w-32 rounded-tr-md border-b border-l border-slate-100/20 bg-white/30 p-2">
-							<h3 className="text-center text-lg font-extrabold text-slate-50">{sqids.encode([props.booking.id])}</h3>
-						</Tippy>
-						<Tippy
-							content="Rezervasyon Kanalı"
-							className="absolute right-0 top-11 w-32 rounded-bl border-y border-l border-indigo-500/80 bg-indigo-600/80 p-2 shadow">
-							<h6 className="rounded text-center text-xs font-semibold text-slate-50">{props.booking.channel}</h6>
-						</Tippy>
-						<div className="col-span-12 rounded-t-md border-b border-teal-700 bg-teal-600 px-4 py-5 dark:bg-teal-700/40">
+						<motion.div
+							initial={{scale: 0.5, y: -11, x: 32}}
+							animate={{scale: 1, y: 0, x: 0}}
+							whileHover={{
+								scale: 1.3,
+								y: 6.5,
+								x: -19,
+								transition: {duration: 1},
+							}}
+							className="absolute right-0 top-0 z-50 flex">
+							<Tippy
+								className="h-11 w-32 rounded-tr-md border-b border-l border-slate-100/20 bg-white/30 p-2"
+								content="Rezervasyon Kodu">
+								<h3 className="text-center text-lg font-extrabold text-slate-50">{sqids.encode([props.booking.id])}</h3>
+							</Tippy>
+							<Tippy
+								content="Rezervasyon Kanalı"
+								className="absolute right-0 top-11 w-32 rounded-bl border-y border-l border-indigo-500/80 bg-indigo-600/80 p-2 shadow">
+								<h6 className="rounded text-center text-xs font-semibold text-slate-50">{props.booking.channel}</h6>
+							</Tippy>
+						</motion.div>
+						<div className="-intro-y col-span-12 rounded-t-md border-b border-teal-700 bg-teal-600 px-4 py-5 dark:bg-teal-700/40">
 							<h3 className="rounded-md text-xl font-bold text-light">Rezervasyon Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-light lg:flex-row">
 								<Link
@@ -149,31 +257,27 @@ function Show(props: BookingShowProps) {
 								</div>
 							</div>
 							<div className="mt-2 flex w-full justify-end gap-3">
-								{/*	{!props.booking.open_booking && (*/}
-								{/*		<Button*/}
-								{/*			variant="soft-success"*/}
-								{/*			className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">*/}
-								{/*			<Lucide*/}
-								{/*				icon="CalendarPlus"*/}
-								{/*				className="mr-1 h-5 w-5"*/}
-								{/*			/>*/}
-								{/*			SÜREYİ UZAT*/}
-								{/*			<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">*/}
-								{/*				{props.extendable_number_of_days}*/}
-								{/*			</span>*/}
-								{/*		</Button>*/}
-								{/*	)}*/}
-								{props.booking.open_booking && (
-									<Button
-										variant="soft-pending"
-										className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
-										<Lucide
-											icon="CalendarMinus"
-											className="mr-1 h-5 w-5"
-										/>
-										BİTİR
-									</Button>
-								)}
+								<Button
+									variant="soft-success"
+									className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
+									<Lucide
+										icon="CalendarPlus"
+										className="mr-1 h-5 w-5"
+									/>
+									SÜREYİ UZAT
+									<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
+										{props.extendable_number_of_days}
+									</span>
+								</Button>
+								<Button
+									variant="soft-pending"
+									className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+									<Lucide
+										icon="CalendarMinus"
+										className="mr-1 h-5 w-5"
+									/>
+									ERKEN BİTİR
+								</Button>
 								{dayjs(props.booking.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
 									<Button
 										variant="soft-danger"
@@ -188,7 +292,7 @@ function Show(props: BookingShowProps) {
 								)}
 							</div>
 						</div>
-						<div className="col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
+						<div className="intro-y col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Müşteri Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-dark lg:flex-row dark:text-light">
 								<Link
@@ -232,11 +336,18 @@ function Show(props: BookingShowProps) {
 									<BookingRooms
 										key={index}
 										room={room}
+										currency={props.currency}
+										taxes={props.taxes}
 										citizens={props.citizens}
+										items={props.items}
 										bookingRooms={bookingRooms}
 										setBookingRooms={setBookingRooms}
 										setBalance={setBalance}
+										documentsBalance={documentsBalance}
 										check_in={props.booking.check_in}
+										setShowPaymentForm={setShowPaymentForm}
+										paymentTypeOptions={paymentTypeOptions}
+										setPaymentDocumentIndex={setPaymentDocumentIndex}
 									/>
 								))}
 							</div>
@@ -246,23 +357,23 @@ function Show(props: BookingShowProps) {
 				</div>
 				<div className="w-full xl:w-1/3">
 					<div className="xl:h-full xl:border-l xl:p-5">
-						<div className="box flex items-center justify-between p-5">
-							<h3 className="font-semibold xl:text-lg 2xl:text-2xl">Bakiye</h3>
+						<div className="-intro-y box flex items-center justify-between p-5">
+							<h3 className="-intro-x font-semibold xl:text-lg 2xl:text-2xl">Bakiye</h3>
 							<span
 								className={twMerge([
-									'font-sans font-bold xl:text-xl 2xl:text-3xl',
-									balance > 0 ? 'text-red-600' : 'text-green-700',
+									'intro-y font-sans font-bold xl:text-xl 2xl:text-3xl',
+									balance.number > 0 ? 'text-red-600' : 'text-green-700',
 								])}>
-								{balance} {props.currency}
+								{balance.formatted}
 							</span>
 						</div>
-						<div className="box mt-5 flex flex-col items-center justify-between gap-2 p-5">
+						<div className="intro-x box mt-5 flex flex-col items-center justify-between gap-2 p-5">
 							<Button
-								variant={balance > 0 ? 'primary' : 'soft-dark'}
-								onClick={() => balance > 0 && setShowPaymentForm(!showPaymentForm)}
-								className="w-full text-xl font-semibold shadow-md"
+								variant={balance.number > 0 ? 'primary' : 'soft-dark'}
+								onClick={() => balance.number > 0 && setShowPaymentForm(!showPaymentForm)}
+								className="-intro-x w-full text-xl font-semibold shadow-md"
 								type="button"
-								disabled={balance == 0}>
+								disabled={balance.number == 0}>
 								TAHSİLAT EKLE
 							</Button>
 							<form
@@ -270,7 +381,38 @@ function Show(props: BookingShowProps) {
 								id="payment-form"
 								className={twMerge(['intro-y mt-5 w-full', !errors || (!showPaymentForm && 'hidden')])}>
 								<h3 className="mb-5 text-center text-lg font-extrabold"> TAHSİLAT EKLE </h3>
-								<div className="form-control">
+								<div>
+									<FormLabel
+										htmlFor="payment-date"
+										className="flex items-center justify-between">
+										Tahsilat Türü
+										<span className="text-[9px] font-thin text-slate-400">(Folyo Bazlı / Genel)</span>
+									</FormLabel>
+									<Select
+										ref={paymentTypeSelectRef}
+										id="payment-type"
+										name="payment_type"
+										className="remove-all my-select-container"
+										classNamePrefix="my-select"
+										isMulti={false}
+										value={paymentTypeOptions[paymentDocumentIndex]}
+										styles={{
+											input: (base) => ({
+												...base,
+												'input:focus': {
+													boxShadow: 'none',
+												},
+											}),
+										}}
+										options={paymentTypeOptions}
+										onChange={(e: any, action: any) => {
+											if (action.action === 'select-option') {
+												e && setPaymentDocumentIndex(paymentTypeOptions.findIndex((option) => option.value === e.value))
+											}
+										}}
+									/>
+								</div>
+								<div className="form-control mt-5">
 									<FormLabel htmlFor="payment-date">Tahsilat Tarihi</FormLabel>
 									<Litepicker
 										id="payment-date"
@@ -320,42 +462,46 @@ function Show(props: BookingShowProps) {
 										decimalSeparator=","
 										decimalScale={2}
 										suffix={` ${data.currency}` || ' TRY'}
-										value={data.currency_amount}
+										value={data.amount}
 										decimalsLimit={2}
 										required={true}
-										onValueChange={(value) => setData((data) => ({...data, currency_amount: value || '0'}))}
-										name="currency_amount"
+										onValueChange={(value, name, values) => {
+											setData((data) => ({...data, amount: values?.float?.toFixed(2) || '0'}))
+											if (values && values.float !== null && values.float > maxAmount) {
+												Toast.fire({
+													icon: 'error',
+													title: maxAmountErr,
+												})
+												setData((data) => ({...data, amount: maxAmount.toFixed(2)}))
+											}
+										}}
+										name="amount"
 										className="w-full rounded-md border-slate-200 text-right text-xl font-extrabold shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 									/>
-									{errors.currency_amount && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.currency_amount}</div>
-									)}
+									{errors.amount && <div className="text-theme-6 mt-2 text-danger">{errors.amount}</div>}
 								</div>
 								<div className="form-control mt-5">
 									<FormLabel htmlFor="case">Kasa / Banka</FormLabel>
 									<TomSelect
 										id="case"
-										name="case_and_bank_id"
+										name="bank_id"
 										className="w-full"
 										options={{
 											placeholder: 'Kasa / Banka Seçiniz',
 										}}
-										value={data.case_and_bank_id}
-										onChange={(e) => setData((data) => ({...data, case_and_bank_id: e.toString()}))}>
+										value={data.bank_id}
+										onChange={(e) => setData((data) => ({...data, bank_id: e.toString()}))}>
 										<option>Seçiniz</option>
-										{props.case_and_banks.map((case_and_bank) => (
+										{props.banks.map((bank) => (
 											<option
-												key={case_and_bank.id}
-												value={case_and_bank.id}>
-												{case_and_bank.name}
+												key={bank.id}
+												value={bank.id}>
+												{bank.name}
 											</option>
 										))}
 									</TomSelect>
-									{errors.case_and_bank_id && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.case_and_bank_id}</div>
-									)}
+									{errors.bank_id && <div className="text-theme-6 mt-2 text-danger">{errors.bank_id}</div>}
 								</div>
-
 								<div className="form-control mt-5">
 									<FormLabel
 										htmlFor="payment-method"
@@ -397,6 +543,7 @@ function Show(props: BookingShowProps) {
 										id="payment-cancel"
 										className="shadow-md"
 										variant="secondary"
+										onClick={() => setShowPaymentForm(false)}
 										type="button">
 										Vazgeç
 									</Button>
@@ -421,7 +568,6 @@ function Show(props: BookingShowProps) {
 										</div>
 									))}
 								</div>
-								<form>asdas</form>
 							</div>
 						)}
 					</div>

@@ -3,7 +3,13 @@ import {twMerge} from 'tailwind-merge'
 import Tippy from '@/Components/Tippy'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
-import {BookingResultProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
+import {
+	BookingResultProps,
+	CheckedRoomsDailyPriceProps,
+	CheckedRoomsProps,
+	RoomDailyPriceProps,
+	RoomTypeRoomGuestsProps,
+} from '@/Pages/Hotel/Booking/types/steps'
 import {CustomerProps, DailyPriceProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
 import CurrencyInput from 'react-currency-input-field'
 import SummarySelectedRoom from '@/Pages/Hotel/Booking/components/SummarySelectedRoom'
@@ -12,6 +18,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {router} from '@inertiajs/react'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
+import {floor} from 'lodash'
 interface BookingSummaryProps {
 	number_of_adults: number
 	number_of_children: number
@@ -22,6 +29,7 @@ interface BookingSummaryProps {
 	bookingResult: BookingResultProps | undefined
 	checkedRooms: CheckedRoomsProps | undefined
 	setCheckedRooms: React.Dispatch<React.SetStateAction<CheckedRoomsProps | undefined>>
+	dailyPrices: CheckedRoomsDailyPriceProps | undefined
 	grandTotal: number
 	customerId: number | undefined
 	bookingCustomer: CustomerProps | undefined
@@ -35,9 +43,14 @@ function BookingSummary(props: BookingSummaryProps) {
 	const mySwal = withReactContent(Swal)
 	const [nextStepDisabled, setNextStepDisabled] = useState(true)
 	const [grandTotal, setGrandTotal] = useState<number>(parseFloat(props.grandTotal.toFixed(2)))
-	const [dailyPrices, setDailyPrices] = useState<{[key: number]: DailyPriceProps[]}>(
-		props.data.map((item) => item.price.daily_prices),
-	)
+	const [discountRate, setDiscountRate] = useState(1)
+	const [discountableDailyPrices, setDiscountableDailyPrices] = useState(props.dailyPrices)
+
+	const formatter = new Intl.NumberFormat('en-US', {
+		style: 'decimal',
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})
 
 	const Toast = mySwal.mixin({
 		toast: true,
@@ -55,6 +68,7 @@ function BookingSummary(props: BookingSummaryProps) {
 		if (props.step === 2) {
 			props.checkedRooms &&
 				setNextStepDisabled(Object.values(props.checkedRooms).filter((item) => item.length > 0).length === 0)
+			!props.checkedRooms && setDiscountableDailyPrices(undefined)
 		}
 		if (props.step === 3) {
 			setNextStepDisabled(props.customerId === undefined)
@@ -67,7 +81,7 @@ function BookingSummary(props: BookingSummaryProps) {
 						Object.values(room).forEach((groom) => {
 							groom &&
 								Object.values(groom).forEach((guest) => {
-									if (guest.name === '' || guest.surname === '') {
+									if (guest.name === '' || guest.surname === '' || guest.identification_number === '') {
 										checker.push(false)
 									}
 								})
@@ -91,24 +105,32 @@ function BookingSummary(props: BookingSummaryProps) {
 
 	useEffect(() => {
 		const rate = grandTotal / props.grandTotal
-		console.log('rate', rate)
-		setDailyPrices((prevState) => {
-			props.data.forEach((item, index) => {
-				prevState[index] = {
-					...prevState[index],
-					...item.price.daily_prices.map((dailyPrice) => {
-						return {
-							...dailyPrice,
-							price: parseFloat((dailyPrice.price * rate).toFixed(2)),
-							fprice: parseFloat((dailyPrice.price * rate).toFixed(2)).toLocaleString('tr-TR'),
-							fprice_with_currency:
-								parseFloat((dailyPrice.price * rate).toFixed(2)).toLocaleString('tr-TR') + ' ' + props.pricingCurrency,
-						}
-					}),
-				}
+		setDiscountRate(rate)
+		const newDailyPrices: {[key: number]: any[]} = {}
+		if (props.dailyPrices) {
+			Object.keys(props.dailyPrices).forEach((key_rt) => {
+				newDailyPrices[parseInt(key_rt)] = [] as RoomDailyPriceProps[]
+				props.dailyPrices &&
+					Object.keys(props.dailyPrices[parseInt(key_rt)]).forEach((key_r) => {
+						newDailyPrices[parseInt(key_rt)][parseInt(key_r)] = [] as DailyPriceProps[]
+						props.dailyPrices &&
+							Object.values(props.dailyPrices[parseInt(key_rt)][parseInt(key_r)]).forEach((daily_price, key_day) => {
+								// @ts-ignore
+								const price = floor(props.dailyPrices[parseInt(key_rt)][parseInt(key_r)][key_day].price * rate, 2)
+								const fprice = formatter.format(price)
+								newDailyPrices[parseInt(key_rt)][parseInt(key_r)][key_day] = {
+									date: daily_price.date,
+									price: price,
+									fprice: fprice,
+									fprice_with_currency: `${fprice} ${props.pricingCurrency}`,
+								}
+							})
+					})
 			})
-			return prevState
-		})
+		}
+		//newDailyPrices için içi boş dizi elamanlarının hepsini temizle
+		console.log(newDailyPrices)
+		setDiscountableDailyPrices(newDailyPrices)
 	}, [grandTotal])
 
 	const handleSubmit = (e: any) => {
@@ -118,7 +140,8 @@ function BookingSummary(props: BookingSummaryProps) {
 				booking_result: props.bookingResult,
 				checked_rooms: props.checkedRooms,
 				checkin_required: props.checkinRequired,
-				daily_prices: dailyPrices,
+				discount_rate: discountRate,
+				daily_prices: discountableDailyPrices,
 				grand_total: grandTotal,
 				discount: props.grandTotal - grandTotal,
 				customer_id: props.customerId,
@@ -354,7 +377,10 @@ function BookingSummary(props: BookingSummaryProps) {
 								pricingCurrency={props.pricingCurrency}
 								grandTotal={grandTotal}
 								setGrandTotal={setGrandTotal}
+								discountableDailyPrices={discountableDailyPrices || {}}
+								discountRate={discountRate}
 								room={room}
+								roomType={props.data.find((r) => r.id === room.id) as StepOneDataProps}
 							/>
 						))}
 						{grandTotal < props.grandTotal && (

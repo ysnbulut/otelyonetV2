@@ -14,10 +14,11 @@ return new class extends Migration {
 			$table->id();
 			$table
 				->foreignId('building_id')
+                ->default(1)
 				->constrained('buildings')
-				->onDelete('cascade')
-				->default(1);
-			$table->string('name');
+                ->onUpdate('cascade')
+				->onDelete('cascade');
+			$table->string('name', 50);
 			$table->timestamps();
 			$table->softDeletes();
 		});

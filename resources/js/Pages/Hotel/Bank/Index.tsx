@@ -19,7 +19,7 @@ function Index(props: PageProps) {
 	const handleKeyDown = (e: any): void => {
 		if (e.key === 'Enter') {
 			const query = Object.keys(pickBy(filter)).length ? pickBy(filter) : {remember: 'forget'}
-			router.get(route('hotel.case_and_banks.index'), query, {
+			router.get(route('hotel.banks.index'), query, {
 				replace: false,
 				preserveState: true,
 				only: ['customers'],
@@ -29,7 +29,7 @@ function Index(props: PageProps) {
 
 	const handlePerPage = (e: any): void => {
 		router.get(
-			route('hotel.case_and_banks.index'),
+			route('hotel.banks.index'),
 			{per_page: e.target.value},
 			{
 				replace: true,
@@ -65,7 +65,7 @@ function Index(props: PageProps) {
 						</div>
 						<Tippy
 							as={Button}
-							// onClick={() => router.visit(route('hotel.case_and_banks.create'))}
+							// onClick={() => router.visit(route('hotel.banks.create'))}
 							variant="soft-primary"
 							className="intro-x"
 							content="Yeni Kasa Ekle">
@@ -86,7 +86,7 @@ function Index(props: PageProps) {
 								<div className="flex flex-col items-center p-5 lg:flex-row">
 									<div className="mt-3 text-center lg:ml-2 lg:mr-auto lg:mt-0 lg:text-left">
 										<Link
-											href={route('hotel.case_and_banks.edit', bank.id)}
+											href={route('hotel.banks.edit', bank.id)}
 											className="text-3xl font-normal">
 											{bank.name} ({bank.currency})
 										</Link>
@@ -198,7 +198,7 @@ Index.layout = (page: any) => (
 			},
 			{
 				title: 'Kasa ve Bankalar',
-				href: route('hotel.case_and_banks.index'),
+				href: route('hotel.banks.index'),
 			},
 		]}>
 		{page}

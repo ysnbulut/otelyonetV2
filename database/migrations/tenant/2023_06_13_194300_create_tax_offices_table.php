@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('tax_offices', function (Blueprint $table) {
             $table->id();
             $table->integer('province_id');
-            $table->string('province');
-            $table->string('district');
-            $table->string('code');
-            $table->string('tax_office');
+            $table->string('code')->unique();
+            $table->string('tax_office', 100);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

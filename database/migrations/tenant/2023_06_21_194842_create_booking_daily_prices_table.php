@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('booking_daily_prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('booking_total_price_id')->constrained();
-            $table->foreignId('booking_room_id')->constrained();
+            $table->foreignId('booking_room_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->date('date');
-            $table->double('original_price');
-            $table->double('discount')->default(0);
-            $table->double('price');
+            $table->double('original_price', 15, 4);
+            $table->double('discount', 15, 4)->default(0);
+            $table->double('price', 15, 4);
             $table->enum('currency', [
                 'TRY',
                 'USD',

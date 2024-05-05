@@ -6,6 +6,7 @@ import countryList from '@/json/country.json'
 import Select from 'react-select'
 import Litepicker from '@/Components/Litepicker'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
+import dayjs from 'dayjs'
 interface RoomGuestsProps {
 	citizens: CitizenProps[]
 	guestIndex: number
@@ -25,9 +26,9 @@ function RoomGuests(props: RoomGuestsProps) {
 		name: props.guest.name,
 		surname: props.guest.surname,
 		gender: props.guest.gender || genderOptions[0].value,
-		birthday: props.guest.birthday,
-		citizen_id: props.guest.citizen_id,
-		citizen: props.guest.citizen,
+		birthday: props.guest.birthday === '' ? '01.01.1990' : props.guest.birthday,
+		citizen_id: props.guest.citizen_id === '' ? '1' : props.guest.citizen_id,
+		citizen: props.guest.citizen === '' ? countryList[0].label : props.guest.citizen,
 		identification_number: props.guest.identification_number,
 		is_foreign_national: props.guest.is_foreign_national,
 	})
@@ -104,10 +105,11 @@ function RoomGuests(props: RoomGuestsProps) {
 					value={data.birthday}
 					className="px-1.5 py-1 text-xs"
 					options={{
+						startDate: dayjs().subtract(25, 'year').format('DD.MM.YYYY'),
 						singleMode: true,
 						lang: 'tr-TR',
 						dropdowns: {
-							minYear: 1950,
+							minYear: 1930,
 							maxYear: null,
 							months: true,
 							years: true,

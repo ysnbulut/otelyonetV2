@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property mixed|string $check_in
+ * @property mixed|string $check_out
+ */
 class BookingStepOneRequest extends FormRequest
 {
     public function rules(): array

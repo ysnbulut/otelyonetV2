@@ -61,7 +61,7 @@ class BookingRoomsController extends Controller
                 'check_out_kbs' => 0,
             ];
         }
-        return response()->json($returnData);
+        return redirect()->back()->with('success', 'Guests added successfully');
     }
 
     /**
@@ -117,6 +117,7 @@ class BookingRoomsController extends Controller
      */
     public function destroy($booking_room_id)
     {
+        //TODO: Burası komple revize
         $bookingRoom = BookingRoom::find($booking_room_id);
         $bookingRoom->booking_guests()->delete();
         $deletedPrice = 0;

@@ -6,9 +6,13 @@ use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Plank\Mediable\Media;
+use Plank\Mediable\Mediable;
+use Plank\Mediable\MediableInterface;
 
 /**
  * App\Models\RoomType
@@ -37,45 +41,51 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @method static Builder|RoomType query()
  * @method static Builder|RoomType withTrashed()
  * @method static Builder|RoomType withoutTrashed()
- * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
- * @property-read Collection<int, \App\Models\UnitPrice> $unitPrices
+ * @property-read Collection<int, Media> $media
+ * @method static \Plank\Mediable\MediableCollection<int, static> all($columns = ['*'])
+ * @method static \Plank\Mediable\MediableCollection<int, static> get($columns = ['*'])
+ * @method static Builder|RoomType whereHasMedia($tags = [], bool $matchAll = false)
+ * @method static Builder|RoomType whereHasMediaMatchAll($tags)
+ * @method static Builder|RoomType withMedia($tags = [], bool $matchAll = false, bool $withVariants = false)
+ * @method static Builder|RoomType withMediaAndVariants($tags = [], bool $matchAll = false)
+ * @method static Builder|RoomType withMediaAndVariantsMatchAll($tags = [])
+ * @method static Builder|RoomType withMediaMatchAll(bool $tags = [], bool $withVariants = false)
  * @mixin Eloquent
  */
-class RoomType extends Model implements HasMedia
+class RoomType extends Model implements MediableInterface
 {
-    use SoftDeletes, InteractsWithMedia;
+    use SoftDeletes, Mediable;
 
 
     protected $fillable = ['name', 'description', 'size', 'adult_capacity', 'child_capacity', 'room_count'];
 
-    public function rooms(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function rooms(): HasManyThrough
     {
         return $this->hasManyThrough(Room::class, TypeHasView::class, 'type_id', 'type_has_view_id', 'id', 'id');
     }
 
-    public function beds(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function beds(): BelongsToMany
     {
         return $this->belongsToMany(BedType::class, 'type_has_beds', 'type_id', 'bed_type_id')->withPivot(['id','count']);
     }
 
-    public function views(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function views(): BelongsToMany
     {
-        return $this->belongsToMany(RoomView::class, 'type_has_views', 'type_id', 'view_id')->withPivot('id')
-            ->wherePivotNull('deleted_at');
+        return $this->belongsToMany(RoomView::class, 'type_has_views', 'type_id', 'view_id')->withPivot('id');
     }
 
-    public function typeHasViews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function typeHasViews(): HasMany
     {
         return $this->hasMany(TypeHasView::class, 'type_id', 'id');
     }
 
-    public function features(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function features(): BelongsToMany
     {
         return $this->belongsToMany(RoomTypeFeature::class, 'type_has_features', 'type_id', 'feature_id')->withPivot('id', 'order_no');
     }
 
-    public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function unitPrices(): HasManyThrough
     {
         return $this->hasManyThrough(
             UnitPrice::class,
@@ -87,12 +97,12 @@ class RoomType extends Model implements HasMedia
         );
     }
 
-    public function variationsOfGuests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function variationsOfGuests(): HasMany
     {
         return $this->hasMany(VariationsOfGuestsRoomType::class, 'room_type_id', 'id');
     }
 
-    public function variationMultipliers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function variationMultipliers(): HasMany
     {
         return $this->hasMany(VariationMultiplier::class, 'room_type_id', 'id');
     }

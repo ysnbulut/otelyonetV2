@@ -18,16 +18,18 @@ function Show({...props}: PageProps) {
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
 	const {data, setData, post, processing, errors} = useForm({
 		customer_id: props.customer.id,
+		type: 'income',
 		payment_date: dayjs().format('DD.MM.YYYY'),
-		case_and_bank_id: '',
+		bank_id: '',
 		currency: 'TRY',
+		currency_rate: 1,
 		payment_method: '',
-		currency_amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+		amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
 		description: '',
 	})
 
 	useEffect(() => {
-		setData((data) => ({...data, currency_amount: '0,00'}))
+		setData((data) => ({...data, amount: '0,00'}))
 		if (data.currency !== 'TRY') {
 			axios
 				.post(route('amount.exchange'), {
@@ -35,7 +37,11 @@ function Show({...props}: PageProps) {
 					currency: data.currency,
 				})
 				.then((response) => {
-					setData((data) => ({...data, currency_amount: response.data.amount}))
+					setData((data) => ({
+						...data,
+						amount: response.data.total,
+						currency_rate: response.data.exchange_rate,
+					}))
 				})
 				.catch((error) => {
 					console.log(error)
@@ -43,25 +49,24 @@ function Show({...props}: PageProps) {
 		} else {
 			setData((data) => ({
 				...data,
-				currency_amount:
-					props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+				amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+				currency_rate: 1,
 			}))
 		}
 	}, [data.currency])
 
 	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		post(route('hotel.customer_payments.store'), {
+		post(route('hotel.customers.transaction.store', props.customer.id), {
 			onSuccess: () => {
 				setShowPaymentForm(false)
 				setData((data) => ({
 					...data,
 					payment_date: dayjs().format('DD.MM.YYYY'),
-					case_and_bank_id: '',
+					bank_id: '',
 					currency: 'TRY',
 					payment_method: '',
-					currency_amount:
-						props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+					amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
 					description: '',
 				}))
 			},
@@ -185,40 +190,38 @@ function Show({...props}: PageProps) {
 										decimalSeparator=","
 										decimalScale={2}
 										suffix={` ${data.currency}` || ' TRY'}
-										value={data.currency_amount}
+										value={data.amount}
 										decimalsLimit={2}
 										required={true}
-										onValueChange={(value) => setData((data) => ({...data, currency_amount: value || '0'}))}
-										name="currency_amount"
+										onValueChange={(value, name, values) =>
+											setData((data) => ({...data, amount: values?.float?.toFixed(2) || '0'}))
+										}
+										name="amount"
 										className="w-full rounded-md border-slate-200 text-right text-xl font-extrabold shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 									/>
-									{errors.currency_amount && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.currency_amount}</div>
-									)}
+									{errors.amount && <div className="text-theme-6 mt-2 text-danger">{errors.amount}</div>}
 								</div>
 								<div className="form-control mt-5">
 									<FormLabel htmlFor="case">Kasa / Banka</FormLabel>
 									<TomSelect
 										id="case"
-										name="case_and_bank_id"
+										name="bank_id"
 										className="w-full"
 										options={{
 											placeholder: 'Kasa / Banka Seçiniz',
 										}}
-										value={data.case_and_bank_id}
-										onChange={(e) => setData((data) => ({...data, case_and_bank_id: e.toString()}))}>
+										value={data.bank_id}
+										onChange={(e) => setData((data) => ({...data, bank_id: e.toString()}))}>
 										<option>Seçiniz</option>
-										{props.case_and_banks.map((case_and_bank) => (
+										{props.banks.map((bank) => (
 											<option
-												key={case_and_bank.id}
-												value={case_and_bank.id}>
-												{case_and_bank.name}
+												key={bank.id}
+												value={bank.id}>
+												{bank.name}
 											</option>
 										))}
 									</TomSelect>
-									{errors.case_and_bank_id && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.case_and_bank_id}</div>
-									)}
+									{errors.bank_id && <div className="text-theme-6 mt-2 text-danger">{errors.bank_id}</div>}
 								</div>
 
 								<div className="form-control mt-5">
@@ -238,6 +241,7 @@ function Show({...props}: PageProps) {
 										<option value="cash">Nakit</option>
 										<option value="credit_card">Kredi Kartı</option>
 										<option value="bank_transfer">Banka Havale/EFT</option>
+										<option value="virtual_pos">Sanal Pos</option>
 									</TomSelect>
 									{errors.payment_method && (
 										<div className="text-theme-6 mt-2 text-danger">{errors.payment_method}</div>

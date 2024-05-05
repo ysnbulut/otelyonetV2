@@ -47,50 +47,38 @@ const initialState: SideMenuState = {
 				},
 			],
 		},
-		// {
-		// 	icon: 'Store',
-		// 	title: 'POS',
-		// 	pathname: 'hotel.pos.index',
-		// 	permission: ['hotel.customers.index'],
-		// 	subMenu: [
-		// 		{
-		// 			icon: 'ScanBarcode',
-		// 			title: 'Ürünler',
-		// 			pathname: 'hotel.products.index',
-		// 			permission: ['hotel.booking_create.*'],
-		// 		},
-		// 		{
-		// 			icon: 'Group',
-		// 			title: 'Ürün Kategorileri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'ShowerHead',
-		// 			title: 'Hizmetler',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Boxes',
-		// 			title: 'Hizmet Kategorileri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Combine',
-		// 			title: 'Satış Üniteleri',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 		{
-		// 			icon: 'Split',
-		// 			title: 'Satış Kanalları',
-		// 			pathname: 'hotel.pos.index',
-		// 			permission: ['hotel.bookings.index'],
-		// 		},
-		// 	],
-		// },
+		{
+			icon: 'Store',
+			title: 'POS',
+			pathname: 'hotel.pos.index',
+			permission: ['hotel.customers.index'],
+			subMenu: [
+				{
+					icon: 'ScanBarcode',
+					title: 'Ürünler / Hizmetler',
+					pathname: 'hotel.items.index',
+					permission: ['hotel.booking_create.*'],
+				},
+				// {
+				// 	icon: 'Group',
+				// 	title: 'Ürün / Hizmet Kategorileri',
+				// 	pathname: 'hotel.pos.index',
+				// 	permission: ['hotel.bookings.index'],
+				// },
+				// {
+				// 	icon: 'Split',
+				// 	title: 'Satış Kanalları',
+				// 	pathname: 'hotel.pos.index',
+				// 	permission: ['hotel.bookings.index'],
+				// },
+				// {
+				// 	icon: 'BringToFront',
+				// 	title: 'Satış Üniteleri',
+				// 	pathname: 'hotel.sales_units.index',
+				// 	permission: ['hotel.sales_units.index'],
+				// },
+			],
+		},
 		{
 			icon: 'Users2',
 			title: 'Müşteriler',
@@ -106,8 +94,8 @@ const initialState: SideMenuState = {
 		{
 			icon: 'Wallet2',
 			title: 'Kasa ve Bankalar',
-			pathname: 'hotel.case_and_banks.index',
-			permission: ['hotel.case_and_banks.index'],
+			pathname: 'hotel.banks.index',
+			permission: ['hotel.banks.index'],
 		},
 		{
 			icon: 'DoorOpen',

@@ -37,12 +37,6 @@ use Stancl\Tenancy\Database\TenantCollection;
  * // * @method static \Stancl\Tenancy\Database\TenantCollection<int, static> all($columns = ['*'])
  * // * @method static \Stancl\Tenancy\Database\TenantCollection<int, static> get($columns = ['*'])
  * @property-read \App\Models\Hotel|null $hotel
- * @method static TenantCollection<int, static> all($columns = ['*'])
- * @method static TenantCollection<int, static> get($columns = ['*'])
- * @method static TenantCollection<int, static> all($columns = ['*'])
- * @method static TenantCollection<int, static> get($columns = ['*'])
- * @method static TenantCollection<int, static> all($columns = ['*'])
- * @method static TenantCollection<int, static> get($columns = ['*'])
  * @mixin Eloquent
  */
 

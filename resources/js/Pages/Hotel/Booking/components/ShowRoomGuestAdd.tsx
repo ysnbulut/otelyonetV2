@@ -3,14 +3,18 @@ import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
 import ShowRoomGuest from '@/Pages/Hotel/Booking/components/ShowRoomGuest'
 import Tippy from '@/Components/Tippy'
-import axios from 'axios'
-import {CitizenProps, GuestsProps} from '@/Pages/Hotel/Booking/types/show'
+import {CitizenProps, GuestsProps, PageProps} from '@/Pages/Hotel/Booking/types/show'
+import {router} from '@inertiajs/react'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
+import {FormDataConvertible} from '@inertiajs/inertia'
 
 interface ShowRoomGuestProps {
 	totalGuests: number
 	bookingRoomId: number
 	citizens: CitizenProps[]
 	setRoomGuests: React.Dispatch<React.SetStateAction<GuestsProps[]>>
+	roomId: number
 }
 
 interface AddGuestsProps {
@@ -23,9 +27,22 @@ interface AddGuestsProps {
 }
 
 function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
+	const MySwal = withReactContent(Swal)
 	const [roomGuests, setRoomGuests] = useState<AddGuestsProps[]>([])
 	const [errors, setErrors] = useState()
 	const [addGuest, setAddGuest] = useState<boolean>(false)
+
+	const Toast = MySwal.mixin({
+		toast: true,
+		position: 'top-right',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: true,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
+		},
+	})
 
 	const updateRoomGuests = (index: number, newGuest: AddGuestsProps): void => {
 		setRoomGuests((roomGuests) => {
@@ -80,15 +97,31 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 	}, [addGuest])
 
 	const handleSaveRoomGuests = () => {
-		axios
-			.post(route('hotel.bookings.booking_room.add_guest'), {booking_room_id: props.bookingRoomId, guests: roomGuests})
-			.then((response: any) => {
-				props.setRoomGuests(response.data)
-			})
-			.catch((error: any) => {
-				console.log(error)
-				setErrors(error.response.data.errors)
-			})
+		router.post(
+			route('hotel.bookings.booking_room.add_guest'),
+			{booking_room_id: props.bookingRoomId, guests: roomGuests as unknown as FormDataConvertible},
+			{
+				preserveScroll: true,
+				preserveState: true,
+				// @ts-ignore
+				onSuccess: (response: {props: PageProps}) => {
+					props.setRoomGuests(
+						(prevState) => response.props.booking.rooms.find((room) => room.id === props.roomId)?.guests ?? prevState,
+					)
+					Toast.fire({
+						icon: 'success',
+						title: 'Misafirler başarıyla eklendi.',
+					})
+				},
+				onError: (error: any) => {
+					setErrors(error.response.data.errors)
+					Toast.fire({
+						icon: 'error',
+						title: 'Misafirler eklenirken hata oluştu.',
+					})
+				},
+			},
+		)
 	}
 
 	return (

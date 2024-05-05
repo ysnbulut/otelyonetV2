@@ -13,7 +13,7 @@ return new class extends Migration {
 		Schema::create('room_type_features', function (Blueprint $table) {
 			$table->id();
             $table->integer('order_no');
-			$table->string('name');
+			$table->string('name', 50)->unique();
             $table->boolean('is_paid')->default(false);
 			$table->timestamps();
 			$table->softDeletes();

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateCustomerRequest;
-use App\Models\CaseAndBank;
+use App\Models\Bank;
 use App\Models\Customer;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
@@ -35,17 +36,17 @@ class CustomerController extends Controller
                 ->paginate(Request::get('per_page') ?? 10)
                 ->withQueryString()
                 ->through(function ($customer) {
+                    $grandTotal = $customer->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type == 'total')->map(fn($total) => $total->amount))->flatten(1)->sum();
+                    $remainingBalance = $grandTotal - $customer->documents->map(fn($document) => $document->payments->map(fn($payment) => $payment->transaction->amount))->flatten(1)->sum();
                     return [
                         'id' => $customer->id,
                         'title' => $customer->title,
                         'type' => $customer->type,
                         'tax_office' => $customer->tax_office,
                         'tax_number' => $customer->tax_number,
-                        'remaining_balance' =>
-                            $customer
-                                ->remainingBalance(),
+                        'remaining_balance' => $remainingBalance,
                         'remaining_balance_formatted' =>
-                            number_format(abs($customer->remainingBalance()), 2, '.', ',') . ' ' . $this->settings->currency['value'],
+                            number_format(abs($remainingBalance), 2, '.', ',') . ' ' . $this->settings->currency['value'],
                     ];
                 }),
         ]);
@@ -74,7 +75,7 @@ class CustomerController extends Controller
      */
     public function search($query)
     {
-        $response = [
+        return [
             'query' => $query,
             'customers' => Customer::search($query)
                 ->get()
@@ -92,7 +93,6 @@ class CustomerController extends Controller
                     ];
                 }),
         ];
-        return $response;
     }
 
     /**
@@ -106,6 +106,16 @@ class CustomerController extends Controller
             ->with('success', 'Müşteri oluşturuldu.');
     }
 
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('Hotel/Customer/Create', [
+            'banks' => Bank::select(['id', 'name', 'type', 'currency'])->get(),
+        ]);
+    }
+
     public function storeApi(StoreCustomerRequest $request)
     {
         $created_customer = Customer::create($request->validated());
@@ -115,20 +125,35 @@ class CustomerController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return Inertia::render('Hotel/Customer/Create', [
-            'case_and_banks' => CaseAndBank::select(['id', 'name', 'type', 'currency'])->get(),
-        ]);
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(Customer $customer)
     {
+        $documentsTotal = $customer
+            ->documents
+            ->map(
+                fn($document) => $document->total
+                    ->filter(
+                        fn($total) => $total->type == 'total'
+                    )
+                    ->map(
+                        function ($total) use ($document) {
+                            return $total->amount * $document->currency_rate;
+                        })
+            )->flatten(1)
+            ->sum();
+        $transactionsTotal = $customer
+            ->documents
+            ->map(
+                fn($document) => $document
+                    ->payments
+                    ->map(
+                        fn($payment) => $payment->amount
+                    )
+            )
+            ->flatten(1)
+            ->sum();
+        $remainingBalance = $transactionsTotal - $documentsTotal;
         return Inertia::render('Hotel/Customer/Show', [
             'currency' => $this->settings->currency['value'],
             'customer' => [
@@ -142,34 +167,118 @@ class CustomerController extends Controller
                 'country' => $customer->country,
                 'city' => $customer->city,
                 'address' => $customer->address,
-                'remaining_balance' => round($customer->remainingBalance(), 2),
-                'remaining_balance_formatted' => number_format(round(abs($customer->remainingBalance()), 2), 2) . ' ' .
+                'remaining_balance' => $remainingBalance,
+                'remaining_balance_formatted' => number_format(round(abs($remainingBalance), 2), 2) . ' ' .
                     $this->settings->currency['value'],
             ],
-            'case_and_banks' => CaseAndBank::select(['id', 'name', 'type', 'currency'])->get(),
+            'banks' => Bank::select(['id', 'name', 'type', 'currency'])->get(),
         ]);
+    }
+
+    public function transactionAdd(StoreTransactionRequest $request, Customer $customer)
+    {
+        $now = Carbon::now();
+        $nowParseTime = Carbon::parse($now)->format('H:i:s');
+        $transaction = $customer->transactions()->create([
+            'type' => $request->type,
+            'bank_id' => $request->bank_id,
+            'paid_at' => Carbon::parse($request->payment_date . ' ' . $nowParseTime)->format('Y-m-d H:i:s'),
+            'description' => $request->description,
+            'amount' => $request->amount,
+            'currency' => $request->currency,
+            'currency_rate' => $request->currency_rate,
+            'payment_method' => $request->payment_method,
+        ]);
+        $amount = $request->amount;
+        $customer->documents->each(function ($document) use ($request, $transaction, &$amount) {
+            if ($amount > 0) {
+                if ($document->currency !== $request->currency) {
+                    $rate = $document->currency_rate / $request->currency_rate;
+                    $dcTotal = $document->total->filter(function ($total) {
+                        return $total->type === 'total';
+                    })->first()->amount - $document->payments->sum('amount');
+                    $exchange = $dcTotal * $rate;
+                    $diff = $exchange - $amount;
+                    if ($diff < 0) {
+                        $document->payments()->create([
+                            'transaction_id' => $transaction->id,
+                            'amount' => $dcTotal,
+                        ]);
+                        $amount = round(abs($diff), 2);
+                        return true;
+                    } else {
+                        $document->payments()->create([
+                            'transaction_id' => $transaction->id,
+                            'amount' => $amount / $rate,
+                        ]);
+                        $amount = 0;
+                        return false;
+                    }
+                } else {
+                    $dcTotal = $document->total->filter(function ($total) {
+                        return $total->type === 'total';
+                    })->first()->amount;
+                    $diff = $dcTotal - $amount;
+                    if ($diff < 0) {
+                        $document->payments()->create([
+                            'transaction_id' => $transaction->id,
+                            'amount' => $dcTotal,
+                        ]);
+                        $amount = abs($diff);
+                        return true;
+                    } else {
+                        $document->payments()->create([
+                            'transaction_id' => $transaction->id,
+                            'amount' => $amount,
+                        ]);
+                        $amount = 0;
+                        return false;
+                    }
+                }
+            } else {
+                return false;
+            }
+        });
+        return redirect()
+            ->route('hotel.customers.show', $customer)
+            ->with('success', 'Ödeme eklendi.');
     }
 
     public function transactions(Customer $customer)
     {
-        return $customer->bookings()
-            ->select(['id', 'customer_id', 'check_in as date', 'type' => DB::raw("'booking'")])
-            ->union(
-                $customer->payments()
-                    ->select(['id', 'customer_id', 'payment_date as date', 'type' => DB::raw("'payment'")])
-            )->orderBy('date', 'desc')
+        return $customer
+            ->transactions()
+            ->select([
+                'id',
+                'currency',
+                'payment_method',
+                'bank_id',
+                'paid_at as date',
+                DB::raw('"transaction" as type'),
+                'amount',
+            ])
+            ->union($customer
+                ->documents()
+                ->select([
+                    'id',
+                    'currency',
+                    'payment_method' => DB::raw('null'),
+                    'bank_id' => DB::raw('null'),
+                    'issue_date as date',
+                    DB::raw('"document" as type'),
+                    'amount' => DB::raw('(SELECT SUM(amount) FROM document_totals WHERE document_totals.document_id = documents.id AND document_totals.type = "total")')
+                ]))
+            ->orderBy('date')
             ->paginate(10)
             ->withQueryString()
-            ->through(function ($transaction) use ($customer) {
+            ->through
+            (function ($payment) {
                 $info = '';
-                if ($transaction->booking === 'booking') {
-                    $booking = $customer->bookings()->where('id', $transaction->id)->first();
-                    $amount = $booking->total_price->grand_total;
-                    $currency = $this->settings->currency['value'];
-                    $info .= $booking->rooms->pluck('name')->implode(', ') . ' - ' . $booking->stayDurationNight() . ' (' . $booking->rooms->sum('pivot.number_of_adults') . ' Yetişkin ' . $booking->rooms->sum('pivot.number_of_children') . ' Çocuk)';
+                if ($payment->type === 'document') {
+                    $currency = $payment->currency;
+                    $amount = $payment->amount;
+                    $info .= 'Folyo...';
                 } else {
-                    $payment = $customer->payments()->where('id', $transaction->id)->first();
-                    //TODO burası dashboardda da var sonra ayrıştırılmalı fonksiyon haline gelmeli
                     if ($payment->payment_method == 'cash') {
                         $payment_method = 'Nakit';
                     } elseif ($payment->payment_method == 'credit_card') {
@@ -180,21 +289,20 @@ class CustomerController extends Controller
                         $payment_method = 'Bilinmiyor.';
                     }
                     if ($payment->currency !== $this->settings->currency['value']) {
-                        $amount = $payment->currency_amount;
-                        $info .= '(' . number_format($payment->amount_paid, 2, ',', '.') . ' ' . $this->settings->currency['value'] . ') ';
+                        $amount = $payment->amount;
+                        $info .= '(' . number_format($payment->amount, 2, ',', '.') . ' ' . $this->settings->currency['value'] . ') ';
                     } else {
-                        $amount = $payment->amount_paid;
+                        $amount = $payment->amount;
                     }
                     $currency = $payment->currency;
-                    $info .= $payment->case->name . ' ' . $payment_method . ' Ödendi. ';
+                    $info .= $payment->bank->name . ' ' . $payment_method . ' Ödendi. ';
                     $info .= $payment->description !== NULL ? '(' . $payment->description . ')' : '';
                 }
                 $amount_formatted = number_format($amount, 2, ',', '.') . ' ' . $currency;
                 return [
-                    'id' => $transaction->id,
-                    'customer_id' => $transaction->customer_id,
-                    'type' => $transaction->booking === 'booking' ? 'Rezervasyon' : 'Ödeme',
-                    'date' => Carbon::createFromFormat('Y-m-d', $transaction->date)->format('d.m.Y'),
+                    'id' => $payment->id,
+                    'type' => $payment->type,
+                    'date' => Carbon::parse($payment->date)->format('d.m.Y'),
                     'amount' => $amount_formatted,
                     'info' => $info,
                 ];

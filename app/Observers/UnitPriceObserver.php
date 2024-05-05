@@ -2,10 +2,9 @@
 
 namespace App\Observers;
 
-use App\Jobs\CMUnitPriceJob;
+use App\Jobs\ChannelManager\CMUnitPriceJob;
 use App\Models\UnitPrice;
 use App\Settings\HotelSettings;
-use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Models\Activity;
 
 class UnitPriceObserver
@@ -14,9 +13,8 @@ class UnitPriceObserver
     {
         $hotelSettings = new HotelSettings();
         $cmIsEnabled = $hotelSettings->channel_manager['value'] !== 'closed';
-        Log::log('info', 'UnitPriceObserver created', ['cmIsEnabled' => $cmIsEnabled]);
         if ($cmIsEnabled) {
-            CMUnitPriceJob::dispatch($unitPrice);
+            CMUnitPriceJob::dispatch($unitPrice)->onQueue('price');
             Activity::create([
                 'log_name' => 'unit_price',
                 'description' => 'updated',
@@ -51,7 +49,6 @@ class UnitPriceObserver
     {
         $hotelSettings = new HotelSettings();
         $cmIsEnabled = $hotelSettings->channel_manager['value'] !== 'closed';
-        Log::log('info', 'UnitPriceObserver created', ['cmIsEnabled' => $cmIsEnabled, 'unitPrice' => $unitPrice]);
         if ($cmIsEnabled) {
             CMUnitPriceJob::dispatch($unitPrice);
             Activity::create([

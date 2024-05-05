@@ -5,6 +5,7 @@ import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
+import dayjs from 'dayjs'
 interface GuestsProps {
 	name: string
 	surname: string
@@ -27,7 +28,7 @@ function ShowRoomGuest(props: ShowRoomGuestProps) {
 	const [guest, setGuest] = useState<GuestsProps>({
 		name: props.guest.name || '',
 		surname: props.guest.surname || '',
-		birthday: props.guest.birthday || '',
+		birthday: props.guest.birthday || '01.01.1990',
 		gender: props.guest.gender || 'male',
 		citizen_id: props.guest.citizen_id || '0',
 		identification_number: props.guest.identification_number || '',
@@ -54,7 +55,7 @@ function ShowRoomGuest(props: ShowRoomGuestProps) {
 							setGuest({
 								name: '',
 								surname: '',
-								birthday: '',
+								birthday: '01.01.1990',
 								gender: '',
 								citizen_id: '',
 								identification_number: '',
@@ -116,6 +117,7 @@ function ShowRoomGuest(props: ShowRoomGuestProps) {
 					value={guest.birthday}
 					className="px-1.5 py-1 text-xs"
 					options={{
+						startDate: dayjs().subtract(25, 'year').format('DD.MM.YYYY'),
 						singleMode: true,
 						lang: 'tr-TR',
 						dropdowns: {

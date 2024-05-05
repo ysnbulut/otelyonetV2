@@ -11,10 +11,6 @@ function GuestStatusColors() {
 					className="h-6 w-6 rounded-full bg-pending"
 				/>
 				<Tippy
-					content="Gelmeyecek"
-					className="h-6 w-6 rounded-full bg-danger"
-				/>
-				<Tippy
 					content="Check İn"
 					className="h-6 w-6 rounded-full bg-success"
 				/>

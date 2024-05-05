@@ -12,11 +12,19 @@ return new class extends Migration {
  {
   Schema::create('rooms', function (Blueprint $table) {
    $table->id();
-   $table->foreignId('building_id')->constrained('buildings');
-   $table->foreignId('floor_id')->constrained('floors');
-   $table->foreignId('type_has_view_id')->constrained('type_has_views');
-   $table->string('name');
-//   $table->text('description');
+   $table->foreignId('building_id')
+       ->constrained('buildings')
+       ->onUpdate('cascade')
+       ->onDelete('cascade');
+   $table->foreignId('floor_id')
+       ->constrained('floors')
+       ->onUpdate('cascade')
+       ->onDelete('cascade');
+   $table->foreignId('type_has_view_id')
+       ->constrained('type_has_views')
+       ->onUpdate('cascade')
+       ->onDelete('cascade');
+   $table->string('name', 50)->unique();
    $table->boolean('is_clean')->default(true);
    $table->boolean('status')->default(true);
    $table->timestamps();

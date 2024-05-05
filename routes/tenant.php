@@ -2,25 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Helpers\ChannelManagers;
-use App\Helpers\Helper;
-use App\Helpers\PriceCalculator;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\BookingWebhookController;
+use App\Http\Controllers\Hotel\BankController;
 use App\Http\Controllers\Hotel\BedTypeController;
 use App\Http\Controllers\Hotel\BookingController;
 use App\Http\Controllers\Hotel\BookingGuestsController;
 use App\Http\Controllers\Hotel\BookingRoomsController;
-use App\Http\Controllers\Hotel\CaseAndBanksController;
 use App\Http\Controllers\Hotel\CustomerController;
-use App\Http\Controllers\Hotel\BookingPaymentsController;
 use App\Http\Controllers\Hotel\DashboardController;
+use App\Http\Controllers\Hotel\DocumentController;
 use App\Http\Controllers\Hotel\FloorController;
 use App\Http\Controllers\Hotel\GuestController;
 use App\Http\Controllers\Hotel\GuestVariationMultiplierController;
 use App\Http\Controllers\Hotel\HotelRunnerController;
+use App\Http\Controllers\Hotel\ItemsController;
 use App\Http\Controllers\Hotel\PricingPolicySettingsController;
-use App\Http\Controllers\Hotel\ProductsController;
 use App\Http\Controllers\Hotel\RoleController;
 use App\Http\Controllers\Hotel\RoomController;
 use App\Http\Controllers\Hotel\RoomTypeController;
@@ -30,14 +25,13 @@ use App\Http\Controllers\Hotel\SalesUnitController;
 use App\Http\Controllers\Hotel\SeasonController;
 use App\Http\Controllers\Hotel\UnitPriceController;
 use App\Http\Controllers\Hotel\UserController;
-use App\Http\Controllers\MediaController;
-use App\Models\SalesUnit;
-use App\Models\Season;
-use Carbon\Carbon;
+use App\Models\Document;
+
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
+use Cknow\Money\Money;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,30 +51,28 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
 
-    require __DIR__.'/auth.php';
+    require __DIR__ . '/auth.php';
 
-    Route::post('upload-media', MediaController::class)->middleware(['auth:sanctum'])->name('upload-media');
     Route::get('/test', function () {
-        $routes = Route::getRoutes()->getRoutes();
-        $return = [];
-        foreach ($routes as $route) {
-            $return[] = [
-                'name' => $route->getName(),
-                'uri' => $route->uri(),
-                'methods' => $route->methods(),
-                'action' => $route->getAction(),
-            ];
-        }
-        return $return;
+        $settings = new \App\Settings\PricingPolicySettings();
+        $currency = $settings->pricing_currency['value'];
+
+        $money = Money::$currency(500345000.67878978, true);
+        return [
+            'money' => $money,
+            'amount' => $money->getAmount(),
+            'formatted' => $money->getMoney()->getCurrency(),
+            'formatted_without_symbol' => Money::$currency(500345000.67878978, true)->format(null, null,
+                    NumberFormatter::DECIMAL).' '.$money->getMoney()
+                    ->getCurrency(),
+        ];
     })->name('test');
 
 
-
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web','auth', 'verified'])->name
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web', 'auth', 'verified'])->name
     ('hotel.dashboard.index');
     //users
-    Route::prefix('users')->middleware(['web','auth'])->group(function () {
+    Route::prefix('users')->middleware(['web', 'auth'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('hotel.users.index');
         Route::get('/create', [UserController::class, 'create'])->name('hotel.users.create');
         Route::post('/', [UserController::class, 'store'])->name('hotel.users.store');
@@ -136,8 +128,8 @@ Route::middleware([
         Route::get('/', [RoomTypeController::class, 'index'])->name('hotel.room_types.index');
         Route::get('/create', [RoomTypeController::class, 'create'])->name('hotel.room_types.create');
         Route::post('/', [RoomTypeController::class, 'store'])->middleware('precognitive')->name('hotel.room_types.store');
-        Route::post('/{room_type}', [RoomTypeController::class, 'photoAdd'])->name('hotel.room_types.photo_add');
-        Route::delete('/{room_type}/photo/{photo_id}/delete', [RoomTypeController::class, 'photoDelete'])->name('hotel.room_types.photo_delete');
+        Route::post('/{room_type}', [RoomTypeController::class, 'imageAdd'])->name('hotel.room_types.image_add');
+        Route::delete('/{room_type}/image/{image_id}/delete', [RoomTypeController::class, 'imageDelete'])->name('hotel.room_types.image_delete');
         Route::post('/{room_type}/beds/add', [RoomTypeController::class, 'roomTypeBedAdd'])->name
         ('hotel.room_types.bed_add');
         Route::put('/{room_type}/beds/{bed_id}', [RoomTypeController::class, 'roomTypeBedEdit'])->name
@@ -148,7 +140,7 @@ Route::middleware([
         ('hotel.room_types.view_add');
         Route::delete('/{room_type}/views/{view_id}/delete', [RoomTypeController::class, 'roomTypeViewDelete'])->name
         ('hotel.room_types.view_delete');
-        Route::post('/{room_type}/photos', [RoomTypeController::class, 'photosOrdersUpdate'])->name('hotel.room_type_features.photos_orders_update');
+        Route::post('/{room_type}/images', [RoomTypeController::class, 'imagesOrdersUpdate'])->name('hotel.room_types.images_orders_update');
         Route::get('/{room_type}/edit', [RoomTypeController::class, 'edit'])->name('hotel.room_types.edit');
         Route::put('/{room_type}', [RoomTypeController::class, 'update'])->name('hotel.room_types.update');
         Route::delete('/{room_type}', [RoomTypeController::class, 'destroy'])->name('hotel.room_types.destroy');
@@ -208,11 +200,12 @@ Route::middleware([
         Route::put('/{sales_unit}', [SalesUnitController::class, 'update'])->name('hotel.sales_units.update');
         Route::delete('/{sales_unit}', [SalesUnitController::class, 'destroy'])->name('hotel.sales_units.destroy');
     });
-    //products
-    Route::prefix('products')->middleware('auth')->group(function () {
-        Route::get('/', [ProductsController::class, 'index'])->name('hotel.products.index');
-        Route::get('/create', [ProductsController::class, 'create'])->name('hotel.products.create');
-        Route::post('/', [ProductsController::class, 'store'])->name('hotel.products.store');
+    //items
+    Route::prefix('items')->middleware('auth')->group(function () {
+        Route::get('/', [ItemsController::class, 'index'])->name('hotel.items.index');
+        Route::post('/image_upload', [ItemsController::class, 'imageUpload'])->name('hotel.items.image_upload');
+        Route::get('/create', [ItemsController::class, 'create'])->name('hotel.items.create');
+        Route::post('/', [ItemsController::class, 'store'])->name('hotel.items.store');
     });
     //bookings
     Route::prefix('bookings')->middleware('auth')->group(function () {
@@ -220,6 +213,8 @@ Route::middleware([
         Route::get('/upcomings', [BookingController::class, 'upcoming'])->name('hotel.bookings.upcoming');
         Route::post('/', [BookingController::class, 'store'])->name('hotel.bookings.store');
         Route::get('/{booking}', [BookingController::class, 'show'])->name('hotel.bookings.show');
+        Route::post('/{booking}/transaction', [BookingController::class, 'transactionAdd'])
+            ->name('hotel.bookings.transaction.store');
         Route::post('/booking_room/add_guest', [BookingRoomsController::class, 'addGuests'])
             ->name('hotel.bookings.booking_room.add_guest');
         Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.bookings.edit');
@@ -234,7 +229,14 @@ Route::middleware([
     Route::prefix('booking_create')->middleware('auth')->group(function () {
         Route::get('/', [BookingController::class, 'create'])
             ->name('hotel.booking_create');
-        Route::post('/step/1', [BookingController::class, 'stepOne'])
+        Route::post('/step/1', [BookingController::class, 'getAvailableRoomsAndPrices'])
+            ->name('hotel.booking_create.step.one');
+        Route::post('/customer_add', [CustomerController::class, 'storeApi'])->name('hotel.bookings.customer_add');
+    });
+    Route::prefix('booking_create')->middleware('auth')->group(function () {
+        Route::get('/', [BookingController::class, 'create'])
+            ->name('hotel.booking_create');
+        Route::post('/step/1', [BookingController::class, 'getAvailableRoomsAndPrices'])
             ->name('hotel.booking_create.step.one');
         Route::post('/customer_add', [CustomerController::class, 'storeApi'])->name('hotel.bookings.customer_add');
     });
@@ -299,6 +301,7 @@ Route::middleware([
         Route::get('/search/{query}', [CustomerController::class, 'search'])->name('hotel.customers.search');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('hotel.customers.show');
         Route::get('/{customer}/transactions', [CustomerController::class, 'transactions'])->name('hotel.customers.transactions');
+        Route::post('/{customer}/transaction', [CustomerController::class, 'transactionAdd'])->name('hotel.customers.transaction.store');
         Route::get('/{customer}/get', [CustomerController::class, 'get'])->name('hotel.customers.get');
         Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('hotel.customers.edit');
         Route::put('/{customer}', [CustomerController::class, 'update'])->name('hotel.customers.update');
@@ -309,24 +312,35 @@ Route::middleware([
     Route::prefix('customer_payments')->middleware('auth')->group(function () {
         /*Route::get('/', [CustomerController::class, 'index'])->name('hotel.customer_payments.index');
         Route::get('/create', [CustomerController::class, 'create'])->name('hotel.customer_payments.create');*/
-        Route::post('/', [BookingPaymentsController::class, 'store'])
-            ->middleware('customer_payment_request')
-            ->name('hotel.customer_payments.store');
+//        Route::post('/', [TransactionController::class, 'store'])
+//            ->name('hotel.customer_payments.store');
         /*	Route::get('/{customer_payment}', [CustomerController::class, 'show'])->name('hotel.customer_payments.show');
             Route::get('/{customer_payment}/edit', [CustomerController::class, 'edit'])->name('hotel.customer_payments.edit');
             Route::put('/{customer_payment}', [CustomerController::class, 'update'])->name('hotel.customer_payments.update');
             Route::delete('/{customer_payment}', [CustomerController::class, 'destroy'])->name('hotel.customer_payments.destroy');*/
     });
 
-    //case_and_banks
-    Route::prefix('case_and_banks')->middleware('auth')->group(function () {
-        Route::get('/', [CaseAndBanksController::class, 'index'])->name('hotel.case_and_banks.index');
-        Route::get('/create', [CaseAndBanksController::class, 'create'])->name('hotel.case_and_banks.create');
-        Route::post('/', [CaseAndBanksController::class, 'store'])->name('hotel.case_and_banks.store');
-        //Route::get('/{case_and_banks}', [CaseAndBanksController::class, 'show'])->name('hotel.guests.show');
-        Route::get('/{case_and_banks}/edit', [CaseAndBanksController::class, 'edit'])->name('hotel.case_and_banks.edit');
-        Route::put('/{case_and_banks}', [CaseAndBanksController::class, 'update'])->name('hotel.case_and_banks.update');
-        Route::delete('/{case_and_banks}', [CaseAndBanksController::class, 'destroy'])->name('hotel.case_and_banks.destroy');
+    //banks
+    Route::prefix('banks')->middleware('auth')->group(function () {
+        Route::get('/', [BankController::class, 'index'])->name('hotel.banks.index');
+        Route::get('/create', [BankController::class, 'create'])->name('hotel.banks.create');
+        Route::post('/', [BankController::class, 'store'])->name('hotel.banks.store');
+        //Route::get('/{banks}', [BankController::class, 'show'])->name('hotel.guests.show');
+        Route::get('/{banks}/edit', [BankController::class, 'edit'])->name('hotel.banks.edit');
+        Route::put('/{banks}', [BankController::class, 'update'])->name('hotel.banks.update');
+        Route::delete('/{banks}', [BankController::class, 'destroy'])->name('hotel.banks.destroy');
+    });
+
+    //documents
+    Route::prefix('documents')->middleware('auth')->group(function () {
+//        Route::get('/', [DocumentController::class, 'index'])->name('hotel.documents.index');
+//        Route::get('/create', [DocumentController::class, 'create'])->name('hotel.documents.create');
+//        Route::post('/', [DocumentController::class, 'store'])->name('hotel.documents.store');
+//        Route::get('/{document}', [DocumentController::class, 'show'])->name('hotel.documents.show');
+//        Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('hotel.documents.edit');
+        Route::post('/{document}/item_add', [DocumentController::class, 'itemAdd'])->name('hotel.documents.item_add');
+//        Route::put('/{document}', [DocumentController::class, 'update'])->name('hotel.documents.update');
+//        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('hotel.documents.destroy');
     });
 
     //hotelrunner

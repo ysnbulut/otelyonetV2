@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('booking_notes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('booking_id')->constrained();
+            $table->foreignId('booking_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->text('note');
             $table->boolean('is_reminder')->default(false);
-            $table->dateTime('reminder_date')->nullable();
-            $table->date('last_reminder_date')->nullable();
+            $table->dateTime('due_date')->nullable();
             $table->boolean('is_read')->default(false);
+            $table->boolean('is_done')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

@@ -27,7 +27,6 @@ function TableItem(props: TableItemProps) {
 		pending: 'bg-pending',
 		check_in: 'bg-success',
 		check_out: 'bg-slate-600',
-		not_coming: 'bg-danger',
 	}
 
 	useEffect(() => {
@@ -47,7 +46,15 @@ function TableItem(props: TableItemProps) {
 						value={props.guest.booking_guests_id}
 						name={`guest-${props.guest.id}`}
 						checked={checked}
-						onChange={(e) => setChecked(e.target.checked)}
+						onChange={(e) => {
+							setChecked(e.target.checked)
+							props.setSelectedBookingGuests((prev) => {
+								if (e.target.checked) {
+									return [...prev, props.guest.booking_guests_id]
+								}
+								return prev.filter((id) => id !== props.guest.booking_guests_id)
+							})
+						}}
 					/>
 				</FormCheck>
 			</td>

@@ -5,6 +5,12 @@ namespace App\Models;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -29,6 +35,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read int|null $prices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BookingRoomTask> $tasks
  * @property-read int|null $tasks_count
+ * @property mixed $check_in
+ * @property mixed $check_out
+ * @property-read \App\Models\ReasonForCancellation|null $cancelReason
+ * @property-read Document|null $document
  * @mixin Eloquent
  */
 class BookingRoom extends Model
@@ -37,43 +47,50 @@ class BookingRoom extends Model
     protected $fillable = [
         'booking_id',
         'room_id',
+        'check_in',
+        'check_out',
         'number_of_adults',
         'number_of_children',
         'children_ages'
     ];
 
-    public function booking(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
     }
 
-    public function room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
     }
 
-    public function prices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function documents(): morphMany
+    {
+        return $this->morphMany(Document::class, 'unit');
+    }
+
+    public function prices(): HasMany
     {
         return $this->hasMany(BookingDailyPrice::class, 'booking_room_id');
     }
 
-    public function tasks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function tasks(): morphMany
     {
-        return $this->hasMany(BookingRoomTask::class, 'booking_room_id');
+        return $this->morphMany(Task::class, 'taskable');
     }
 
-    public function booking_guests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function booking_guests(): HasMany
     {
         return $this->hasMany(BookingGuests::class, 'booking_room_id');
     }
 
-    public function guests(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function guests(): BelongsToMany
     {
         return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id')->withPivot('check_in', 'check_out', 'status', 'check_in_date', 'check_out_date', 'check_in_kbs',  'check_out_kbs');
     }
 
-    public function expenses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function cancelReason(): HasOne
     {
-        return $this->hasMany(BookingRoomExpense::class, 'booking_room_id');
+        return $this->hasOne(ReasonForCancellation::class, 'booking_room_id');
     }
 }

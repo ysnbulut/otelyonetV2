@@ -1,76 +1,81 @@
 import React, {useEffect, useState} from 'react'
 import CurrencyInput from 'react-currency-input-field'
-import {BookingResultProps} from '@/Pages/Hotel/Booking/types/steps'
-import Button from '@/Components/Button'
-import Lucide from '@/Components/Lucide'
+import {BookingResultProps, CheckedRoomsDailyPriceProps, RoomDailyPriceProps} from '@/Pages/Hotel/Booking/types/steps'
+import {DailyPriceProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
 
 interface SummaryTypedRoomProps {
 	step: number
 	bookingResult: BookingResultProps | undefined
 	pricingCurrency: string
 	room: {
+		id: number
 		name: string
 		count: number
 		price: number
 		total_price: number
 	}
+	roomType: StepOneDataProps
 	grandTotal: number
 	setGrandTotal: React.Dispatch<React.SetStateAction<number>>
+	discountableDailyPrices: CheckedRoomsDailyPriceProps | {[key: number]: any}
+	discountRate: number
 }
 
 function SummaryTypedRoom(props: SummaryTypedRoomProps) {
 	const [price, setPrice] = useState<number>(props.room.price)
 	const [totalPrice, setTotalPrice] = useState<number>(props.room.total_price * props.room.count)
-	// const [priceFocus, setPriceFocus] = useState<boolean>(false)
-	// const [totalPriceFocus, setTotalPriceFocus] = useState<boolean>(false)
+
+	const roomTypeFirstRoomId =
+		props.discountableDailyPrices &&
+		props.discountableDailyPrices[props.room.id] &&
+		parseInt(Object.keys(props.discountableDailyPrices[props.room.id])[0])
+
+	const groom = roomTypeFirstRoomId && props.roomType.rooms.find((room) => room.id === roomTypeFirstRoomId)
 
 	useEffect(() => {
-		setTotalPrice(props.room.total_price)
-	}, [props.room.count])
+		setTotalPrice(props.room.total_price * props.discountRate)
+	}, [props.room.count, props.discountRate])
 
 	return (
 		<div className="rounded border p-2">
 			<div className="flex flex-col items-end justify-center gap-1 py-1">
-				<span className="text-xs font-semibold">
-					{props.room.name} {props.bookingResult?.night_count} Gece Toplam Fiyat
-				</span>
-				<div className="flex items-center justify-end">
-					{/*{priceFocus && (*/}
-					{/*	<Button*/}
-					{/*		type="button"*/}
-					{/*		className="bg-slate-100 p-0.5 text-xs font-semibold text-success"*/}
-					{/*		onClick={() => {*/}
-					{/*			props.setGrandTotal(*/}
-					{/*				parseFloat(props.grandTotal.toFixed(2) || '0') -*/}
-					{/*					(parseFloat(props.room.price) - price) * props.room.count,*/}
-					{/*			)*/}
-					{/*			setPriceFocus(false)*/}
-					{/*		}}>*/}
-					{/*		<Lucide*/}
-					{/*			icon="CheckCheck"*/}
-					{/*			className="h-4 w-4"*/}
-					{/*		/>*/}
-					{/*	</Button>*/}
-					{/*)}*/}
-					<CurrencyInput
-						id="unit-price"
-						allowNegativeValue={false}
-						allowDecimals={true}
-						decimalSeparator=","
-						decimalScale={2}
-						suffix={` ${props.pricingCurrency}` || ' TRY'}
-						value={price}
-						decimalsLimit={2}
-						required={true}
-						disabled={true}
-						// onValueChange={(value, name, values) => {
-						// 	setPrice(values?.float || 0)
-						// 	setTotalPrice((values?.float || 0) * props.room.count)
-						// 	values && values.float !== parseFloat(props.room.price) && setPriceFocus(true)
-						// }}
-						name="unit_price"
-						className="w-28 border-none px-0.5 py-0.5 text-right text-sm font-normal text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
-					/>
+				<span className="w-full border-b text-center text-xs font-semibold">{props.room.name}</span>
+				<div className="w-full border-b px-1">
+					{roomTypeFirstRoomId &&
+						props.discountableDailyPrices &&
+						props.discountableDailyPrices[props.room.id] &&
+						props.discountableDailyPrices[props.room.id][roomTypeFirstRoomId].map(
+							(dailyPrice: DailyPriceProps, index: number) => {
+								return (
+									<div
+										key={index}
+										className="flex items-center justify-between">
+										<span className="text-xs font-semibold">
+											{dayjs(dailyPrice.date, 'YYYY-MM-DD').format('DD.MM.YYYY')}
+										</span>
+										<div className="flex items-center justify-end">
+											<CurrencyInput
+												id="unit-price"
+												allowNegativeValue={false}
+												allowDecimals={true}
+												decimalSeparator=","
+												decimalScale={2}
+												suffix={` ${props.pricingCurrency}` || ' TRY'}
+												value={dailyPrice.price}
+												decimalsLimit={2}
+												required={true}
+												disabled={true}
+												name="unit_price"
+												className="w-28 border-none px-0.5 py-0.5 text-right text-sm font-normal text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
+											/>
+										</div>
+									</div>
+								)
+							},
+						)}
 				</div>
 			</div>
 			<div className="flex flex-col items-end justify-center border-b py-1">
@@ -79,22 +84,6 @@ function SummaryTypedRoom(props: SummaryTypedRoomProps) {
 			<div className="flex items-center justify-between py-1">
 				<span className="text-xs font-semibold">Toplam</span>
 				<div className="flex items-center justify-end">
-					{/*{totalPriceFocus && (*/}
-					{/*	<Button*/}
-					{/*		type="button"*/}
-					{/*		className="bg-slate-100 p-0.5 text-xs font-semibold text-success"*/}
-					{/*		onClick={() => {*/}
-					{/*			props.setGrandTotal(*/}
-					{/*				parseFloat(props.grandTotal.toFixed(2) || '0') - (parseFloat(props.room.total_price) - totalPrice),*/}
-					{/*			)*/}
-					{/*			setTotalPriceFocus(false)*/}
-					{/*		}}>*/}
-					{/*		<Lucide*/}
-					{/*			icon="CheckCheck"*/}
-					{/*			className="h-4 w-4"*/}
-					{/*		/>*/}
-					{/*	</Button>*/}
-					{/*)}*/}
 					<CurrencyInput
 						id="unit-price"
 						allowNegativeValue={false}
@@ -106,11 +95,6 @@ function SummaryTypedRoom(props: SummaryTypedRoomProps) {
 						decimalsLimit={2}
 						required={true}
 						disabled={true}
-						// onValueChange={(value, name, values) => {
-						// 	setTotalPrice(values?.float || 0)
-						// 	setPrice((values?.float || 0) / props.room.count)
-						// 	values && values.float !== parseFloat(props.room.price) && setTotalPriceFocus(true)
-						// }}
 						name="unit_price"
 						className="w-32 border-none px-0.5 py-0.5 text-right text-sm font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"
 					/>

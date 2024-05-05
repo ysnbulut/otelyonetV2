@@ -13,7 +13,7 @@ function DashboardClock(props: any) {
 	}, [])
 
 	return (
-		<div className="box flex items-center justify-center gap-4 p-4">
+		<div className="box flex items-center justify-between gap-4 p-6">
 			<Clock
 				className="rounded-full bg-slate-100 dark:bg-darkmode-700"
 				value={clock}

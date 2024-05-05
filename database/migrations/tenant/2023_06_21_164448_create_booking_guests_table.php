@@ -12,11 +12,17 @@ return new class extends Migration {
 	{
 		Schema::create('booking_guests', function (Blueprint $table) {
 			$table->id();
-			$table->foreignId('booking_room_id')->constrained();
-			$table->foreignId('guest_id')->constrained();
+			$table->foreignId('booking_room_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+			$table->foreignId('guest_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->boolean('check_in')->default(false);
             $table->boolean('check_out')->default(false);
-            $table->enum('status', ['pending', 'not_coming', 'check_in', 'check_out'])->default('pending');
+            $table->enum('status', ['pending', 'check_in', 'check_out'])->default('pending');
             $table->date('check_in_date')->nullable();
             $table->date('check_out_date')->nullable();
             $table->boolean('check_in_kbs')->default(false);

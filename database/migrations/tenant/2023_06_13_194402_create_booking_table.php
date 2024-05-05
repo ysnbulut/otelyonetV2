@@ -12,16 +12,21 @@ return new class extends Migration {
 	{
 		Schema::create('bookings', function (Blueprint $table) {
 			$table->id();
-            $table->string('booking_code')->unique();
+            $table->string('booking_code', 15)->unique();
 			$table
 				->foreignId('customer_id')
-				->constrained('customers');
-			$table->date('check_in');
-			$table->date('check_out')->nullable();
-            $table->foreignId('channel_id')->constrained('booking_channels');
+				->constrained('customers')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->foreignId('channel_id')
+                ->constrained('booking_channels')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->unsignedInteger('campaign_id')->nullable();
             $table->integer('number_of_rooms')->default(1);
             $table->integer('number_of_adults')->default(1);
             $table->integer('number_of_children')->default(0);
+            $table->json('calendar_colors');
 			$table->timestamps();
 			$table->softDeletes();
 		});

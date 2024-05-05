@@ -27,7 +27,7 @@ function Index(props: PageProps) {
 				{
 					replace: false,
 					preserveState: true,
-					only: ['customers'],
+					only: ['bookings'],
 				},
 			)
 		}
@@ -114,15 +114,9 @@ function Index(props: PageProps) {
 													<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
 														Giriş Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_in}</span>
 													</span>
-													{booking.open_booking ? (
-														<span className="flex items-center text-base font-semibold text-orange-500 dark:text-orange-300">
-															Açık Rezervasyon
-														</span>
-													) : (
-														<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
-															Çıkış Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_out}</span>
-														</span>
-													)}
+													<span className="flex items-center text-sm font-light text-darkmode-500 dark:text-darkmode-50">
+														Çıkış Tarihi :<span className="ms-2 text-base font-semibold">{booking.check_out}</span>
+													</span>
 												</Link>
 											</div>
 										</Table.Td>

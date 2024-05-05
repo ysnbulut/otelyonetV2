@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\SalesChannel
  *
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitChannelProductPrice> $unitPrices
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitChannelItemPrice> $unitPrices
  * @property-read int|null $unit_prices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SalesUnit> $units
  * @property-read int|null $units_count
@@ -43,10 +43,10 @@ class SalesChannel extends Model
     public function unitPrices()
     {
         return $this->hasManyThrough(
-            UnitChannelProductPrice::class,
+            UnitChannelItemPrice::class,
             SalesUnitChannel::class,
             'sales_channel_id', // Foreign key in SalesUnitChannel table
-            'sales_unit_channel_id', // Foreign key in UnitChannelProductPrice table
+            'sales_unit_channel_id', // Foreign key in UnitChannelItemPrice table
             'id', // Local key on SalesChannel table
             'id' // Local key on SalesUnitChannel table
         );

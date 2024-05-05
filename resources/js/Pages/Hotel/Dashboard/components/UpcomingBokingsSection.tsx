@@ -61,53 +61,37 @@ function UpcomingBookings(props: InjectedViewportProps<HTMLDivElement>) {
 						<h2 className="mr-5 truncate text-lg font-medium">Gelecek Rezervasyonlar</h2>
 					</div>
 					<div className="intro-y mt-8 overflow-auto sm:mt-0 lg:overflow-visible">
-						<Table className="border-separate border-spacing-y-[10px] sm:mt-2">
+						<Table
+							id="responsive-table"
+							className="border-separate border-spacing-y-[10px] sm:mt-2">
 							<Table.Thead>
 								<Table.Tr>
 									<Table.Th className="whitespace-nowrap border-b-0">GİRİŞ/ÇIKIŞ TARİHİ</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">ODALAR</Table.Th>
-									<Table.Th className="whitespace-nowrap border-b-0 text-center">MÜŞTERİ</Table.Th>
-									<Table.Th className="whitespace-nowrap border-b-0 text-center">TOPLAM TUTAR</Table.Th>
-									<Table.Th className="whitespace-nowrap border-b-0 text-center">BAKİYE</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">MÜŞTERİ</Table.Th>
 								</Table.Tr>
 							</Table.Thead>
-							<Table.Tbody>
+							<Table.Tbody className="divide-y-[0.7rem] divide-transparent">
 								{bookings.data.map((booking) => (
 									<Table.Tr
 										key={booking.id}
 										className="intro-y">
 										<Table.Td
-											dataLabel=""
-											className="w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+											dataLabel="Giriş Çıkış Tarihi"
+											className="w-full rounded-t-md bg-white lg:w-40 lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
 											<div className="flex whitespace-nowrap">
 												{booking.check_in} - {booking.check_out}
 											</div>
 										</Table.Td>
 										<Table.Td
-											dataLabel=""
+											dataLabel="Oda"
 											className="border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-											<div className="flex">{booking.rooms}</div>
+											{booking.rooms}
 										</Table.Td>
 										<Table.Td
-											dataLabel=""
-											className="border-b-0 bg-white text-center shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
+											dataLabel="Müşteri"
+											className="w-full rounded-b-md bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md lg:last:rounded-bl-none dark:bg-darkmode-600">
 											{booking.customer}
-										</Table.Td>
-										<Table.Td
-											dataLabel=""
-											className="w-40 border-b-0 bg-white shadow-[20px_3px_20px_#0000000b] first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600">
-											{booking.amount_formatted}
-										</Table.Td>
-										<Table.Td
-											dataLabel=""
-											className="relative w-56 border-b-0 bg-white py-0 shadow-[20px_3px_20px_#0000000b] before:absolute before:inset-y-0 before:left-0 before:my-auto before:block before:h-8 before:w-px before:bg-slate-200 first:rounded-l-md last:rounded-r-md dark:bg-darkmode-600 before:dark:bg-darkmode-400">
-											<div className="flex items-center justify-center">
-												{booking.remaining_balance !== 0 ? (
-													<span className="text-danger">{booking.remaining_balance_formatted}</span>
-												) : (
-													<span className="text-success">Ödendi</span>
-												)}
-											</div>
 										</Table.Td>
 									</Table.Tr>
 								))}

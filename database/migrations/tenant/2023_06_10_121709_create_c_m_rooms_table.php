@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('c_m_rooms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('type_has_view_id')->constrained();
-            $table->string('room_code');
-            $table->integer('stock');
+            $table->foreignId('type_has_view_id')
+                ->constrained()
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
+            $table->string('room_code',25)->unique();
+            $table->integer('stock')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

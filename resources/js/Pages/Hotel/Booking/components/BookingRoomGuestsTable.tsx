@@ -13,9 +13,6 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 
 	useEffect(() => {
 		if (guestAllChecked) {
-			//TODO: GuestsProps[] da ki booking_guests_id yeni oluşturulan guests için yok ??? olurşturulduğunda bunu
-			// ekletmelisin
-			//@ts-ignore
 			props.setSelectedBookingGuests(props.guests.map((guest) => guest.booking_guests_id))
 		}
 	}, [guestAllChecked])

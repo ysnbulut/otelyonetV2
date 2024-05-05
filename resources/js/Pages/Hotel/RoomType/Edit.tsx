@@ -21,7 +21,12 @@ import Tippy from '@/Components/Tippy'
 export default function Edit(props: PageProps) {
 	const MySwal = withReactContent(Swal)
 	const dropzoneMultipleRef = useRef<DropzoneElement>()
-	const [photos, setPhotos] = useState(props.roomType.photos)
+	const [images, setImages] = useState(
+		props.roomType.images.map((image) => ({
+			id: image.orginal.id,
+			url: image.variants.small ? image.variants.small.url : image.orginal.url,
+		})),
+	)
 	const [features, setFeatures] = useState(props.features)
 	const [selectedFeatures, setSelectedFeatures] = useState<SelectedFeatures[]>(
 		props.features
@@ -71,10 +76,10 @@ export default function Edit(props: PageProps) {
 		}).then((result) => {
 			if (result.isConfirmed) {
 				axios
-					.delete(route('hotel.room_types.photo_delete', {room_type: props.roomType.id, photo_id: id}))
+					.delete(route('hotel.room_types.image_delete', {room_type: props.roomType.id, photo_id: id}))
 					.then(() => {
-						const newPhotos = photos.filter((photo) => photo.id !== id)
-						setPhotos(newPhotos)
+						const newPhotos = images.filter((image) => image.id !== id)
+						setImages(newPhotos)
 						Toast.fire({
 							icon: 'success',
 							title: 'Fotoğraf başarıyla silindi.',
@@ -245,11 +250,11 @@ export default function Edit(props: PageProps) {
 				/>
 				{errors.room_type_features && <div className="text-theme-6 mt-2 text-danger">{errors.room_type_features}</div>}
 				<div className="relative rounded-lg bg-slate-100 p-4 dark:bg-darkmode-700">
-					{photos.length > 0 ? (
+					{images.length > 0 ? (
 						<ReactSortable
-							group="photos"
-							list={photos}
-							setList={setPhotos}
+							group="images"
+							list={images}
+							setList={setImages}
 							animation={500}
 							delay={5}
 							ghostClass="sortable-ghost"
@@ -259,7 +264,7 @@ export default function Edit(props: PageProps) {
 							draggable="#photoItem"
 							onEnd={(evt) => {
 								axios
-									.post(route('hotel.room_type_features.photos_orders_update', props.roomType.id), {
+									.post(route('hotel.room_types.images_orders_update', props.roomType.id), {
 										media_id: evt.item.dataset.id,
 										old_order_no: evt.oldIndex ? evt.oldIndex + 1 : 1,
 										new_order_no: evt.newIndex ? evt.newIndex + 1 : 1,
@@ -268,10 +273,10 @@ export default function Edit(props: PageProps) {
 									.catch(() => {})
 							}}
 							className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-							{photos.map((photo, key) => (
+							{images.map((image, key) => (
 								<div
 									id="photoItem"
-									key={photo.id}
+									key={image.id}
 									className="box rouded">
 									<div className="flex h-32 min-w-full items-center justify-center overflow-hidden rounded shadow">
 										<div
@@ -285,13 +290,13 @@ export default function Edit(props: PageProps) {
 											type="button"
 											className="absolute right-0 top-0 z-10 rounded-bl rounded-br-none rounded-tl-none rounded-tr p-1 focus:ring-0"
 											onClick={() => {
-												deletePhoto(photo.id)
+												deletePhoto(image.id)
 											}}>
 											<Trash2 className="h-4 w-4" />
 										</Button>
 										<Zoom>
 											<img
-												src={photo.url}
+												src={image.url}
 												alt=""
 												className="min-h-32 min-w-full rounded object-cover"
 											/>
@@ -307,13 +312,13 @@ export default function Edit(props: PageProps) {
 									dropzoneMultipleRef.current = el
 								}}
 								options={{
-									url: route('hotel.room_types.photo_add', props.roomType.id),
+									url: route('hotel.room_types.image_add', props.roomType.id),
 									thumbnailWidth: 200,
 									headers: {'X-CSRF-TOKEN': props.csrf_token},
 									uploadMultiple: false,
 									init() {
-										this.on('success', (file, response: {message: string; photo: {id: number; url: string}}) => {
-											setPhotos((photos) => [...photos, response.photo])
+										this.on('success', (file, response: {message: string; image: {id: number; url: string}}) => {
+											setImages((images) => [...images, response.image])
 											this.removeFile(file)
 										})
 									},
@@ -328,13 +333,13 @@ export default function Edit(props: PageProps) {
 								dropzoneMultipleRef.current = el
 							}}
 							options={{
-								url: route('hotel.room_types.photo_add', props.roomType.id),
+								url: route('hotel.room_types.image_add', props.roomType.id),
 								thumbnailWidth: 200,
 								headers: {'X-CSRF-TOKEN': props.csrf_token},
 								uploadMultiple: false,
 								init() {
-									this.on('success', (file, response: {message: string; photo: {id: number; url: string}}) => {
-										setPhotos((photos) => [...photos, response.photo])
+									this.on('success', (file, response: {message: string; image: {id: number; url: string}}) => {
+										setImages((images) => [...images, response.image])
 										this.removeFile(file)
 									})
 								},

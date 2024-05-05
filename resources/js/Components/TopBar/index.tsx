@@ -3,9 +3,7 @@ import Lucide from '@/Components/Lucide'
 import Breadcrumb from '@/Components/Breadcrumb'
 import {FormInput} from '@/Components/Form'
 import {Menu, Popover} from '@/Components/Headless'
-import fakerData from '@/utils/faker'
 import _ from 'lodash'
-import clsx from 'clsx'
 import {Transition} from '@headlessui/react'
 import Button from '@/Components/Button'
 import {useAppDispatch, useAppSelector} from '@/stores/hooks'
@@ -58,7 +56,7 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 	return (
 		<>
 			{/* BEGIN: Top Bar */}
-			<div className="relative z-[51] flex h-[67px] items-center border-b border-slate-200">
+			<div className="relative z-50 flex h-[67px] items-center border-b border-slate-200">
 				{/* BEGIN: Breadcrumb */}
 				<Breadcrumb className="-intro-x mr-auto hidden sm:flex">
 					{breadcrumb &&
@@ -95,96 +93,19 @@ function Main({breadcrumb}: {breadcrumb: BreadcrumbItem[]}) {
 							className="h-5 w-5 dark:text-slate-500"
 						/>
 					</a>
-					<Transition
-						as={Fragment}
-						show={searchDropdown}
-						enter="transition-all ease-linear duration-150"
-						enterFrom="mt-5 invisible opacity-0 translate-y-1"
-						enterTo="mt-[3px] visible opacity-100 translate-y-0"
-						leave="transition-all ease-linear duration-150"
-						leaveFrom="mt-[3px] visible opacity-100 translate-y-0"
-						leaveTo="mt-5 invisible opacity-0 translate-y-1">
-						<div className="absolute right-0 z-10 mt-[3px]">
-							<div className="box w-[450px] p-5">
-								<div className="mb-2 font-medium">Pages</div>
-								<div className="mb-5">
-									{/*<a*/}
-									{/*	href=""*/}
-									{/*	className="flex items-center">*/}
-									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/20 text-success dark:bg-success/10">*/}
-									{/*		<Lucide*/}
-									{/*			icon="Inbox"*/}
-									{/*			className="h-4 w-4"*/}
-									{/*		/>*/}
-									{/*	</div>*/}
-									{/*	<div className="ml-3">Mail Settings</div>*/}
-									{/*</a>*/}
-									{/*<a*/}
-									{/*	href=""*/}
-									{/*	className="mt-2 flex items-center">*/}
-									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-pending/10 text-pending">*/}
-									{/*		<Lucide*/}
-									{/*			icon="Users"*/}
-									{/*			className="h-4 w-4"*/}
-									{/*		/>*/}
-									{/*	</div>*/}
-									{/*	<div className="ml-3">Users & Permissions</div>*/}
-									{/*</a>*/}
-									{/*<a*/}
-									{/*	href=""*/}
-									{/*	className="mt-2 flex items-center">*/}
-									{/*	<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/80 dark:bg-primary/20">*/}
-									{/*		<Lucide*/}
-									{/*			icon="CreditCard"*/}
-									{/*			className="h-4 w-4"*/}
-									{/*		/>*/}
-									{/*	</div>*/}
-									{/*	<div className="ml-3">Transactions Report</div>*/}
-									{/*</a>*/}
-								</div>
-								<div className="mb-2 font-medium">Users</div>
-								<div className="mb-5">
-									{_.take(fakerData, 4).map((faker, fakerKey) => (
-										<a
-											key={fakerKey}
-											href=""
-											className="mt-2 flex items-center">
-											<div className="image-fit h-8 w-8">
-												<img
-													alt="Midone Tailwind HTML Admin Template"
-													className="rounded-full"
-													src={faker.photos[0]}
-												/>
-											</div>
-											<div className="ml-3">{faker.users[0].name}</div>
-											<div className="ml-auto w-48 truncate text-right text-xs text-slate-500">
-												{faker.users[0].email}
-											</div>
-										</a>
-									))}
-								</div>
-								<div className="mb-2 font-medium">Products</div>
-								{_.take(fakerData, 4).map((faker, fakerKey) => (
-									<a
-										key={fakerKey}
-										href=""
-										className="mt-2 flex items-center">
-										<div className="image-fit h-8 w-8">
-											<img
-												alt="Midone Tailwind HTML Admin Template"
-												className="rounded-full"
-												src={faker.images[0]}
-											/>
-										</div>
-										<div className="ml-3">{faker.products[0].name}</div>
-										<div className="ml-auto w-48 truncate text-right text-xs text-slate-500">
-											{faker.products[0].category}
-										</div>
-									</a>
-								))}
-							</div>
-						</div>
-					</Transition>
+					{/*<Transition*/}
+					{/*	as={Fragment}*/}
+					{/*	show={searchDropdown}*/}
+					{/*	enter="transition-all ease-linear duration-150"*/}
+					{/*	enterFrom="mt-5 invisible opacity-0 translate-y-1"*/}
+					{/*	enterTo="mt-[3px] visible opacity-100 translate-y-0"*/}
+					{/*	leave="transition-all ease-linear duration-150"*/}
+					{/*	leaveFrom="mt-[3px] visible opacity-100 translate-y-0"*/}
+					{/*	leaveTo="mt-5 invisible opacity-0 translate-y-1">*/}
+					{/*	<div className="absolute right-0 z-10 mt-[3px]">*/}
+					{/*		<div className="box w-[450px] p-5">Search Results</div>*/}
+					{/*	</div>*/}
+					{/*</Transition>*/}
 				</div>
 				{/* END: Search  */}
 				<Button

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreRoomTypeRequest;
 use App\Http\Requests\TypeHasBedsRequest;
 use App\Http\Requests\TypeHasViewRequest;
 use App\Http\Requests\UpdateRoomTypeRequest;
+use App\Jobs\ImageVariantCreatorJob;
 use App\Models\BedType;
 use App\Models\RoomType;
 use App\Models\RoomTypeFeature;
@@ -15,8 +16,8 @@ use App\Models\RoomView;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Nette\Utils\Strings;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Plank\Mediable\Facades\MediaUploader;
+use Plank\Mediable\Media;
 
 class RoomTypeController extends Controller
 {
@@ -35,12 +36,10 @@ class RoomTypeController extends Controller
                             $roomType->rooms->pluck('name')
                                 ->join(', ') . '</b> odaları';
                     }
-                    if($roomType->unitPrices->count() > 0) {
-                        $warningMessage .= $warningMessage !== null ? ' ve <b>'.Str::replace(', , ', ', ',
-                                $roomType->unitPrices->map(fn
-                            ($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', '))
-                            .'</b> sezonları için fiyatlar ile ' . $roomType->name .' oda tipine bağlı tüm varyasyonlar <b>('.$roomType->variationMultipliers->count().' adet varyasyon) ve çarpanları</b> silinecektir.' : '<b>'.Str::replace(', , ', ', ', $roomType->unitPrices->map(fn
-                            ($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ')).'</b>'.' sezonları için fiyatlar silinecektir!';
+                    if ($roomType->unitPrices->count() > 0) {
+                        $warningMessage .= $warningMessage !== null ? ' ve <b>' . Str::replace(', , ', ', ',
+                                $roomType->unitPrices->map(fn($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', '))
+                            . '</b> sezonları için fiyatlar ile ' . $roomType->name . ' oda tipine bağlı tüm varyasyonlar <b>(' . $roomType->variationMultipliers->count() . ' adet varyasyon) ve çarpanları</b> silinecektir.' : '<b>' . Str::replace(', , ', ', ', $roomType->unitPrices->map(fn($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ')) . '</b>' . ' sezonları için fiyatlar silinecektir!';
                     } else {
                         $warningMessage .= $warningMessage !== null ? ' da silinecektir!' : '';
                     }
@@ -73,7 +72,7 @@ class RoomTypeController extends Controller
             'room_count' => $data['room_count'],
         ];
         $roomtype = RoomType::create($inset_data);
-        if(count($data['room_type_features']) > 0) {
+        if (count($data['room_type_features']) > 0) {
             $features = [];
             foreach ($data['room_type_features'] as $key => $value) {
                 $features[$value['feature_id']] = ['order_no' => $value['order_no']];
@@ -120,15 +119,13 @@ class RoomTypeController extends Controller
                 ]),
                 'views' => $roomType->views->map(function ($view) use ($roomType) {
                     $warningMessage = null;
-                    if( $view->rooms->count() > 0) {
-                        $warningMessage .= $view->name . ' oda manzarası '.$roomType->name.'\'den silindiğinde <b>' .
+                    if ($view->rooms->count() > 0) {
+                        $warningMessage .= $view->name . ' oda manzarası ' . $roomType->name . '\'den silindiğinde <b>' .
                             $view->rooms->pluck('name')
                                 ->join(', ') . '</b> odaları da silinecektir!';
                     }
-                    if($view->unitPrices->count() > 0) {
-                        $warningMessage .= $warningMessage !== null ? ' ve <b>'.$view->unitPrices->map(fn
-                            ($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ').'</b> sezonları için fiyatlar da silinecektir.' : '<b>'.$view->unitPrices->map(fn
-                            ($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ').'</b>'.' sezonları için fiyatlar silinecektir!';
+                    if ($view->unitPrices->count() > 0) {
+                        $warningMessage .= $warningMessage !== null ? ' ve <b>' . $view->unitPrices->map(fn($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ') . '</b> sezonları için fiyatlar da silinecektir.' : '<b>' . $view->unitPrices->map(fn($unitPrice) => $unitPrice->season !== null ? $unitPrice->season->name : '')->join(', ') . '</b>' . ' sezonları için fiyatlar silinecektir!';
                     }
                     return [
                         'id' => $view->id,
@@ -141,9 +138,17 @@ class RoomTypeController extends Controller
                     'name' => $feature->name,
                     'order_no' => $feature->pivot->order_no,
                 ]),
-                'photos' => $roomType->getMedia('room_type_photos')->map(fn($media) => [
-                    'id' => $media->id,
-                    'url' => $media->getUrl(),
+                'images' => $roomType->media->map(fn(Media $media) => [
+                    'orginal' => [
+                        'id' => $media->id,
+                        'url' => $media->getUrl(),
+                    ],
+                    'variants' => $media->getAllVariants()->map(function (Media $mediaVariant) {
+                        return [
+                            'id' => $mediaVariant->id,
+                            'url' => $mediaVariant->getUrl(),
+                        ];
+                    }),
                 ]),
             ],
             'views' => RoomView::orderBy('id')->get(['id', 'name']),
@@ -152,20 +157,25 @@ class RoomTypeController extends Controller
         ]);
     }
 
-    public function photoAdd(RoomType $roomType)
+    public function imageAdd(RoomType $roomType)
     {
         try {
-            $photo = Request::file('file');
-            $roomType
-                ->addMedia($photo)
-                ->usingFileName(Strings::webalize(str_replace($photo->getClientOriginalExtension(), '', $photo->getClientOriginalName())))
-                ->toMediaCollection('room_type_photos');
-            $uploadedPhoto = $roomType->getMedia('room_type_photos')->last();
+            $requestImage = Request::file('file');
+            $tenant = tenancy()->tenant->id;
+            $media = MediaUploader::fromSource($requestImage)
+                ->toDestination('digitalocean', $tenant . '/room_type/images')
+                ->useHashForFilename('sha1')
+                ->makePublic()
+                ->upload();
+            //TODO: Bir sonraki güncelemede burayı kaldırmalısın. $roomType ı kaldırıp kaydet işlemi ile store veya
+            // update funksiyonuna taşımalısın.
+            $roomType->attachMedia($media, 'images');
+            ImageVariantCreatorJob::dispatch($media)->onQueue('image_variants');
             return response()->json([
                 'message' => 'Fotoğraf başarıyla eklendi.',
-                'photo' => [
-                    'id' => $uploadedPhoto->id,
-                    'url' => $uploadedPhoto->original_url,
+                'image' => [
+                    'id' => $media->id,
+                    'url' => $media->getUrl(),
                 ],
             ], 200);
         } catch (\Exception $e) {
@@ -175,32 +185,32 @@ class RoomTypeController extends Controller
         }
     }
 
-    public function photosOrdersUpdate(RoomType $roomType, Request $request)
+    public function imagesOrdersUpdate(RoomType $roomType, Request $request)
     {
-        $roomType->getMedia('room_type_photos')->each(function (Media $media) {
+        $roomType->getMedia('images')->each(function (Media $media) {
             if ($media->id != Request::get('media_id')) {
                 if (Request::get('new_order_no') > Request::get('old_order_no')) {
-                    if ($media->order_column > Request::get('old_order_no') && $media->order_column <= Request::get('new_order_no')) {
-                        $media->order_column--;
-                        $media->save();
+                    if ($media->pivot->order > Request::get('old_order_no') && $media->pivot->order <= Request::get('new_order_no')) {
+                        $media->pivot->order--;
+                        $media->pivot->save();
                     }
                 } else {
-                    if ($media->order_column >= Request::get('new_order_no') && $media->order_column < Request::get('old_order_no')) {
-                        $media->order_column++;
-                        $media->save();
+                    if ($media->pivot->order >= Request::get('new_order_no') && $media->pivot->order < Request::get('old_order_no')) {
+                        $media->pivot->order++;
+                        $media->pivot->save();
                     }
                 }
             } else {
-                $media->order_column = Request::get('new_order_no');
-                $media->save();
+                $media->pivot->order = Request::get('new_order_no');
+                $media->pivot->save();
             }
         });
     }
 
-    public function photoDelete(RoomType $roomType, $photo_id)
+    public function imageDelete(RoomType $roomType, $photo_id)
     {
-        $deletedPhoto = $roomType->getMedia('room_type_photos')->find($photo_id);
-        $roomType->getMedia('room_type_photos')->each(function (Media $media) use ($deletedPhoto) {
+        $deletedPhoto = $roomType->getMedia('images')->find($photo_id);
+        $roomType->getMedia('images')->each(function (Media $media) use ($deletedPhoto) {
             if ($media->id != $deletedPhoto->id) {
                 if ($media->order_column > $deletedPhoto->order_column) {
                     $media->order_column--;

@@ -23,7 +23,18 @@ interface FeaturesDataProps {
 	order_no: number
 }
 
-interface PhotoDataProps {
+interface ImagesProps {
+	orginal: ImageDataProps
+	variants: ImageVariantProps
+}
+
+interface ImageVariantProps {
+	small: ImageDataProps
+	medium: ImageDataProps
+	large: ImageDataProps
+}
+
+interface ImageDataProps {
 	id: number
 	url: string
 }
@@ -44,7 +55,7 @@ interface RoomTypeDataProps {
 	beds: RoomTypeBedsDataProps[]
 	views: ViewsDataProps[]
 	features: FeaturesDataProps[]
-	photos: PhotoDataProps[]
+	images: ImagesProps[]
 }
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
 	roomType: RoomTypeDataProps

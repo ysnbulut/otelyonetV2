@@ -2,17 +2,15 @@
 
 namespace App\Observers;
 
-use App\Jobs\CMStockJob;
+use App\Jobs\ChannelManager\CMStockJob;
 use App\Models\BookingRoom;
-use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Models\Activity;
 
 class BookingRoomObserver
 {
     public function created(BookingRoom $bookingRooms): void
     {
-        Log::log('info', 'BookingRoomObserver created', ['bookingRooms' => $bookingRooms]);
-        CMStockJob::dispatch($bookingRooms);
+        CMStockJob::dispatch($bookingRooms)->onQueue('stock');
         Activity::create([
             'log_name' => 'booking_room',
             'description' => 'created',

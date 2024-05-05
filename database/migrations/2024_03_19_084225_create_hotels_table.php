@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('hotels', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Tenant::class);
-            $table->enum('status', ['active', 'suspend', 'closed']);
+            $table->enum('status', ['active', 'suspend', 'closed'])->default('active');
             $table->string('name');
             $table->date('register_date');
             $table->date('renew_date');

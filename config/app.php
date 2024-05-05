@@ -169,7 +169,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
+        Plank\Mediable\MediableServiceProvider::class,
         App\Providers\TenancyServiceProvider::class,
+        Artisaninweb\SoapWrapper\ServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -185,6 +187,9 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'MediaUploader' => Plank\Mediable\Facades\MediaUploader::class,
+        'ImageManipulator' => Plank\Mediable\Facades\ImageManipulator::class,
+        'SoapWrapper' => Artisaninweb\SoapWrapper\Facade::class,
     ])->toArray(),
 
 ];

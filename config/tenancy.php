@@ -20,6 +20,7 @@ return [
     'central_domains' => [
 	    '127.0.0.1',
 	    'localhost',
+        'yasin.test',
 	    'otelyonet.test',
     ],
 
@@ -90,7 +91,8 @@ return [
      * You can clear cache selectively by specifying the tag.
      */
     'cache' => [
-        'tag_base' => 'tenant', // This tag_base, followed by the tenant_id, will form a tag that will be applied on each cache call.
+        'tag_base' => 'otel-', // This tag_base, followed by the tenant_id, will form a tag that will be applied on each
+        // cache call.
     ],
 
     /**
@@ -101,11 +103,12 @@ return [
         /**
          * Each disk listed in the 'disks' array will be suffixed by the suffix_base, followed by the tenant_id.
          */
-        'suffix_base' => 'tenant',
+        'suffix_base' => 'otel-',
         'disks' => [
             'local',
             'public',
             // 's3',
+            'digitalocean'
         ],
 
         /**
