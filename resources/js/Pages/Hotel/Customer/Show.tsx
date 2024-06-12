@@ -128,11 +128,10 @@ function Show({...props}: PageProps) {
 						</div>
 						<div className="box mt-5 flex flex-col items-center justify-between gap-2 p-5">
 							<Button
-								variant={props.customer.remaining_balance < 0 ? 'primary' : 'soft-dark'}
-								onClick={() => props.customer.remaining_balance < 0 && setShowPaymentForm(!showPaymentForm)}
+								variant="primary"
+								onClick={() => setShowPaymentForm(!showPaymentForm)}
 								className="w-full text-xl font-semibold shadow-md"
-								type="button"
-								disabled={props.customer.remaining_balance == 0}>
+								type="button">
 								TAHSİLAT EKLE
 							</Button>
 							<form
@@ -267,14 +266,12 @@ function Show({...props}: PageProps) {
 										className="shadow-md"
 										variant="secondary"
 										type="button">
-										{' '}
 										Vazgeç
 									</Button>
 									<Button
 										className="shadow-md"
 										variant="primary"
 										type="submit">
-										{' '}
 										Tahsilat Ekle
 									</Button>
 								</div>

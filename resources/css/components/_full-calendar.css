@@ -66,6 +66,7 @@
 
     table {
         border-radius: theme("borderRadius.md");
+
         tr th .fc-scrollgrid-sync-inner {
             padding-top: theme("spacing.3");
             padding-bottom: theme("spacing.3");
@@ -264,8 +265,12 @@
     @apply h-[4rem] !important;
 }
 
+.fc-list-day-cushion {
+    @apply bg-slate-100 dark:bg-darkmode-700 !important;
+}
+
 .fc-event {
-    @apply h-[4rem] !important;
+    @apply h-auto !important;
 }
 
 .fc-scrollgrid {
@@ -274,6 +279,18 @@
 
 .fc-datagrid-body {
     @apply -mb-3 !important;
+}
+
+.fc-listYear-view {
+    @apply border-slate-100 dark:border-darkmode-300 !important;
+}
+
+.fc-highlight {
+    @apply bg-primary/40 dark:bg-primary/20 !important;
+}
+
+.fc-daygrid-day-frame {
+    @apply border border-slate-400 dark:border-darkmode-500 !important;
 }
 
 .fc-scroller::-webkit-scrollbar-track {
@@ -301,11 +318,15 @@
 }
 
 .fc-daygrid-day-top {
-    @apply border-b border-slate-200 dark:border-darkmode-500 !important;
+    @apply border-b border-slate-200 dark:border-darkmode-500 p-0 !important;
+}
+
+.fc-daygrid-day-number {
+    @apply flex w-full p-0 !important;
 }
 
 .fc-daygrid-month-start {
-    @apply bg-yellow-300 dark:bg-yellow-700 shadow-sm text-xs font-normal rounded-bl-md !important;
+    @apply bg-yellow-300 dark:bg-yellow-700 shadow-sm text-xs font-extrabold rounded-bl-md m-0 !important;
 }
 
 .fc-datagrid-cell-frame.fc-datagrid-cell-frame-liquid {

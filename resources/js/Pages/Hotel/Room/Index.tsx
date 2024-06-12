@@ -57,6 +57,38 @@ function Index(props: PageProps) {
 		}
 	}
 
+	const handleDelete = (id: number) => {
+		MySwal.fire({
+			title: 'Odayı silmek istiyor musun?',
+			text: 'Bu işlem geri alınamaz!',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet, Sil',
+			cancelButtonText: 'Vazgeç',
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				axios
+					.delete(route('hotel.rooms.destroy', id))
+					.then(() => {
+						setRooms((prevState) => prevState.filter((room) => room.id !== id))
+						Toast.fire({
+							icon: 'success',
+							title: 'Oda başarıyla silindi',
+						})
+					})
+					.catch((error) => {
+						console.error(error)
+						Toast.fire({
+							icon: 'error',
+							title: 'Oda silinirken bir hata oluştu',
+						})
+					})
+			}
+		})
+	}
+
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		axios
@@ -189,17 +221,22 @@ function Index(props: PageProps) {
 					<div
 						key={room.id}
 						className="intro-x col-span-12 sm:col-span-6 md:col-span-6 lg:col-span-4 xl:col-span-4 2xl:col-span-3">
-						{/*{ border border-success/60 bg-success/20 dark:bg-success/15}*/}
-						{/*{ border border-slate-400/60 border-slate-400/20 dark:border-slate-400/15}*/}
-						{/*{ border-pending/40 bg-pending/15 dark:bg-pending/10}*/}
-						{/*{ border-danger/40 bg-danger/20 dark:bg-danger/10}*/}
 						<div
 							className={twMerge(
-								'flex items-center justify-center rounded-md p-5 shadow-lg',
+								'relative flex items-center justify-center rounded-md p-5 shadow-lg',
 								!room.is_clean
 									? 'border bg-white dark:bg-darkmode-400'
 									: 'border-pending/40 bg-pending/15 dark:bg-pending/10',
 							)}>
+							<Button
+								variant="soft-danger"
+								onClick={() => handleDelete(room.id)}
+								className="absolute right-1 top-1 p-0">
+								<Lucide
+									icon="X"
+									className="h-5 w-5"
+								/>
+							</Button>
 							<div>
 								<h3 className="text-center text-3xl font-extrabold text-slate-600 dark:text-slate-400">{room.name}</h3>
 								<div className="text-center text-base font-semibold text-slate-500">

@@ -2,13 +2,14 @@ import React from 'react'
 import AdminAuthenticatedLayout from '@/Layouts/AdminAuthenticatedLayout'
 import route from 'ziggy-js'
 import {PageProps} from './types'
+import {Head} from '@inertiajs/react'
 
 function Index(props: PageProps) {
-	console.log(props)
 	return (
-		<div>
+		<>
+			<Head title="Dashboard" />
 			<h1>Dashboard</h1>
-		</div>
+		</>
 	)
 }
 

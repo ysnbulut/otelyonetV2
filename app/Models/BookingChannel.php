@@ -25,6 +25,7 @@ class BookingChannel extends Model
     protected $fillable = [
         'code',
         'name',
+        'active',
     ];
 
 

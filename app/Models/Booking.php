@@ -14,13 +14,15 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use ShiftOneLabs\LaravelCascadeDeletes\CascadesDeletes;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Sqids\Sqids;
 
 /**
  * App\Models\Booking
  *
- * @property-read BookingTotalPrice|null $total_price
  * @property-read Customer|null $customer
  * @property-read Collection<int, Guest> $guests
  * @property-read int|null $guests_count
@@ -37,7 +39,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static Builder|Booking stayDurationNight()
  * @method static Builder|Booking withTrashed()
  * @method static Builder|Booking withoutTrashed()
- * @property-read Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
  * @property-read int|null $messages_count
  * @property-read Collection<int, \App\Models\BookingNote> $notes
@@ -50,7 +52,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Booking extends Model
 {
-    use SoftDeletes, LogsActivity;
+    use SoftDeletes, LogsActivity, CascadesDeletes;
 
 
     protected $fillable = [
@@ -65,6 +67,27 @@ class Booking extends Model
         'calendar_colors',
     ];
 
+    protected $cascadeDeletes = ['rooms', 'cMBooking', 'notes', 'tasks', 'cancelReason'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($booking) {
+            $sqids = new Sqids('ABCDEFGHJKLMNPQRSTUVWXYZ', 9);
+            $randomNumber = mt_rand(10000, 99999);
+            $datePart = date('Ym');
+            $count = static::whereYear('created_at', date('Y'))
+                    ->whereMonth('created_at', date('m'))
+                    ->count() + 1;
+            $count = str_pad($count, 4, '0', STR_PAD_LEFT);
+
+            $booking_code = $sqids->encode([$datePart.$count.$randomNumber]);
+
+            $booking->booking_code = $booking_code;
+        });
+    }
+
     /**
      * @param $check_in
      * @param $check_out
@@ -74,17 +97,17 @@ class Booking extends Model
     {
         return Booking::select('id')
             ->whereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->where('check_in', '>=', $check_in)
-                    ->where('check_in', '<', $check_out);
+                $query->whereDate('check_in', '>=', $check_in)
+                    ->whereDate('check_in', '<', $check_out);
             })
             ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->where('check_out', '>', $check_in)
-                    ->where('check_out', '<=', $check_out)->orWhereNull('check_out');
+                $query->whereDate('check_out', '>', $check_in)
+                    ->whereDate('check_out', '<=', $check_out);
             })
             ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->where('check_in', '<=', $check_in)
-                    ->where('check_out', '>=', $check_out)->orWhereNull('check_out');
-            })->with('rooms')->get()->pluck('rooms')->flatten()->pluck('id')->unique()->toArray();
+                $query->whereDate('check_in', '<=', $check_in)
+                    ->whereDate('check_out', '>=', $check_out);
+            })->with('rooms')->get()->pluck('rooms')->flatten()->pluck('room_id')->unique()->toArray();
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -96,6 +119,11 @@ class Booking extends Model
     public function channel(): BelongsTo
     {
         return $this->belongsTo(BookingChannel::class, 'channel_id', 'id');
+    }
+
+    public function cMBooking(): HasOne
+    {
+        return $this->hasOne(CMBooking::class, 'booking_id', 'id');
     }
 
     public function documents(): HasManyThrough
@@ -115,11 +143,6 @@ class Booking extends Model
         return $this->hasMany(BookingRoom::class);
     }
 
-    public function old_rooms(): BelongsToMany
-    {
-        return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->withPivot('id', 'check_in', 'check_out', 'number_of_adults', 'number_of_children', 'children_ages')->wherePivotNull('deleted_at');
-    }
-
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
@@ -129,11 +152,6 @@ class Booking extends Model
     {
         $balance = $this->total_price->grand_total - $this->payments()->sum('amount_paid');
         return $balance < 1 ? 0 : $balance;
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Transaction::class, 'booking_id', 'id');
     }
 
     public function tasks(): MorphMany

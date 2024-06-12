@@ -93,12 +93,12 @@ function Calendar(props: PageProps) {
 						resourceTimelinePlugin,
 					]}
 					schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
-					googleCalendarApiKey="AIzaSyD5Gd_5uY-E5idAlQVJUPQBCS0Re_hlLHI"
+					googleCalendarApiKey="AIzaSyAGMso60hDLROBDBs5RSwgMmLTwIRwIOl8"
 					initialView="resourceTimelineMonth"
 					views={{
 						resourceTimeline: {
 							duration: {
-								days: 45,
+								days: 15,
 							},
 							slotDuration: {
 								hours: 24,

@@ -25,9 +25,19 @@ use App\Http\Controllers\Hotel\SalesUnitController;
 use App\Http\Controllers\Hotel\SeasonController;
 use App\Http\Controllers\Hotel\UnitPriceController;
 use App\Http\Controllers\Hotel\UserController;
+use App\Models\Booking;
+use App\Models\BookingChannel;
+use App\Models\BookingRoom;
+use App\Models\CMBooking;
+use App\Models\CMRoom;
 use App\Models\Document;
 
+use App\Models\Room;
+use App\Models\Tax;
+use App\Models\TypeHasView;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
+use Sqids\Sqids;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -54,18 +64,7 @@ Route::middleware([
     require __DIR__ . '/auth.php';
 
     Route::get('/test', function () {
-        $settings = new \App\Settings\PricingPolicySettings();
-        $currency = $settings->pricing_currency['value'];
-
-        $money = Money::$currency(500345000.67878978, true);
-        return [
-            'money' => $money,
-            'amount' => $money->getAmount(),
-            'formatted' => $money->getMoney()->getCurrency(),
-            'formatted_without_symbol' => Money::$currency(500345000.67878978, true)->format(null, null,
-                    NumberFormatter::DECIMAL).' '.$money->getMoney()
-                    ->getCurrency(),
-        ];
+        return BookingChannel::where('active', true)->whereNotIn('code', ['web', 'reception', 'agency', 'online'])->pluck('id');
     })->name('test');
 
 
@@ -104,13 +103,13 @@ Route::middleware([
 
     //bed_types
     Route::prefix('bed_types')->middleware('auth')->group(function () {
-        Route::get('/', [bedTypeController::class, 'index'])->name('hotel.bed_types.index');
-        Route::get('/create', [bedTypeController::class, 'create'])->name('hotel.bed_types.create');
-        Route::post('/', [bedTypeController::class, 'store'])->name('hotel.bed_types.store');
+        Route::get('/', [BedTypeController::class, 'index'])->name('hotel.bed_types.index');
+        Route::get('/create', [BedTypeController::class, 'create'])->name('hotel.bed_types.create');
+        Route::post('/', [BedTypeController::class, 'store'])->name('hotel.bed_types.store');
         //Route::get('/{bed_type}', [bedTypeController::class, 'show'])->name('hotel.bed_types.show');
-        Route::get('/{bed_type}/edit', [bedTypeController::class, 'edit'])->name('hotel.bed_types.edit');
-        Route::put('/{bed_type}', [bedTypeController::class, 'update'])->name('hotel.bed_types.update');
-        Route::delete('/{bed_type}', [bedTypeController::class, 'destroy'])->name('hotel.bed_types.destroy');
+        Route::get('/{bed_type}/edit', [BedTypeController::class, 'edit'])->name('hotel.bed_types.edit');
+        Route::put('/{bed_type}', [BedTypeController::class, 'update'])->name('hotel.bed_types.update');
+        Route::delete('/{bed_type}', [BedTypeController::class, 'destroy'])->name('hotel.bed_types.destroy');
     });
 
     //room_type_features
@@ -185,6 +184,7 @@ Route::middleware([
         //Route::get('/{season}', [SeasonController::class, 'show'])->name('hotel.seasons.show');
         Route::get('/{season}/edit', [SeasonController::class, 'edit'])->name('hotel.seasons.edit');
         Route::put('/{season}', [SeasonController::class, 'update'])->name('hotel.seasons.update');
+        Route::put('/{season}/drop', [SeasonController::class, 'updateForDrop'])->name('hotel.seasons.drop');
         Route::delete('/{season}', [SeasonController::class, 'destroy'])->name('hotel.seasons.destroy');
     });
     //Pos

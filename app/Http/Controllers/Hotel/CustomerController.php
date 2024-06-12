@@ -148,7 +148,7 @@ class CustomerController extends Controller
                 fn($document) => $document
                     ->payments
                     ->map(
-                        fn($payment) => $payment->amount
+                        fn($payment) => $payment->transaction->amount
                     )
             )
             ->flatten(1)
@@ -217,15 +217,20 @@ class CustomerController extends Controller
                 } else {
                     $dcTotal = $document->total->filter(function ($total) {
                         return $total->type === 'total';
-                    })->first()->amount;
+                    })->first()->amount - $document->payments->sum('amount');
                     $diff = $dcTotal - $amount;
                     if ($diff < 0) {
-                        $document->payments()->create([
-                            'transaction_id' => $transaction->id,
-                            'amount' => $dcTotal,
-                        ]);
-                        $amount = abs($diff);
-                        return true;
+                        if($dcTotal > 0) {
+                            $document->payments()->create([
+                                'transaction_id' => $transaction->id,
+                                'amount' => $dcTotal,
+                            ]);
+                            $amount = abs($diff);
+                            return true;
+                        } else {
+                            $amount = abs($diff);
+                            return false;
+                        }
                     } else {
                         $document->payments()->create([
                             'transaction_id' => $transaction->id,

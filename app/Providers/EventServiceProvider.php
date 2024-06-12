@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Models\BookingRoom;
-use App\Models\DocumentItem;
+use App\Models\Season;
 use App\Models\Tenant;
 use App\Models\UnitPrice;
 use App\Observers\BookingRoomObserver;
-use App\Observers\DocumentItemObserver;
+use App\Observers\SeasonObserver;
 use App\Observers\TenantObserver;
 use App\Observers\UnitPriceObserver;
 use Illuminate\Auth\Events\Registered;
@@ -31,6 +31,8 @@ class EventServiceProvider extends ServiceProvider
         Tenant::class => [TenantObserver::class],
         UnitPrice::class => [UnitPriceObserver::class],
         BookingRoom::class => [BookingRoomObserver::class],
+//        Booking::class => [BookingObserver::class],
+        Season::class => [SeasonObserver::class],
     ];
 
     /**

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use ShiftOneLabs\LaravelCascadeDeletes\CascadesDeletes;
 
 /**
  * App\Models\Document
@@ -32,7 +33,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Document extends Model
 {
-    use softDeletes;
+    use softDeletes, CascadesDeletes;
 
     protected $fillable = [
         'type',
@@ -44,6 +45,8 @@ class Document extends Model
         'issue_date',
         'due_date',
     ];
+
+    protected $cascadeDeletes = ['items', 'total', 'payments'];
 
     protected static function boot(): void
     {

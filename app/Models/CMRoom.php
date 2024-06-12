@@ -27,4 +27,14 @@ class CMRoom extends Model
         'room_code',
         'stock',
     ];
+
+    public function typeHasView(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(TypeHasView::class);
+    }
+
+    public function unitPrices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(UnitPrice::class, TypeHasView::class, 'id', 'type_has_view_id', 'type_has_view_id', 'id');
+    }
 }

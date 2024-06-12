@@ -4,51 +4,64 @@ import {router, useForm} from '@inertiajs/react'
 import {twMerge} from 'tailwind-merge'
 import axios from 'axios'
 import Button from '@/Components/Button'
-import {SeasonListItemProps} from '../types/season-list-item'
+import {SeasonListItemProps} from '../types/unit-channel-price'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {FormLabel} from '@/Components/Form'
+import Lucide from '@/Components/Lucide'
 
-export function SeasonListItem(props: SeasonListItemProps) {
+export function UnitChannelPrice(props: SeasonListItemProps) {
 	const [submitClick, setSubmitClick] = useState<boolean>(false)
 	const MySwall = withReactContent(Swal)
 	const [editable, setEditable] = useState(false)
-	const {data, setData, post, processing, errors} = useForm({
+	const {data, setData, post, put, processing, errors} = useForm({
 		type_has_view_id: props.roomTypeAndViewId,
-		season_id: props.season.id,
-		unit_price:
-			props.season.unit_price !== null
-				? props.season.unit_price.unit_price !== null
-					? props.season.unit_price.unit_price
-					: '0'
-				: '0',
+		season_id: props?.season?.id || null,
+		booking_channel_id: props.bookingChannel?.id || null,
+		unit_price: Array.isArray(props.season?.unit_prices)
+			? props.season?.unit_prices?.find((unit_price) => unit_price.booking_channel_id === props.bookingChannel?.id)?.unit_price ?? '0'
+			: props.season?.unit_prices?.booking_channel_id === (props.bookingChannel?.id || null)
+				? props.season?.unit_prices?.unit_price ?? '0'
+				: '0' ?? '0',
 	})
-
-	const [price, setPrice] = useState(parseFloat(data.unit_price.toString()) / (1 + 0.2))
+	const [price, setPrice] = useState(parseFloat(data.unit_price.toString()) / (1 + props.taxRate))
 	const [tax, setTax] = useState(parseFloat(data.unit_price.toString()) - price)
+	const [changePriceType, setChangePriceType] = useState<string>()
+	const [postCheck, setPostCheck] = useState(false)
 
 	useEffect(() => {
-		props.setWarnings((warnings) => ({
-			...warnings,
-			[props.season.id !== null ? props.season.id : 0]:
-				data.unit_price === '0' || data.unit_price === '0,00' ? true : props.setableSubmitClick ? !submitClick : false,
-		}))
+		const check = !((
+			Array.isArray(props.season?.unit_prices)
+				? props.season?.unit_prices?.find((unit_price) => unit_price.booking_channel_id === props.bookingChannel?.id)?.unit_price ?? '0'
+				: props.season?.unit_prices?.unit_price
+		)
+			? (Array.isArray(props.season?.unit_prices)
+					? props.season?.unit_prices?.find((unit_price) => unit_price.booking_channel_id === props.bookingChannel?.id)?.unit_price ?? '0'
+					: props.season?.unit_prices?.unit_price) !== '0'
+			: false)
+		setPostCheck(check)
+	}, [props.season])
+
+	useEffect(() => {
+		props.setWarning((warning) => (!warning ? warning : data.unit_price === '0' || data.unit_price === '0,00' ? true : props.setableSubmitClick ? !submitClick : false))
 	}, [data.unit_price, submitClick])
 
 	useEffect(() => {
 		if (data.unit_price === '0' || data.unit_price === '0,00') {
 			setEditable(true)
 		}
-		setPrice(parseFloat(data.unit_price.toString()) / (1 + 0.2))
-		setTax(parseFloat(data.unit_price.toString()) - price)
+		const price = parseFloat(data.unit_price.toString()) / (1 + props.taxRate)
+		changePriceType === 'unit_price' && setPrice(price)
+		changePriceType === 'unit_price' && setTax(parseFloat(data.unit_price.toString()) - price)
 	}, [data.unit_price])
 
 	useEffect(() => {
-		setData((data) => ({
-			...data,
-			unit_price: price + price * 0.2,
-		}))
-		setTax(price * 0.2)
+		changePriceType === 'price' &&
+			setData((data) => ({
+				...data,
+				unit_price: price + price * props.taxRate,
+			}))
+		changePriceType === 'price' && setTax(price * props.taxRate)
 	}, [price])
 
 	const Toast = MySwall.mixin({
@@ -67,46 +80,45 @@ export function SeasonListItem(props: SeasonListItemProps) {
 		if (props.setableSubmitClick) {
 			setSubmitClick(true)
 		}
-		if (props.season !== null && props.season.unit_price !== null) {
-			axios
-				.put(route('hotel.unit_prices.update', props.season.unit_price.id), data)
-				.then((response) => {
+		if (!postCheck) {
+			const id = Array.isArray(props.season.unit_prices) ? props.season.unit_prices?.find((unit_price) => unit_price.booking_channel_id === props.bookingChannel?.id)?.id : props.season.unit_prices?.id
+
+			put(route('hotel.unit_prices.update', id), {
+				preserveState: true,
+				preserveScroll: true,
+				onSuccess: () => {
 					Toast.fire({
 						icon: 'success',
 						title: 'Ünite Fiyatı Güncellendi!',
 					})
 					setEditable(false)
-				})
-				.catch((error) => {
-					Toast.fire({
-						icon: 'error',
-						title: error.response.data.message,
-					})
-				})
+				},
+			})
 		} else {
-			if (data.unit_price === '0' || data.unit_price === '0,00') {
+			if (data.unit_price === '0,00' || data.unit_price === '0') {
 				Toast.fire({
 					icon: 'error',
 					title: 'Ünite Fiyatı 0 Olamaz!',
 				})
 			} else {
-				axios
-					.post(route('hotel.unit_prices.store'), data)
-					.then((response) => {
-						setEditable(false)
+				post(route('hotel.unit_prices.store'), {
+					preserveState: true,
+					preserveScroll: true,
+					onSuccess: () => {
 						Toast.fire({
 							icon: 'success',
 							title: 'Ünite Fiyatı Eklendi!',
 						})
-					})
-					.catch((error) => {
+						setEditable(false)
+					},
+					onError: (error) => {
+						console.log('error', error)
 						Toast.fire({
 							icon: 'error',
-							title: error.response.data.message,
-						}).finally(() => {
-							router.reload()
+							title: 'Ünite Fiyatı Eklenemedi!',
 						})
-					})
+					},
+				})
 			}
 		}
 	}
@@ -114,18 +126,14 @@ export function SeasonListItem(props: SeasonListItemProps) {
 	return (
 		<form
 			onSubmit={(e) => handleSubmit(e)}
-			className="intro-x grid grid-cols-1 items-center gap-2 rounded p-3 lg:grid-cols-12">
-			<div className="col-span-7 flex items-center justify-center border-b border-slate-100 lg:justify-start lg:border-b-0">
-				<h3
-					className={twMerge(
-						'text-base font-semibold',
-						data.unit_price === '0' || data.unit_price === '0,00'
-							? 'text-danger'
-							: props.season.name
-							  ? ''
-							  : 'text-pending',
-					)}>
-					{props.season.name ? props.season.name : 'Sezon Dışı' + ' Fiyatı'}
+			className="intro-x grid grid-cols-1 items-center gap-2 bg-transparent px-4 pb-4 pt-2 lg:grid-cols-12">
+			<div className="col-span-7 mt-2 flex items-center justify-center border-b border-slate-100 lg:justify-start lg:border-b-0">
+				<Lucide
+					icon="GripHorizontal"
+					className="mr-2 h-6 w-6 text-primary dark:text-white/50"
+				/>
+				<h3 className={twMerge('text-base font-normal', data.unit_price === '0' || data.unit_price === '0,00' ? 'text-danger' : props.season.name ? '' : 'text-pending')}>
+					{props.bookingChannel ? props.bookingChannel?.name : 'Kanallar'}
 				</h3>
 			</div>
 			<div className="col-span-5 flex items-center justify-center lg:justify-center">
@@ -148,19 +156,20 @@ export function SeasonListItem(props: SeasonListItemProps) {
 							decimalsLimit={2}
 							required={true}
 							disabled={!editable}
-							onValueChange={(value) => value && setPrice(parseFloat(value))}
+							onValueChange={(value, name, values) => {
+								setPrice(values?.float || 0)
+								setChangePriceType('price')
+							}}
 							name="unit_price"
 							className={twMerge(
-								'w-full rounded-md border-slate-200 py-1.5 text-right shadow-sm transition duration-200' +
+								'w-full rounded-md border-slate-200 py-0.5 text-right shadow-sm transition duration-200' +
 									' ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4' +
 									' focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100' +
 									' dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80' +
 									' dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent' +
 									' dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100' +
 									' [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50',
-								data.unit_price === '0' || data.unit_price === '0,00'
-									? 'border-danger text-danger focus:border-danger focus:ring-danger '
-									: 'focus:border-primary focus:ring-primary ',
+								data.unit_price === '0' || data.unit_price === '0,00' ? 'border-danger text-danger focus:border-danger focus:ring-danger ' : 'focus:border-primary focus:ring-primary ',
 							)}
 						/>
 					</div>
@@ -168,7 +177,7 @@ export function SeasonListItem(props: SeasonListItemProps) {
 						<FormLabel
 							htmlFor="tax"
 							className="mb-0.5 mt-0 pl-0.5 text-xs font-semibold leading-none">
-							Kdv (%20)
+							Kdv (%{(props.taxRate * 100).toFixed(0)})
 						</FormLabel>
 						<CurrencyInput
 							id="tax"
@@ -184,7 +193,7 @@ export function SeasonListItem(props: SeasonListItemProps) {
 							disabled
 							name="tax"
 							className={twMerge(
-								'w-full rounded-md border-slate-200 py-1.5 text-right shadow-sm transition duration-200' +
+								'w-full rounded-md border-slate-200 py-0.5 text-right shadow-sm transition duration-200' +
 									' ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4' +
 									' focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100' +
 									' dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80' +
@@ -213,24 +222,23 @@ export function SeasonListItem(props: SeasonListItemProps) {
 							decimalsLimit={2}
 							required={true}
 							disabled={!editable}
-							onValueChange={(value) =>
+							onValueChange={(value, name, values) => {
 								setData((data) => ({
 									...data,
-									unit_price: value || '0',
+									unit_price: values?.float || '0',
 								}))
-							}
+								setChangePriceType('unit_price')
+							}}
 							name="unit_price"
 							className={twMerge(
-								'w-full rounded-md border-slate-200 py-1.5 text-right shadow-sm transition duration-200' +
+								'w-full rounded-md border-slate-200 py-0.5 text-right shadow-sm transition duration-200' +
 									' ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4' +
 									' focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100' +
 									' dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80' +
 									' dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent' +
 									' dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100' +
 									' [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50',
-								data.unit_price === '0' || data.unit_price === '0,00'
-									? 'border-danger text-danger focus:border-danger focus:ring-danger '
-									: 'focus:border-primary focus:ring-primary ',
+								data.unit_price === '0' || data.unit_price === '0,00' ? 'border-danger text-danger focus:border-danger focus:ring-danger ' : 'focus:border-primary focus:ring-primary ',
 							)}
 						/>
 					</div>
@@ -243,25 +251,21 @@ export function SeasonListItem(props: SeasonListItemProps) {
 							setEditable(true)
 						}}
 						variant="soft-secondary"
-						className={twMerge(
-							'ml-2 mt-2.5',
-							processing ? 'btn-loading' : '',
-							data.unit_price === '0' || data.unit_price === '0,00' ? 'text-danger' : 'text-primary',
-						)}>
+						className={twMerge('ml-2 mt-3 py-1 text-dark', processing ? 'btn-loading' : '')}>
 						Düzenle
 					</Button>
-				) : !props.season.unit_price?.unit_price ? (
+				) : postCheck ? (
 					<Button
 						type="submit"
 						variant="soft-secondary"
-						className="ml-2 mt-2.5 text-danger">
-						Kaydet {props.season.unit_price?.unit_price}
+						className="ml-2 mt-3 py-1 text-danger">
+						Kaydet
 					</Button>
 				) : (
 					<Button
 						type="submit"
 						variant="soft-secondary"
-						className="ml-2 mt-2.5 text-primary">
+						className="ml-2 mt-3 py-1 text-primary">
 						Güncelle
 					</Button>
 				)}
@@ -270,4 +274,4 @@ export function SeasonListItem(props: SeasonListItemProps) {
 	)
 }
 
-export default SeasonListItem
+export default UnitChannelPrice

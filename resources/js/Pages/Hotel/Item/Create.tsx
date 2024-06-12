@@ -13,7 +13,6 @@ import 'react-medium-image-zoom/dist/styles.css'
 import Select, {SelectInstance, ActionMeta, OnChangeValue} from 'react-select'
 import CurrencyInput from 'react-currency-input-field'
 import ItemSalesUnitsList from '@/Pages/Hotel/Item/components/ItemSalesUnitsList'
-import {usePrevious} from 'react-use'
 function Create(props: PageProps) {
 	const ref = useRef<SelectInstance>(null)
 	const itemImageDropzoneRef = useRef<DropzoneElement>()
@@ -182,6 +181,7 @@ function Create(props: PageProps) {
 									setData((data) => ({...data, name: e.target.value}))
 								}}
 							/>
+							{errors.name && <span className="pl-1 text-xs font-thin text-danger">{errors.name}</span>}
 						</>
 						<div className="mt-2">
 							<FormLabel
@@ -197,6 +197,7 @@ function Create(props: PageProps) {
 									setData((data) => ({...data, description: e.target.value}))
 								}}
 							/>
+							{errors.description && <span className="pl-1 text-xs font-thin text-danger">{errors.description}</span>}
 						</div>
 					</div>
 				</div>
@@ -225,6 +226,7 @@ function Create(props: PageProps) {
 								e && setData((data) => ({...data, type: e.value.toString()}))
 							}}
 						/>
+						{errors.type && <span className="pl-1 text-xs font-thin text-danger">{errors.type}</span>}
 					</div>
 					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
@@ -253,6 +255,7 @@ function Create(props: PageProps) {
 								e && setData((data) => ({...data, category_id: e.value.toString()}))
 							}}
 						/>
+						{errors.category_id && <span className="pl-1 text-xs font-thin text-danger">{errors.category_id}</span>}
 					</div>
 					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
@@ -268,6 +271,9 @@ function Create(props: PageProps) {
 								setData((data) => ({...data, preparation_time: e.target.value}))
 							}}
 						/>
+						{errors.preparation_time && (
+							<span className="pl-1 text-xs font-thin text-danger">{errors.preparation_time}</span>
+						)}
 					</div>
 					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
@@ -289,6 +295,7 @@ function Create(props: PageProps) {
 							name="price"
 							className="w-full rounded-md border-slate-200 text-right text-sm shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 						/>
+						{errors.price && <span className="pl-1 text-xs font-thin text-danger">{errors.price}</span>}
 					</div>
 					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
@@ -323,6 +330,7 @@ function Create(props: PageProps) {
 							isClearable
 							placeholder="Vergi Oranı"
 						/>
+						{errors.tax_id && <span className="pl-1 text-xs font-thin text-danger">{errors.tax_id}</span>}
 					</div>
 					<div className="col-span-12 mt-2 lg:col-span-4">
 						<FormLabel
@@ -344,6 +352,7 @@ function Create(props: PageProps) {
 							name="totalPrice"
 							className="w-full rounded-md border-slate-200 text-right text-sm shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 						/>
+						{errors.total_price && <span className="pl-1 text-xs font-thin text-danger">{errors.total_price}</span>}
 					</div>
 				</div>
 				<div className="col-span-12 mt-2">

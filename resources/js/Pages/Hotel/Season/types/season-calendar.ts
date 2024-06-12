@@ -1,11 +1,9 @@
-import {SeasonDataProps, SeasonCalendarProps} from './index'
+import {SeasonDataProps} from './index'
+import {EventApi} from '@fullcalendar/common'
+
 export interface SeasonCalendarComponentProps {
-	data: SeasonCalendarProps
-	setData: React.Dispatch<React.SetStateAction<SeasonCalendarProps>>
-	slideOver: boolean
+	seasonsCheckForChannels: (season: EventApi, action: string) => {channels: boolean; web: boolean; reception: boolean}
 	setSlideOver: React.Dispatch<React.SetStateAction<boolean>>
-	setCalendarValue: React.Dispatch<React.SetStateAction<string>>
+	setCalendarValue: React.Dispatch<React.SetStateAction<string | undefined>>
 	seasons: SeasonDataProps[]
-	setSeasons: React.Dispatch<React.SetStateAction<SeasonDataProps[]>>
-	setSeasonsDays: React.Dispatch<React.SetStateAction<string[]>>
 }

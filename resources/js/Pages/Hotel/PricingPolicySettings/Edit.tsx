@@ -8,14 +8,12 @@ import _ from 'lodash'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import Button from '@/Components/Button'
-import SelectBox from '@/Pages/Hotel/PricingPolicySettings/components/SelactBox'
+import SelectBox from '@/Pages/Hotel/PricingPolicySettings/components/SelectBox'
 
 function Edit(props: PageProps) {
 	const MySwal = withReactContent(Swal)
 	const ref = useRef<SelectInstance>(null)
-	const {data, setData, errors, setError, clearErrors, put} = useForm(
-		_.fromPairs(_.map(props.settings, (setting) => [setting.name, setting.value])),
-	)
+	const {data, setData, errors, setError, clearErrors, put} = useForm(_.fromPairs(_.map(props.settings, (setting) => [setting.name, setting.value])))
 
 	console.log(props.settings)
 
@@ -65,13 +63,7 @@ function Edit(props: PageProps) {
 						<div className="col-span-2 flex flex-col lg:col-span-1">
 							{setting.type === 'select' && (
 								<SelectBox
-									dynamicOptions={
-										setting.type === 'select'
-											? setting.options.type === 'dynamic'
-												? props[setting.options.values as string]
-												: setting.options.values
-											: []
-									}
+									dynamicOptions={setting.type === 'select' ? (setting.options.type === 'dynamic' ? props[setting.options.values as string] : setting.options.values) : []}
 									setting={setting}
 									data={data}
 									setData={setData}

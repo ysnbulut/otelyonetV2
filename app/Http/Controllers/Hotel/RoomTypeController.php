@@ -80,6 +80,7 @@ class RoomTypeController extends Controller
             $roomtype->features()->attach($features);
         }
         $helper = new Helper();
+        //TODO: Burası revize edilecek extranetwork deki gibi yapmalısın.
         $roomtype->variationsOfGuests()->createMany($helper->guestVariations($data['adult_capacity'], $data['child_capacity']));
         return redirect()
             ->route('hotel.room_types.edit', $roomtype->id)

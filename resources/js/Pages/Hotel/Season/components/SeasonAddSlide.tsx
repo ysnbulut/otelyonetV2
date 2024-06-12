@@ -1,11 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Slideover} from '@/Components/Headless'
 import Button from '@/Components/Button'
 import Lucide from '@/Components/Lucide'
 import {FormCheck, FormInput, FormLabel} from '@/Components/Form'
 import Litepicker from '@/Components/Litepicker'
 import dayjs from 'dayjs'
-import {useForm} from '@inertiajs/react'
 import {SeasonAddSlideComponentProps} from '../types/season-add-slide'
 import {SeasonCalendarProps} from '../types'
 import moment from 'moment'
@@ -13,52 +12,243 @@ import utc from 'dayjs/plugin/utc'
 import tz from 'dayjs/plugin/timezone'
 import customFormat from 'dayjs/plugin/customParseFormat'
 import isBetween from 'dayjs/plugin/isBetween'
-import _ from 'lodash'
+import sqids from 'sqids'
+import {EventApi} from '@fullcalendar/common'
+import {useForm} from '@inertiajs/react'
+import axios from 'axios'
+import {EventChangeArg, EventClickArg} from '@fullcalendar/core'
+import withReactContent from 'sweetalert2-react-content'
+import Swal from 'sweetalert2'
+
 moment.locale('tr')
 dayjs.extend(utc)
 dayjs.extend(tz)
 dayjs.extend(customFormat)
 dayjs.tz.setDefault('Europe/Istanbul')
 dayjs.extend(isBetween)
-function SeasonAddSlide({
-	setDatas,
-	slideOver,
-	setSlideOver,
-	calendarValue,
-	setCalendarValue,
-	seasonsDays,
-}: SeasonAddSlideComponentProps) {
-	const {data, setData, post, processing, errors, reset} = useForm<SeasonCalendarProps>({
-		title: '',
-		description: '',
-		start: '',
-		end: '',
+
+function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSlideOver, calendarValue, setCalendarValue}: SeasonAddSlideComponentProps) {
+	const hashids = new sqids()
+	const MySwal = withReactContent(Swal)
+	const [disabledSeasonCheckbox, setDisabledSeasonCheckbox] = useState<{channels: boolean; web: boolean; reception: boolean}>({
+		channels: false,
+		web: false,
+		reception: false,
 	})
+	const {data, setData, reset, post, put, processing, errors} = useForm<SeasonCalendarProps>({
+		uid: hashids.encode([dayjs().unix()]),
+		name: '',
+		description: '',
+		start_date: '',
+		end_date: '',
+		channels: false,
+		web: false,
+		agency: false,
+		reception: false,
+	})
+	const [seasonEditable, setSeasonEditable] = useState(false)
+
+	const Toast = MySwal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: true,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
+		},
+	})
+
+	const listenerFunctionEventClick = (info: EventClickArg) => {
+		const seasonsCheck = seasonsCheckForChannels(info.event as unknown as EventApi, 'click')
+		setData({
+			uid: info.event.id || hashids.encode([dayjs().unix()]),
+			name: info.event.title || '',
+			description: info.event.extendedProps.description || '',
+			start_date: dayjs(info.event.start).format('DD.MM.YYYY'),
+			end_date: dayjs(info.event.end).subtract(1, 'day').format('DD.MM.YYYY'),
+			channels: info.event.extendedProps.channels,
+			web: info.event.extendedProps.web,
+			agency: info.event.extendedProps.agency,
+			reception: info.event.extendedProps.reception,
+		})
+		setDisabledSeasonCheckbox({
+			channels: info.event.extendedProps.channels ? false : seasonsCheck.channels,
+			web: info.event.extendedProps.web ? false : seasonsCheck.web,
+			reception: info.event.extendedProps.reception ? false : seasonsCheck.reception,
+		})
+		setSlideOver(true)
+		setSeasonEditable(true)
+	}
+
+	const listenerFunctionEventChange = (info: EventChangeArg) => {
+		const seasonsCheck = seasonsCheckForChannels(info.event as unknown as EventApi, 'change')
+		let message = ''
+		if (seasonsCheck.channels || seasonsCheck.web || seasonsCheck.reception) {
+			if (seasonsCheck.channels) {
+				message += 'Kanal, '
+			}
+			if (seasonsCheck.web) {
+				message += 'Web, '
+			}
+			if (seasonsCheck.reception) {
+				message += 'Resepsiyon, '
+			}
+			info.revert()
+			Toast.fire({
+				icon: 'error',
+				text: `${message} çakışmaktadır!`,
+				toast: true,
+				position: 'top-end',
+				showConfirmButton: false,
+				timer: 3000,
+				timerProgressBar: true,
+			})
+				.then()
+				.catch()
+		} else {
+			if (info.event.id == info.oldEvent.id) {
+				axios
+					.put(route('hotel.seasons.drop', info.event.id), {
+						uid: info.event.groupId,
+						start_date: info.event.startStr,
+						end_date: dayjs(info.event.endStr, 'YYYY-MM-DD').subtract(1, 'day').format('YYYY-MM-DD'),
+						name: info.event.title,
+						description: info.event.extendedProps.description,
+						channels: info.event.extendedProps.channels,
+						web: info.event.extendedProps.web,
+						agency: info.event.extendedProps.agency,
+						reception: info.event.extendedProps.reception,
+					})
+					.then(() => {})
+					.catch(() => {
+						info.revert()
+					})
+			}
+		}
+	}
+
+	const eventDelete = (id: string) => {
+		MySwal.fire({
+			title: 'Emin misiniz?',
+			html: `<strong>${data.name}</strong> Sezon silinecektir. Bu işlemi geri alamazsınız!`,
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet, sil!',
+			cancelButtonText: 'Hayır, iptal et!',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				if (calendarRef.current) {
+					calendarRef.current.getApi().getEventById(id)?.remove()
+					setSlideOver(false)
+				}
+			}
+		})
+	}
+
+	useEffect(() => {
+		if (calendarRef.current) {
+			let calendarApi = calendarRef.current.getApi()
+
+			// Event listeners
+			const handleClick = (info: EventClickArg) => listenerFunctionEventClick(info)
+			const handleChange = (info: EventChangeArg) => listenerFunctionEventChange(info)
+			// 'eventClick' event listener'ını ekleyin
+			calendarApi.on('eventClick', (info) => handleClick(info))
+
+			calendarApi.on('eventChange', (info) => handleChange(info))
+
+			// Component temizlendiğinde 'select' event listener'ını kaldırın
+			return () => {
+				calendarApi.off('eventClick', (info) => handleClick(info))
+				calendarApi.off('eventChange', (info) => handleChange(info))
+			}
+		}
+	}, [])
+
+	useEffect(() => {
+		if (calendarValue !== undefined && !seasonEditable) {
+			setDisabledSeasonCheckbox({
+				channels: false,
+				web: false,
+				reception: false,
+			})
+			const split = calendarValue.split(' - ')
+			if (typeof calendarRef !== 'function' && calendarRef.current !== null) {
+				calendarRef.current
+					.getApi()
+					.getEvents()
+					.forEach((event) => {
+						if (
+							dayjs(split[1], 'DD.MM.YYYY').isBetween(dayjs(event.start), dayjs(event.end).subtract(1, 'day'), 'day', '[]') ||
+							dayjs(split[0], 'DD.MM.YYYY').isBetween(dayjs(event.start), dayjs(event.end).subtract(1, 'day'), 'day', '[]') ||
+							dayjs(event.start).isBetween(dayjs(split[0], 'DD.MM.YYYY'), dayjs(split[1], 'DD.MM.YYYY').subtract(1, 'day'), 'day', '[]') ||
+							dayjs(event.end).subtract(1, 'day').isBetween(dayjs(split[0], 'DD.MM.YYYY'), dayjs(split[1], 'DD.MM.YYYY').subtract(1, 'day'), 'day', '[]')
+						) {
+							setDisabledSeasonCheckbox((prevState) => ({
+								channels: prevState.channels ? prevState.channels : event.extendedProps.channels,
+								web: prevState.web ? prevState.web : event.extendedProps.web,
+								reception: prevState.reception ? prevState.reception : event.extendedProps.reception,
+							}))
+						}
+					})
+			}
+		}
+	}, [calendarValue, seasonEditable, calendarRef])
 
 	useEffect(() => {
 		if (!slideOver) {
 			reset()
+			setCalendarValue(undefined)
+			setDisabledSeasonCheckbox({
+				channels: false,
+				web: false,
+				reception: false,
+			})
+			setSeasonEditable(false)
 		}
 	}, [slideOver])
 
 	useEffect(() => {
-		const split = calendarValue.split(' - ')
-		if (
-			seasonsDays.includes(dayjs(split[0], 'DD.MM.YYYY').format('YYYY-MM-DD')) ||
-			seasonsDays.includes(dayjs(split[1], 'DD.MM.YYYY').format('YYYY-MM-DD'))
-		) {
-			console.log('bu tarihler arasında sezon var')
+		if (calendarValue !== undefined) {
+			const split = calendarValue.split(' - ')
+			setData((prevState: SeasonCalendarProps) => ({
+				...prevState,
+				start_date: split[0],
+				end_date: split[1],
+			}))
 		}
-		setData((prevState: SeasonCalendarProps) => ({
-			...prevState,
-			start: split[0],
-			end: split[1],
-		}))
 	}, [calendarValue])
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		setDatas(data)
+		let id: string = hashids.encode([dayjs().unix()])
+		setData((data: SeasonCalendarProps) => ({
+			...data,
+			uid: id,
+		}))
+		if (seasonEditable) {
+			put(route('hotel.seasons.update', {season: data.uid}), {
+				preserveState: true,
+				preserveScroll: true,
+				onSuccess: () => {
+					reset()
+					setSlideOver(false)
+					setSeasonEditable(false)
+				},
+			})
+		} else {
+			post(route('hotel.seasons.store'), {
+				preserveState: true,
+				preserveScroll: true,
+				onSuccess: () => {
+					reset()
+					setSlideOver(false)
+					setSeasonEditable(false)
+				},
+			})
+		}
 	}
 
 	return (
@@ -106,8 +296,8 @@ function SeasonAddSlide({
 										autoApply: true,
 										inlineMode: false,
 										splitView: false,
-										lockDaysFormat: 'YYYY-MM-DD',
-										lockDays: seasonsDays,
+										// lockDaysFormat: 'YYYY-MM-DD',
+										// lockDays: seasonsDays,
 										dropdowns: {
 											minYear: dayjs().year(),
 											maxYear: dayjs().add(3, 'year').year(),
@@ -122,21 +312,24 @@ function SeasonAddSlide({
 											return totalDays - 1
 										},
 									}}
-									value={calendarValue}
+									value={calendarValue || dayjs().format('DD.MM.YYYY') + ' - ' + dayjs().add(1, 'day').format('DD.MM.YYYY')}
 									onChange={(date) => setCalendarValue(date)}
 								/>
+								{errors.start_date && <div className="text-red-500">{errors.start_date}</div>}
+								{errors.end_date && <div className="text-red-500">{errors.end_date}</div>}
 							</div>
 							<div className="mt-3">
 								<FormLabel htmlFor="season-title">Sezon Adı</FormLabel>
 								<FormInput
 									id="season-title"
 									type="text"
-									value={data.title}
+									value={data.name}
 									onChange={(e) => {
-										setData((data: SeasonCalendarProps) => ({...data, title: e.target.value}))
+										setData((data: SeasonCalendarProps) => ({...data, name: e.target.value}))
 									}}
 									placeholder="Sezon Adı"
 								/>
+								{errors.name && <div className="text-red-500">{errors.name}</div>}
 							</div>
 							<div className="mt-3">
 								<FormLabel htmlFor="season-description">Kısa Açıklama</FormLabel>
@@ -149,27 +342,112 @@ function SeasonAddSlide({
 									}}
 									placeholder="Sezon Adı"
 								/>
+								{errors.description && <div className="text-red-500">{errors.description}</div>}
 							</div>
+							<fieldset className="mt-3 rounded border p-2">
+								<legend className="ml-3 font-semibold">Kanallar</legend>
+								<FormCheck>
+									<FormCheck.Input
+										id="channels"
+										type="checkbox"
+										disabled={disabledSeasonCheckbox.channels}
+										checked={data.channels}
+										onChange={(e) => {
+											setData((data: SeasonCalendarProps) => ({...data, channels: e.target.checked}))
+										}}
+									/>
+									<FormCheck.Label htmlFor="channels">Channels</FormCheck.Label>
+								</FormCheck>
+								<FormCheck>
+									<FormCheck.Input
+										id="web"
+										type="checkbox"
+										disabled={disabledSeasonCheckbox.web}
+										checked={data.web}
+										onChange={(e) => {
+											setData((data: SeasonCalendarProps) => ({...data, web: e.target.checked}))
+										}}
+									/>
+									<FormCheck.Label htmlFor="web">Web</FormCheck.Label>
+								</FormCheck>
+								<FormCheck>
+									<FormCheck.Input
+										id="agency"
+										type="checkbox"
+										checked={data.agency}
+										onChange={(e) => {
+											setData((data: SeasonCalendarProps) => ({...data, agency: e.target.checked}))
+										}}
+									/>
+									<FormCheck.Label htmlFor="agency">Agency</FormCheck.Label>
+								</FormCheck>
+								<FormCheck>
+									<FormCheck.Input
+										id="reception"
+										type="checkbox"
+										disabled={disabledSeasonCheckbox.reception}
+										checked={data.reception}
+										onChange={(e) => {
+											setData((data: SeasonCalendarProps) => ({...data, reception: e.target.checked}))
+										}}
+									/>
+									<FormCheck.Label htmlFor="reception">Reception</FormCheck.Label>
+								</FormCheck>
+							</fieldset>
+							{errors.channels && <div className="text-red-500">{errors.channels}</div>}
 						</div>
 					</Slideover.Description>
 					{/* END: Slide Over Body */}
 					{/* BEGIN: Slide Over Footer */}
 					<Slideover.Footer>
-						<Button
-							variant="outline-secondary"
-							type="button"
-							onClick={() => {
-								setSlideOver(false)
-							}}
-							className="mr-1 w-20">
-							Kapat
-						</Button>
-						<Button
-							variant="primary"
-							type="submit"
-							className="w-20">
-							Oluştur
-						</Button>
+						<div className="flex justify-between px-4">
+							{seasonEditable && (
+								<Button
+									variant="danger"
+									type="button"
+									onClick={() => eventDelete(data.uid)}
+									className="mr-1">
+									Sil
+									<Lucide
+										icon="Trash2"
+										className="ml-2 h-5 w-5"
+									/>
+								</Button>
+							)}
+							<div className="flex w-full justify-end">
+								<Button
+									variant="outline-secondary"
+									type="button"
+									onClick={() => {
+										setSlideOver(false)
+									}}
+									className="mr-1">
+									Kapat
+									<Lucide
+										icon="X"
+										className="ml-2 h-5 w-5"
+									/>
+								</Button>
+								<Button
+									disabled={processing}
+									variant="primary"
+									type="submit"
+									className="">
+									{seasonEditable ? 'Düzenle' : 'Oluştur'}
+									{processing ? (
+										<Lucide
+											icon="Loader2"
+											className="ml-2 h-5 w-5 animate-spin"
+										/>
+									) : (
+										<Lucide
+											icon="CheckCheck"
+											className="ml-2 h-5 w-5"
+										/>
+									)}
+								</Button>
+							</div>
+						</div>
 					</Slideover.Footer>
 				</form>
 			</Slideover.Panel>

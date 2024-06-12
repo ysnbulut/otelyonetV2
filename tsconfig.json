@@ -12,7 +12,9 @@
         "noEmit": true,
         "paths": {
             "@/*": ["./resources/js/*"]
-        }
+        },
+        "skipLibCheck": true,
     },
+    "exclude": ["node_modules"],
     "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx", "resources/js/**/*.d.ts",  "declarations.d.ts"]
 }

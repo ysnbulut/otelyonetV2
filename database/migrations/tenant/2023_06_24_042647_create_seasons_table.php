@@ -10,13 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('seasons', function (Blueprint $table) {
+        Schema::create('seasons', static function (Blueprint $table) {
             $table->id();
             $table->string('uid', 20)->unique();
             $table->date('start_date');
             $table->date('end_date');
             $table->string('name', 75);
             $table->string('description')->nullable();
+            $table->boolean('channels')->default(false);
+            $table->boolean('web')->default(false);
+            $table->boolean('agency')->default(false);
+            $table->boolean('reception')->default(false);
+            $table->json('calendar_colors');
             $table->timestamps();
             $table->softDeletes();
         });

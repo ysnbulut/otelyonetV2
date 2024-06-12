@@ -4,14 +4,17 @@ namespace App\Models;
 
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use ShiftOneLabs\LaravelCascadeDeletes\CascadesDeletes;
+
 
 /**
  * App\Models\BookingRoom
@@ -23,27 +26,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|BookingRoom withTrashed()
  * @method static Builder|BookingRoom withoutTrashed()
  * @property mixed $id
- * @property-read \App\Models\Booking|null $booking
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BookingGuests> $booking_guests
+ * @property-read Booking|null $booking
+ * @property-read Collection<int, BookingGuests> $booking_guests
  * @property-read int|null $booking_guests_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BookingRoomExpense> $expenses
  * @property-read int|null $expenses_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Guest> $guests
+ * @property-read Collection<int, Guest> $guests
  * @property-read int|null $guests_count
- * @property-read \App\Models\Room|null $room
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BookingDailyPrice> $prices
+ * @property-read Room|null $room
+ * @property-read Collection<int, BookingDailyPrice> $prices
  * @property-read int|null $prices_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BookingRoomTask> $tasks
+ * @property-read Collection<int, BookingRoomTask> $tasks
  * @property-read int|null $tasks_count
  * @property mixed $check_in
  * @property mixed $check_out
- * @property-read \App\Models\ReasonForCancellation|null $cancelReason
+ * @property-read ReasonForCancellation|null $cancelReason
  * @property-read Document|null $document
  * @mixin Eloquent
  */
 class BookingRoom extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CascadesDeletes;
     protected $fillable = [
         'booking_id',
         'room_id',
@@ -53,6 +55,8 @@ class BookingRoom extends Model
         'number_of_children',
         'children_ages'
     ];
+
+    protected $cascadeDeletes = ['documents', 'tasks', 'booking_guests', 'prices', 'cancelReason'];
 
     public function booking(): BelongsTo
     {
@@ -92,5 +96,10 @@ class BookingRoom extends Model
     public function cancelReason(): HasOne
     {
         return $this->hasOne(ReasonForCancellation::class, 'booking_room_id');
+    }
+
+    public function cmTransaction(): morphMany
+    {
+        return $this->morphMany(CMTransaction::class, 'transactionable');
     }
 }

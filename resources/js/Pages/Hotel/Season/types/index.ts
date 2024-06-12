@@ -1,10 +1,15 @@
 import {PageProps as BasePageProps} from '@/types'
 
 export interface SeasonCalendarProps {
-	title: string
+	uid: string
+	name: string
 	description: string
-	start: string
-	end: string
+	start_date: string
+	end_date: string
+	channels: boolean
+	web: boolean
+	agency: boolean
+	reception: boolean
 }
 
 export interface SeasonDataProps {
@@ -14,6 +19,11 @@ export interface SeasonDataProps {
 	description: string
 	start_date: string
 	end_date: string
+	channels: boolean
+	online: boolean
+	web: boolean
+	agency: boolean
+	reception: boolean
 	backgroundColor: string
 	textColor: string
 	borderColor: string

@@ -201,7 +201,7 @@ class HotelController extends Controller
                 return [
                     'status' => 'success',
                     'message' => 'Kanal yöneticisi başarıyla güncellendi.',
-                    'rooms' => $channelManagers->getRooms()->rooms,
+                    'rooms' => $channelManagers->getRooms()['rooms'] ?? [],
                 ];
             } else {
                 return [

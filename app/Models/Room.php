@@ -42,6 +42,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property mixed $number_of_children
  * @property mixed $children_ages
  * @property mixed $documents
+ * @property mixed $guests
+ * @property mixed $booking_guests
  * @mixin Eloquent
  */
 class Room extends Model

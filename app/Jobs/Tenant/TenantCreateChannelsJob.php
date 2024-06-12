@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use JsonException;
 
 class TenantCreateChannelsJob implements ShouldQueue, ShouldBeUnique
 {
@@ -36,10 +37,13 @@ class TenantCreateChannelsJob implements ShouldQueue, ShouldBeUnique
     {
         return $this->tenant->id;
     }
+
     public function handle(): void
     {
-        $this->tenant->run(function () {
-            $channels = json_decode(file_get_contents(base_path('database/data/bookingChannels.json')), true);
+        $this->tenant->run(/**
+         * @throws JsonException
+         */ function () {
+            $channels = json_decode(file_get_contents(base_path('database/data/bookingChannels.json')), true, 512, JSON_THROW_ON_ERROR);
             BookingChannel::insert($channels);
         });
     }

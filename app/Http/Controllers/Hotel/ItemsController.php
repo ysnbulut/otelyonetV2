@@ -148,7 +148,7 @@ class ItemsController extends Controller
             'price' =>  (float) $data['price'],
             'tax_id' =>  $data['tax_id'],
             'tax' =>  $data['tax'],
-            'total_price' =>  $data['total_price'],
+            'total_price' =>  str_replace(',', '.', $data['total_price']),
             'preparation_time' =>  $data['preparation_time'],
             'enabled' => 1,
         ]);

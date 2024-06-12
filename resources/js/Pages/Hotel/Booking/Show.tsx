@@ -12,7 +12,6 @@ import CurrencyInput from 'react-currency-input-field'
 import {PageProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import Sqids from 'sqids'
 import Tippy from '@/Components/Tippy'
 import BookingRooms from '@/Pages/Hotel/Booking/components/BookingRooms'
 import Swal from 'sweetalert2'
@@ -27,10 +26,6 @@ dayjs.extend(customParseFormat)
 function Show(props: PageProps) {
 	const paymentTypeSelectRef = useRef<SelectInstance>(null)
 	const MySwal = withReactContent(Swal)
-	const sqids = new Sqids({
-		minLength: 7,
-		alphabet: 'ABCDEFGHJKLMNPQRSTUVWXYZ',
-	})
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
 	const [bookingRooms, setBookingRooms] = useState<RoomsProps[]>(props.booking.rooms)
 	const [balance, setBalance] = useState<{number: number; formatted: string}>({
@@ -204,20 +199,20 @@ function Show(props: PageProps) {
 							initial={{scale: 0.5, y: -11, x: 32}}
 							animate={{scale: 1, y: 0, x: 0}}
 							whileHover={{
-								scale: 1.3,
-								y: 6.5,
-								x: -19,
+								scale: 1.1,
+								y: 2,
+								x: -8,
 								transition: {duration: 1},
 							}}
 							className="absolute right-0 top-0 z-50 flex">
 							<Tippy
-								className="h-11 w-32 rounded-tr-md border-b border-l border-slate-100/20 bg-white/30 p-2"
+								className="h-11 w-40 rounded-tr-md border-b border-l border-slate-100/20 bg-white/30 p-2"
 								content="Rezervasyon Kodu">
-								<h3 className="text-center text-lg font-extrabold text-slate-50">{sqids.encode([props.booking.id])}</h3>
+								<h3 className="text-center text-base font-extrabold text-slate-50">{props.booking.booking_code}</h3>
 							</Tippy>
 							<Tippy
 								content="Rezervasyon Kanalı"
-								className="absolute right-0 top-11 w-32 rounded-bl border-y border-l border-indigo-500/80 bg-indigo-600/80 p-2 shadow">
+								className="absolute right-0 top-11 w-40 rounded-bl border-y border-l border-indigo-500/80 bg-indigo-600/80 p-2 shadow">
 								<h6 className="rounded text-center text-xs font-semibold text-slate-50">{props.booking.channel}</h6>
 							</Tippy>
 						</motion.div>

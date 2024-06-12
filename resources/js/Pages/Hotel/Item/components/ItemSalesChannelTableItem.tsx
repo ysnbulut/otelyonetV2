@@ -44,7 +44,6 @@ function ItemSalesChannelTableItem({
 			setPrice('0')
 			setErrorPrice(null)
 		}
-		console.log('increasePercent', increasePercent)
 	}, [increasePercent, itemPrice, openSale])
 
 	useEffect(() => {

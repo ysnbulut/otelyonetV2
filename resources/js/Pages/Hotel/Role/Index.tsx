@@ -12,7 +12,7 @@ function Index(props: PageProps) {
 	const aRef = useRef(null)
 	const [perPage, setPerPage] = useState(props.roles.per_page || 10)
 
-	const handlePerPage = (e: React.FormEvent<HTMLFormElement>): void => {
+	const handlePerPage = (e: any): void => {
 		router.get(
 			route('hotel.roles.index'),
 			{per_page: e.target.value},
@@ -136,7 +136,7 @@ function Index(props: PageProps) {
 						</Pagination.Link>
 					</Pagination>
 					<FormSelect
-						onChange={handlePerPage}
+						onChange={(e) => handlePerPage(e)}
 						defaultValue={perPage}
 						className="!box ml-auto mt-2 w-20 lg:mt-0">
 						{[10, 20, 25, 30, 40, 50, 100].map((item, key) => (

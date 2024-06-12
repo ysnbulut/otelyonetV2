@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -30,11 +31,16 @@ class UnitPrice extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['type_has_view_id', 'season_id', 'unit_price'];
+    protected $fillable = ['type_has_view_id', 'season_id', 'booking_channel_id', 'unit_price'];
 
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(BookingChannel::class);
     }
 
     public function typeHasView(): BelongsTo
@@ -55,5 +61,10 @@ class UnitPrice extends Model
     public function getTypeAndWiewNameAttribute(): string
     {
         return $this->roomType->name . ' ' . $this->roomView->name;
+    }
+
+    public function cmTransaction(): morphTo
+    {
+        return $this->morphTo(CMTransaction::class, 'transactionable');
     }
 }

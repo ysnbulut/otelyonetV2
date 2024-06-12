@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\Season
  *
- * @property-read mixed $season_name
- * @property-read mixed $end_date
- * @property-read mixed $start_date
  * @method static Builder|Season avilableSeasons()
  * @method static Builder|Season newModelQuery()
  * @method static Builder|Season newQuery()
@@ -31,9 +28,40 @@ class Season extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['uid', 'name', 'description', 'start_date', 'end_date'];
+    protected $fillable = [
+        'uid',
+        'name',
+        'description',
+        'start_date',
+        'end_date',
+        'channels',
+        'web',
+        'agency',
+        'reception',
+        'calendar_colors'
+    ];
 
-    public function unitPrices() : HasMany
+    protected $appends = ['season_name'];
+
+    protected array $dates = ['start_date', 'end_date'];
+
+    protected $casts = [
+        'channels' => 'boolean',
+        'web' => 'boolean',
+        'agency' => 'boolean',
+        'reception' => 'boolean'
+    ];
+
+    protected $attributes = [
+        'start_date' => null,
+        'end_date' => null,
+        'channels' => false,
+        'web' => false,
+        'agency' => false,
+        'reception' => false
+    ];
+
+    public function unitPrices(): HasMany
     {
         return $this->hasMany(UnitPrice::class);
     }

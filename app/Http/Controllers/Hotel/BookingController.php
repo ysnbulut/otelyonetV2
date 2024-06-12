@@ -26,10 +26,9 @@ use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\In;
 use Inertia\Inertia;
 use Inertia\Response;
-use Sqids\Sqids;
+use JsonException;
 
 class BookingController extends Controller
 {
@@ -43,7 +42,7 @@ class BookingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('Hotel/Booking/Index', [
             'currency' => $this->settings->currency['value'],
@@ -54,7 +53,7 @@ class BookingController extends Controller
                 ->paginate(10)
                 ->withQueryString()
                 ->through(function ($booking) {
-                    $grandTotal = $booking->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type == 'total')->map(fn($total) => $total->amount))->flatten(1)->sum();
+                    $grandTotal = $booking->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount))->flatten(1)->sum();
                     $remainingBalance = floor($grandTotal - $booking->documents->map(fn($document) => $document->payments->map(fn($payment) => $payment->amount))->flatten(1)->sum());
                     return [
                         'id' => $booking->id,
@@ -75,7 +74,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function upcoming()
+    public function upcoming(): \Illuminate\Contracts\Pagination\CursorPaginator
     {
         return BookingRoom::orderBy('check_in', 'asc')->with(['booking', 'room'])->whereDate('check_in', '>=',
             Carbon::now()
@@ -94,14 +93,14 @@ class BookingController extends Controller
             ]);
     }
 
-    public function calendar()
+    public function calendar(): Response
     {
         $bookings = Booking::orderBy('id')
             ->with('rooms')
             ->get();
         $check_in_time = Str::of($this->settings->check_in_time_policy['value'])->explode(':');
         $check_out_time = Str::of($this->settings->check_out_time_policy['value'])->explode(':');
-        return Inertia::render('Hotel/Booking/Calendar',[ //
+        return Inertia::render('Hotel/Booking/Calendar', [ //
             'check_in_time' => $check_in_time[0],
             'check_out_time' => $check_out_time[0],
             'rooms' => Room::with(['building', 'floor', 'roomType', 'roomView'])
@@ -119,7 +118,7 @@ class BookingController extends Controller
                 ),
             'bookings' => $bookings->flatMap(callback: function ($booking) {
                 return $booking->rooms->map(function ($room) use ($booking) {
-                    $calendarColors = json_decode($booking->calendar_colors, true);
+                    $calendarColors = json_decode($booking->calendar_colors, true, 512, JSON_THROW_ON_ERROR);
                     return [
                         'id' => $booking->id,
                         'resourceId' => $room->room_id,
@@ -136,29 +135,23 @@ class BookingController extends Controller
         ]);
     }
 
-    public function store(StoreBookingRequest $request)
+    /**
+     * @throws JsonException
+     */
+    public function store(StoreBookingRequest $request): \Illuminate\Http\RedirectResponse
     {
         $data = $request->validated();
         $getSettingBookingTax = Tax::find($this->settings->tax_rate['value']);
         $check_in_required = $data['checkin_required'];
         $selected_room_count = collect($data['booking_result']['typed_rooms'])->sum('count');
-        $sqids = new Sqids('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 9);
         $nightCount = Carbon::parse($data['booking_result']['check_in'])->diffInDays($data['booking_result']['check_out']);
-        do {
-            try {
-                $uniqueNumber = str_pad(random_int(0, 999999999), 9, '0', STR_PAD_LEFT);
-            } catch (\Exception $e) {
-                $uniqueNumber = str_pad(mt_rand(0, 999999999), 9, '0', STR_PAD_LEFT);
-            }
-        } while (Booking::where('booking_code', 'O' . $sqids->encode([$uniqueNumber]))->exists());
         $booking_data = [
-            'booking_code' => 'O' . $sqids->encode([$uniqueNumber]),
             'customer_id' => $data['customer_id'],
             'channel_id' => 122, //reception_id
             'number_of_rooms' => collect($data['booking_result']['typed_rooms'])->sum('count'),
             'number_of_adults' => $data['booking_result']['number_of_adults_total'],
             'number_of_children' => $data['booking_result']['number_of_children_total'],
-            'calendar_colors' => json_encode($this->getRandomColors()),
+            'calendar_colors' => json_encode($this->getRandomColors(), JSON_THROW_ON_ERROR),
         ];
         $booking = Booking::create($booking_data);
         $number_of_adults = $data['booking_result']['number_of_adults_total'] / $selected_room_count || $data['number_of_adults'];
@@ -396,6 +389,7 @@ class BookingController extends Controller
             }),
             'booking' => [
                 'id' => $booking->id,
+                'booking_code' => $booking->booking_code,
                 'channel' => $booking->channel->name,
                 'check_in' => Carbon::parse($booking->rooms->pluck('check_in')->min())->format('d.m.Y'),
                 'check_out' => Carbon::parse($booking->rooms->pluck('check_out')->max())->format('d.m.Y'),
@@ -628,8 +622,8 @@ class BookingController extends Controller
                         }
                     } else {
                         $dcTotal = $document->total->filter(function ($total) {
-                            return $total->type === 'total';
-                        })->first()->amount;
+                                return $total->type === 'total';
+                            })->first()->amount - $document->payments->sum('amount');
                         $diff = $dcTotal - $amount;
                         if ($diff < 0) {
                             $document->payments()->create([

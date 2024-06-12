@@ -7,8 +7,11 @@ use App\Jobs\Tenant\TenantCreateBFloorJob;
 use App\Jobs\Tenant\TenantCreateChannelsJob;
 use App\Jobs\Tenant\TenantCreateCitizensJob;
 use App\Jobs\Tenant\TenantCreateHotelSettingsJob;
+use App\Jobs\Tenant\TenantCreateItemCategoriesJob;
 use App\Jobs\Tenant\TenantCreatePermissionsJob;
 use App\Jobs\Tenant\TenantCreatePricingPolicySettingsJob;
+use App\Jobs\Tenant\TenantCreateSalesUnitAndChannelJob;
+use App\Jobs\Tenant\TenantCreateTaxesJob;
 use App\Jobs\Tenant\TenantCreateUserJob;
 use App\Models\Tenant;
 
@@ -24,7 +27,9 @@ class TenantObserver
         TenantCreateChannelsJob::dispatch($tenant)->onQueue('tenant');
         TenantCreatePricingPolicySettingsJob::dispatch($tenant)->onQueue('tenant');
         TenantCreateHotelSettingsJob::dispatch($tenant)->onQueue('tenant');
-
+        TenantCreateTaxesJob::dispatch($tenant)->onQueue('tenant');
+        TenantCreateSalesUnitAndChannelJob::dispatch($tenant)->onQueue('tenant');
+        TenantCreateItemCategoriesJob::dispatch($tenant)->onQueue('tenant');
     }
 
     public function deleted(Tenant $tenant): void

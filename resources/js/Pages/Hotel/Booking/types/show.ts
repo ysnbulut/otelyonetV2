@@ -102,6 +102,7 @@ export interface RoomsProps {
 
 interface BookingProps {
 	id: number
+	booking_code: string
 	channel: string
 	check_in: string
 	check_out: string

@@ -24,6 +24,7 @@ class StoreUnitPriceRequest extends FormRequest
         return [
             'type_has_view_id' => 'required|exists:type_has_views,id',
             'season_id' => 'nullable|exists:seasons,id',
+            'booking_channel_id' => 'nullable|exists:booking_channels,id',
             'unit_price' => 'required|min:0',
         ];
     }

@@ -10,6 +10,7 @@ type OptionValues = {
 	value: string
 	label: string
 }
+
 interface SelectBoxProps {
 	dynamicOptions?: OptionValues[] | unknown | []
 	setting: {
@@ -21,12 +22,10 @@ interface SelectBoxProps {
 		}
 	}
 	data: _.Dictionary<string | number | boolean>
-	setData: setDataByObject<_.Dictionary<string | number | boolean>> &
-		setDataByMethod<_.Dictionary<string | number | boolean>> &
-		setDataByKeyValuePair<_.Dictionary<string | number | boolean>>
+	setData: setDataByObject<_.Dictionary<string | number | boolean>> & setDataByMethod<_.Dictionary<string | number | boolean>> & setDataByKeyValuePair<_.Dictionary<string | number | boolean>>
 }
 
-function SelactBox(props: SelectBoxProps) {
+function SelectBox(props: SelectBoxProps) {
 	const ref = useRef<SelectInstance>(null)
 	const [options, setOptions] = useState<OptionValues[]>([])
 
@@ -71,4 +70,4 @@ function SelactBox(props: SelectBoxProps) {
 	)
 }
 
-export default SelactBox
+export default SelectBox
