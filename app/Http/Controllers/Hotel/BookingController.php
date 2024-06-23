@@ -289,7 +289,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function getAvailableRoomsAndPrices(BookingStepOneRequest $request)
+    public function getAvailableRoomsAndPrices(BookingStepOneRequest $request): array
     {
         $priceCalculator = new PriceCalculator();
         $request->check_in = Carbon::createFromFormat('d.m.Y', $request->check_in)->format('Y-m-d');
@@ -330,14 +330,14 @@ class BookingController extends Controller
                         'name' => $room->name,
                     ]
                 ) : false,
-                'price' => $priceCalculator->prices(
+                'prices' => $priceCalculator->prices(
                     $typeHasViews->id,
                     $request->check_in,
                     $request->check_out,
                     $request->number_of_adults,
                     $request->number_of_children,
                     $request->children_ages
-                )->first(),
+                ),
             ];
         });
         return [
@@ -397,7 +397,7 @@ class BookingController extends Controller
                 'number_of_adults' => $booking->number_of_adults,
                 'number_of_children' => $booking->number_of_children,
                 'stay_duration_days' => $booking->stayDurationDay(),
-                'stay_duration_nights' => $booking->stayDurationNight(),
+                'stay_duration_nights' => ((int)($booking->stayDurationNight()) + 1) . 'Gece',
                 'rooms' => $booking->rooms->map(function ($booking_room) use (
                     $booking,
                     &$availableDatesCounts
@@ -408,7 +408,7 @@ class BookingController extends Controller
                         $date = Carbon::parse($booking->check_out)->endOf('day');
                         $date->addDay($i);
                         $dateStr = $date->format('Y-m-d');
-                        if (!in_array($dateStr, $checkinDates)) {
+                        if (!in_array($dateStr, $checkinDates, true)) {
                             $availableDatesCount++;
                         } else {
                             break;
@@ -434,7 +434,7 @@ class BookingController extends Controller
                             'type' => $document->type,
                             'customer' => [
                                 'id' => $document->customer->id,
-                                'type' => $document->customer->type == 'individual' ? 'Bireysel' : 'Kurumsal',
+                                'type' => $document->customer->type === 'individual' ? 'Bireysel' : 'Kurumsal',
                                 'title' => $document->customer->title,
                                 'tax_office' => $document->customer->tax_office,
                                 'tax_number' => $document->customer->tax_number,
@@ -524,7 +524,7 @@ class BookingController extends Controller
             'customer' => [
                 'id' => $booking->customer->id,
                 'title' => $booking->customer->title,
-                'type' => $booking->customer->type == 'individual' ? 'Bireysel' : 'Kurumsal',
+                'type' => $booking->customer->type === 'individual' ? 'Bireysel' : 'Kurumsal',
                 'tax_office' => $booking->customer->tax_office,
                 'tax_number' => $booking->customer->tax_number,
                 'country' => $booking->customer->country,
@@ -558,7 +558,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function transactionAdd(StoreTransactionRequest $request, Booking $booking)
+    public function transactionAdd(StoreTransactionRequest $request, Booking $booking): \Illuminate\Http\RedirectResponse
     {
         $request->validated();
         $now = Carbon::now();

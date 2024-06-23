@@ -47,7 +47,7 @@ class TenantCreatePermissionsJob implements ShouldQueue, ShouldBeUnique
             foreach ($routes as $route) {
                 if (Arr::has($route->getAction(), 'middleware')) {
                     if (Arr::has($route->getAction()['middleware'], 2)) {
-                        if ($route->getName() != ''
+                        if ($route->getName() !== ''
                             && $route->getAction()['middleware'][0] === 'web'
                             && $route->getAction()['middleware'][1] === 'Stancl\Tenancy\Middleware\InitializeTenancyByDomain'
                             && $route->getAction()['middleware'][2] === 'Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains') {
@@ -57,7 +57,6 @@ class TenantCreatePermissionsJob implements ShouldQueue, ShouldBeUnique
                             }
                         }
                     }
-
                 }
             }
         });

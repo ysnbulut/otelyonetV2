@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Hotel\BankController;
 use App\Http\Controllers\Hotel\BedTypeController;
 use App\Http\Controllers\Hotel\BookingController;
@@ -28,16 +36,15 @@ use App\Http\Controllers\Hotel\UserController;
 use App\Models\Booking;
 use App\Models\BookingChannel;
 use App\Models\BookingRoom;
-use App\Models\CMBooking;
 use App\Models\CMRoom;
 use App\Models\Document;
+use App\Helpers\ChannelManagers;
+use App\Settings\HotelSettings;
 
-use App\Models\Room;
 use App\Models\Tax;
 use App\Models\TypeHasView;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
-use Sqids\Sqids;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -61,12 +68,60 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
 
-    require __DIR__ . '/auth.php';
-
     Route::get('/test', function () {
-        return BookingChannel::where('active', true)->whereNotIn('code', ['web', 'reception', 'agency', 'online'])->pluck('id');
+        $unitPrice = \App\Models\UnitPrice::find(61);
+
+        return $unitPrice->typeHasView->unitPrices->filter(function ($value) {
+            return $value->season_id === null && $value->booking_channel_id === null;
+        })->first();
     })->name('test');
 
+    Route::middleware('guest')->group(function () {
+        //    Route::get('register', [RegisteredUserController::class, 'create'])
+        //                ->name('register');
+        //
+        //    Route::post('register', [RegisteredUserController::class, 'store']);
+
+        Route::get('/', [AuthenticatedSessionController::class, 'create'])
+            ->name('hotel.login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('hotel.login.store');
+
+        Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+            ->name('hotel.password.request');
+
+        Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+            ->name('hotel.password.email');
+
+        Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+            ->name('hotel.password.reset');
+
+        Route::post('reset-password', [NewPasswordController::class, 'store'])
+            ->name('hotel.password.store');
+    });
+
+    Route::middleware('auth')->group(function () {
+        Route::get('verify-email', EmailVerificationPromptController::class)
+            ->name('hotel.verification.notice');
+
+        Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('hotel.verification.verify');
+
+        Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('hotel.verification.send');
+
+        Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+            ->name('hotel.password.confirm');
+
+        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('hotel.password-confirm');
+
+        Route::put('password', [PasswordController::class, 'update'])->name('hotel.password.update');
+
+        Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+            ->name('hotel.logout');
+    });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web', 'auth', 'verified'])->name
     ('hotel.dashboard.index');
@@ -106,7 +161,7 @@ Route::middleware([
         Route::get('/', [BedTypeController::class, 'index'])->name('hotel.bed_types.index');
         Route::get('/create', [BedTypeController::class, 'create'])->name('hotel.bed_types.create');
         Route::post('/', [BedTypeController::class, 'store'])->name('hotel.bed_types.store');
-        //Route::get('/{bed_type}', [bedTypeController::class, 'show'])->name('hotel.bed_types.show');
+        //Route::get('/{bed_type}', [BedTypeController::class, 'show'])->name('hotel.bed_types.show');
         Route::get('/{bed_type}/edit', [BedTypeController::class, 'edit'])->name('hotel.bed_types.edit');
         Route::put('/{bed_type}', [BedTypeController::class, 'update'])->name('hotel.bed_types.update');
         Route::delete('/{bed_type}', [BedTypeController::class, 'destroy'])->name('hotel.bed_types.destroy');
@@ -226,7 +281,7 @@ Route::middleware([
         Route::get('/', [BookingController::class, 'calendar'])->name('hotel.booking_calendar');
     });
 
-    Route::prefix('booking_create')->middleware('auth')->group(function () {
+    Route::prefix('booking_create')->group(function () {
         Route::get('/', [BookingController::class, 'create'])
             ->name('hotel.booking_create');
         Route::post('/step/1', [BookingController::class, 'getAvailableRoomsAndPrices'])
@@ -355,4 +410,3 @@ Route::middleware([
 //        Route::get('/create', [ChannelManagerController::class, 'create'])->name('hotel.channel_managers.create');
     });
 });
-

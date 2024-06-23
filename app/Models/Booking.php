@@ -73,16 +73,16 @@ class Booking extends Model
     {
         parent::boot();
 
-        static::creating(function ($booking) {
+        static::creating(static function ($booking) {
             $sqids = new Sqids('ABCDEFGHJKLMNPQRSTUVWXYZ', 9);
-            $randomNumber = mt_rand(10000, 99999);
+            $randomNumber = random_int(10000, 99999);
             $datePart = date('Ym');
             $count = static::whereYear('created_at', date('Y'))
                     ->whereMonth('created_at', date('m'))
                     ->count() + 1;
             $count = str_pad($count, 4, '0', STR_PAD_LEFT);
 
-            $booking_code = $sqids->encode([$datePart.$count.$randomNumber]);
+            $booking_code = $sqids->encode([$datePart . $count . $randomNumber]);
 
             $booking->booking_code = $booking_code;
         });
@@ -95,7 +95,7 @@ class Booking extends Model
      */
     public static function getUnavailableRoomsIds($check_in, $check_out): array
     {
-        return Booking::select('id')
+        return self::select('id')
             ->whereHas('rooms', function ($query) use ($check_in, $check_out) {
                 $query->whereDate('check_in', '>=', $check_in)
                     ->whereDate('check_in', '<', $check_out);

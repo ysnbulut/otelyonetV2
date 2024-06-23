@@ -34,13 +34,17 @@ class HandleInertiaRequests extends Middleware
     {
         $tenant = tenancy()->tenant !== null;
         $settings = $tenant ? new PricingPolicySettings() : null;
+        $pricingPolicyValue = null;
+        if ($tenant && $settings) {
+            $pricingPolicyValue = $settings->pricing_policy['value'];
+        }
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
                 'role' => $request->user()?->roles->first()?->name ?? 'User',
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
-                'pricing_policy' => $tenant ? $settings->pricing_policy['value'] : null,
+                'pricing_policy' => $pricingPolicyValue,
             ],
             'csrf_token' => csrf_token(),
             'flash' => [
@@ -57,7 +61,7 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
                 'route' => collect(new Ziggy)['routes'][$request->route()?->getName()] ?? null,
             ],
-            'is_tenant' => (bool) $tenant
+            'is_tenant' => (bool)$tenant
         ];
     }
 }

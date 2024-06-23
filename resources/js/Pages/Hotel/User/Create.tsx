@@ -45,7 +45,6 @@ function Create(props: PageProps) {
 				}).then((r) => {
 					console.log(r)
 				})
-				router.visit(route('hotel.users.index'))
 			},
 			onError: (errors: any) => {
 				Toast.fire({
@@ -87,9 +86,7 @@ function Create(props: PageProps) {
 								htmlFor="user-name"
 								className="flex justify-between">
 								Ad Soyad
-								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, minimum 2 karakter
-								</span>
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">Gerekli, minimum 2 karakter</span>
 							</FormLabel>
 							<FormInput
 								className="w-full"
@@ -110,9 +107,7 @@ function Create(props: PageProps) {
 								htmlFor="user-email"
 								className="flex justify-between">
 								E-posta adresi
-								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, email formatında
-								</span>
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">Gerekli, email formatında</span>
 							</FormLabel>
 							<FormInput
 								className="w-full"
@@ -134,9 +129,7 @@ function Create(props: PageProps) {
 								htmlFor="user-password"
 								className="flex justify-between">
 								Şifre
-								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, minimum 6 karakter.
-								</span>
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">Gerekli, minimum 6 karakter.</span>
 							</FormLabel>
 							<FormInput
 								className="w-full"
@@ -156,9 +149,7 @@ function Create(props: PageProps) {
 								htmlFor="user-password-confirmation"
 								className="flex w-full flex-nowrap justify-between whitespace-nowrap">
 								Şifre tekrarı
-								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">
-									Gerekli, şifreler birbiri ile uyuşmalı.
-								</span>
+								<span className="me-2 mt-1 whitespace-pre-wrap text-right text-xs text-slate-500 sm:ml-auto sm:mt-0">Gerekli, şifreler birbiri ile uyuşmalı.</span>
 							</FormLabel>
 							<FormInput
 								className="w-full"
@@ -171,9 +162,7 @@ function Create(props: PageProps) {
 								onChange={(e) => setData((data) => ({...data, password_confirmation: e.target.value}))}
 								placeholder="Şifre Tekrarı"
 							/>
-							{errors.password_confirmation && (
-								<div className="text-theme-6 mt-2 text-danger">{errors.password_confirmation}</div>
-							)}
+							{errors.password_confirmation && <div className="text-theme-6 mt-2 text-danger">{errors.password_confirmation}</div>}
 						</div>
 					</div>
 					<div className="my-2">

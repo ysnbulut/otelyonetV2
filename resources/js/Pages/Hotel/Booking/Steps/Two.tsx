@@ -11,11 +11,13 @@ function Two(props: StepTwoProps) {
 				props.stepOneResults.data.map((item, key) => (
 					<AvailableRooms
 						accommodationType={props.accommodationType}
+						selectedPrice={props.selectedPrice}
 						key={key}
 						currency={props.stepOneResults.currency}
 						item={item}
 						request={props.stepOneResults.request}
 						checkedRooms={props.checkedRooms}
+						setSelectedPrice={props.setSelectedPrice}
 						setCheckedRooms={props.setCheckedRooms}
 						setDailyPrices={props.setDailyPrices}
 						setRoomsGuests={props.setRoomsGuests}

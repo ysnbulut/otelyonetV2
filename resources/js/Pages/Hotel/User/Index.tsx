@@ -8,14 +8,57 @@ import {FormInput, FormSelect} from '@/Components/Form'
 import Table from '@/Components/Table'
 import Pagination from '@/Components/Pagination'
 import Tippy from '@/Components/Tippy'
+import Swal from 'sweetalert2'
+import withReactContent from 'sweetalert2-react-content'
 
 function Index(props: PageProps) {
+	const MySwal = withReactContent(Swal)
 	const [searchValue, setSearchValue] = useState<any>(props.filters.search || '')
 	const [perPage, setPerPage] = useState(props.users.per_page || 10)
+
+	const Toast = MySwal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: false,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
+		},
+	})
 
 	const handleSearch = (e: any): void => {
 		e.preventDefault()
 		setSearchValue(e.target.value)
+	}
+
+	const handleDeleteUser = (id: number): void => {
+		MySwal.fire({
+			title: 'Emin misiniz?',
+			text: 'Bu işlem geri alınamaz!',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet, sil!',
+			cancelButtonText: 'Hayır, iptal!',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				router.delete(route('hotel.users.destroy', id), {
+					preserveState: true,
+					onSuccess: () => {
+						Toast.fire({
+							icon: 'success',
+							title: 'Kullanıcı başarıyla silindi.',
+						}).then((r) => {
+							console.log(r)
+						})
+					},
+					onError: (errors) => {
+						console.log(errors)
+					},
+				})
+			}
+		})
 	}
 
 	const handleKeyDown = (e: any): void => {
@@ -124,14 +167,19 @@ function Index(props: PageProps) {
 													className="h-5 w-5 text-primary"
 												/>
 											</Button>
-											<Button
-												className="border-none p-1 shadow-none focus:ring-0"
-												onClick={() => console.log(true)}>
-												<Lucide
-													icon="Trash2"
-													className="h-5 w-5 text-danger"
-												/>
-											</Button>
+											{user.role !== 'Super Admin' && (
+												<Button
+													className="border-none p-1 shadow-none focus:ring-0"
+													onClick={(e: any) => {
+														e.preventDefault()
+														handleDeleteUser(user.id)
+													}}>
+													<Lucide
+														icon="Trash2"
+														className="h-5 w-5 text-danger"
+													/>
+												</Button>
+											)}
 											<Link
 												href="#"
 												className="px-2">

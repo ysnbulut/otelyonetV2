@@ -21,11 +21,12 @@ const initialState: SideMenuState = {
 			icon: 'Home',
 			title: 'Dashboard',
 			pathname: 'hotel.dashboard.index',
+			permission: ['hotel.dashboard.index'],
 		},
 		{
 			icon: 'CalendarSearch',
 			title: 'Rezervasyon',
-			permission: ['asdadasd'], //burayı düzelttttttt
+			permission: ['hotel.booking_create', 'hotel.bookings.index', 'hotel.booking_calendar'], //burayı düzelttttttt
 			subMenu: [
 				{
 					icon: 'CalendarPlus',
@@ -43,7 +44,7 @@ const initialState: SideMenuState = {
 					icon: 'CalendarRange',
 					title: 'Rezervasyon Takvimi',
 					pathname: 'hotel.booking_calendar',
-					permission: ['hotel.bookings.index'],
+					permission: ['hotel.booking_calendar'],
 				},
 			],
 		},

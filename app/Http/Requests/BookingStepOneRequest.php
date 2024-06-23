@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests;
 
+use AllowDynamicProperties;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property mixed|string $check_in
  * @property mixed|string $check_out
  */
-class BookingStepOneRequest extends FormRequest
+#[AllowDynamicProperties] class BookingStepOneRequest extends FormRequest
 {
     public function rules(): array
     {

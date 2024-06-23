@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+
 use Carbon\Carbon;
 
 class Helper
@@ -33,12 +34,12 @@ class Helper
             $dates[] = $end->format($format);
         }
 
-        if($carbon) {
-            return array_map(function ($date) {
+        if ($carbon) {
+            return array_map(static function ($date) {
                 return Carbon::parse($date);
             }, $dates);
-        } else {
-            return $dates;
         }
+
+        return $dates;
     }
 }

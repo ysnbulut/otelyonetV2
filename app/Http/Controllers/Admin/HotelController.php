@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Settings\HotelSettings;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
@@ -77,7 +78,7 @@ class HotelController extends Controller
                         ...$hotel->toArray(),
                         'province' => $hotel->province->name,
                         'district' => $hotel->district->name,
-                        'tax_office' => $hotel->tax_office->tax_office,
+                        'tax_office' => $hotel->tax_office?->tax_office,
                         'panel_url' => 'https://' . $hotel->tenant->domains->first()->domain . '/',
                         'webhook_url' => 'https://otelyonet.com/api/' . $hotel->tenant->id . '/webhook/booking',
                     ];
@@ -87,9 +88,8 @@ class HotelController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @throws SettingAlreadyExists
      */
-    public function store(StoreHotelsRequest $request)
+    public function store(StoreHotelsRequest $request): \Illuminate\Http\RedirectResponse
     {
         $data = $request->validated();
         $tenant = Tenant::create();
@@ -120,7 +120,7 @@ class HotelController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): \Inertia\Response
     {
         return Inertia::render('Admin/Hotel/Create', [
             'provinces' => Province::all(['id', 'name']),
@@ -132,7 +132,7 @@ class HotelController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Hotel $hotel)
+    public function show(Hotel $hotel): \Inertia\Response
     {
         $tenant = $hotel->tenant;
         $settings = null;
@@ -146,7 +146,7 @@ class HotelController extends Controller
                 ...$hotel->toArray(),
                 'province' => $hotel->province->name,
                 'district' => $hotel->district->name,
-                'tax_office' => $hotel->tax_office->tax_office,
+                'tax_office' => $hotel->tax_office?->tax_office,
                 'panel_url' => 'https://' . $hotel->tenant->domains->first()->domain . '/',
                 'webhook_url' => 'https://otelyonet.com/api/' . $hotel->tenant->id . '/webhook/booking',
             ],
@@ -165,15 +165,17 @@ class HotelController extends Controller
         ]);
     }
 
-    public function channel_manager(Hotel $hotel, HotelChannelManagerStoreRequest $request)
+    /**
+     * @throws GuzzleException
+     */
+    public function channel_manager(Hotel $hotel, HotelChannelManagerStoreRequest $request): ?array
     {
         $tenant = $hotel->tenant;
         $request->validated();
         $tenant->run(function () use ($request) {
             $settings = new HotelSettings();
             $settingsData = $settings->toArray();
-            if ($request->channel_manager !== 'closed' && $request->channel_manager !==
-                $settingsData['channel_manager']['value']) {
+            if ($request->channel_manager !== 'closed' && $request->channel_manager !== $settingsData['channel_manager']['value']) {
                 $settingsData['channel_manager']['value'] = $request->channel_manager;
                 $settingsData['api_settings']['token'] = $request->api_token;
                 $settingsData['api_settings']['hr_id'] = $request->api_hr_id;
@@ -213,7 +215,35 @@ class HotelController extends Controller
         }
     }
 
-    public function CmRoomsStore(Hotel $hotel, StoreCMRoomRequest $request)
+    public function setActiveChannels(Hotel $hotel)
+    {
+        return $hotel->tenant->run(/**
+         * @throws GuzzleException
+         */ function () use (&$settings) {
+            $settings = new HotelSettings();
+            if ($settings->channel_manager['value'] === 'closed') {
+                return [
+                    'status' => 'error',
+                    'message' => 'Kanal yöneticisi kapalı.',
+                ];
+            }
+            $channelManagers = new ChannelManagers($settings->channel_manager['value'], ['token' => $settings->api_settings['token'], 'hr_id' => $settings->api_settings['hr_id']]);
+            $connectedChannels = $channelManagers->getChannelList();
+            foreach ($connectedChannels['channels'] as $channel) {
+                if (BookingChannel::where('code', $channel['code'])->exists()) {
+                    BookingChannel::where('code', $channel['code'])->update([
+                        'active' => true,
+                    ]);
+                }
+            }
+            return [
+                'status' => 'success',
+                'message' => 'Kanal yöneticileri aktif edildi.',
+            ];
+        });
+    }
+
+    public function CmRoomsStore(Hotel $hotel, StoreCMRoomRequest $request): \Illuminate\Http\RedirectResponse
     {
         $request->validated();
         $tenant = $hotel->tenant;

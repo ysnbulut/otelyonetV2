@@ -1,27 +1,23 @@
 import React, {useEffect, useState} from 'react'
 import Lucide from '@/Components/Lucide'
-import {Disclosure} from '@/Components/Headless'
+import {Disclosure, Menu} from '@/Components/Headless'
 import RoomCheckButton from '@/Pages/Hotel/Booking/components/RoomCheckButton'
 import {AvailableRoomsProps} from '@/Pages/Hotel/Booking/types/available-rooms'
 import {twMerge} from 'tailwind-merge'
 import CurrencyInput from 'react-currency-input-field'
 import Button from '@/Components/Button'
-import {
-	CheckedRoomsDailyPriceProps,
-	RoomDailyPriceProps,
-	RoomGuestsProps,
-	RoomTypeRoomGuestsProps,
-} from '@/Pages/Hotel/Booking/types/steps'
+import {CheckedRoomsDailyPriceProps, RoomDailyPriceProps, RoomGuestsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
 import {DailyPriceProps, GuestProps} from '@/Pages/Hotel/Booking/types/response'
 import {useAppSelector} from '@/stores/hooks'
 import {selectDarkMode} from '@/stores/darkModeSlice'
 import image from '../../../../../images/image.jpg'
 import image_dark from '../../../../../images/image_dark.jpg'
+import Select from 'react-select'
 
 function AvailableRooms(props: AvailableRoomsProps) {
 	const darkMode = useAppSelector(selectDarkMode)
 	const [roomCount, setRoomCount] = useState<number>(0)
-	const [calcTotalPrice, setCalcTotalPrice] = useState(props.item.price.total_price.price)
+	const [calcTotalPrice, setCalcTotalPrice] = useState(props.selectedPrice && props.item.prices[props.selectedPrice[props.item.id]].total_price.price)
 	const formatToTurkishLira = (amount: any): string => {
 		return new Intl.NumberFormat('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(amount)
 	}
@@ -49,19 +45,15 @@ function AvailableRooms(props: AvailableRoomsProps) {
 
 	const accommodationType = accommodationTypes[props.accommodationType] || 'Sadece Oda'
 
-	useEffect(() => {
-		setCalcTotalPrice(props.item.price.total_price.price)
-	}, [props.request])
+	// useEffect(() => {
+	// 	props.selectedPrice && setCalcTotalPrice(props.item.prices[props.selectedPrice[props.item.id]].total_price.price)
+	// }, [props.selectedPrice])
 
 	useEffect(() => {
 		if (props.checkedRooms !== undefined && props.checkedRooms[props.item.id] !== undefined) {
-			const newPrice = props.item.price.total_price.price * props.checkedRooms[props.item.id].length
+			const newPrice = props.selectedPrice && props.item.prices[props.selectedPrice[props.item.id]].total_price.price * props.checkedRooms[props.item.id].length
 			const newRoomCount = props.checkedRooms[props.item.id].length
-			if (
-				totalElementCount(props.checkedRooms) > 0 &&
-				props.checkedRooms[props.item.id].length > 0 &&
-				newPrice !== calcTotalPrice
-			) {
+			if (totalElementCount(props.checkedRooms) > 0 && props.checkedRooms[props.item.id].length > 0 && newPrice !== calcTotalPrice) {
 				setCalcTotalPrice(newPrice)
 			}
 			if (newRoomCount !== roomCount) {
@@ -87,7 +79,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			})
 			props.setRoomsGuests((prevState) => ({...prevState, ...generateD}))
 		} else {
-			const newPrice = props.item.price.total_price.price
+			const newPrice = props.selectedPrice && props.item.prices[props.selectedPrice[props.item.id]].total_price.price
 			if (newPrice !== calcTotalPrice) {
 				setCalcTotalPrice(newPrice)
 			}
@@ -96,7 +88,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 				setRoomCount(0)
 			}
 		}
-	}, [props.checkedRooms, props.request, props.item.price.total_price.price, props.item.id])
+	}, [props.checkedRooms, props.item.id, props.selectedPrice])
 
 	useEffect(() => {
 		if (props.checkedRooms !== undefined && props.checkedRooms[props.item.id] !== undefined) {
@@ -104,9 +96,10 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			generateDP[props.item.id] = [] as RoomDailyPriceProps[]
 			props.checkedRooms &&
 				props.checkedRooms[props.item.id] &&
+				props.selectedPrice &&
 				Object.values(props.checkedRooms[props.item.id]).forEach((room) => {
 					generateDP[props.item.id][room] = [] as DailyPriceProps[]
-					generateDP[props.item.id][room] = props.item.price.daily_prices
+					generateDP[props.item.id][room] = props.selectedPrice && props.item.prices[props.selectedPrice[props.item.id]].daily_prices
 				})
 			generateDP && generateDP[props.item.id] && props.setDailyPrices((prevState) => ({...prevState, ...generateDP}))
 		}
@@ -117,14 +110,14 @@ function AvailableRooms(props: AvailableRoomsProps) {
 			<div className="flex gap-4">
 				<div className="flex flex-col items-center justify-start gap-2 lg:w-36">
 					<img
-						className="h-32 w-32 rounded object-cover"
+						className="h-32 w-32 rounded object-cover shadow-sm"
 						alt={props.item.name}
 						src={props.item.photos.length > 0 ? props.item.photos[0] : darkMode ? image_dark : image}
 					/>
 					{props.item.rooms && (
 						<>
 							<p className="text-center text-xs">Seçilen oda sayısı</p>
-							<div className="flex items-center justify-between gap-1 rounded border bg-slate-50 p-2 dark:bg-darkmode-700">
+							<div className="flex items-center justify-between gap-1 rounded border bg-slate-50 p-2 shadow-sm dark:bg-darkmode-700">
 								<Button
 									onClick={() => {
 										if (roomCount > 0) {
@@ -178,21 +171,12 @@ function AvailableRooms(props: AvailableRoomsProps) {
 									onClick={() => {
 										const newCheckedRooms =
 											props.checkedRooms && props.checkedRooms[props.item.id]
-												? props.item.rooms
-														.filter(
-															(room) =>
-																props.checkedRooms &&
-																props.checkedRooms[props.item.id] &&
-																!props.checkedRooms[props.item.id].includes(room.id),
-														)
-														.slice(0, 1)
+												? props.item.rooms.filter((room) => props.checkedRooms && props.checkedRooms[props.item.id] && !props.checkedRooms[props.item.id].includes(room.id)).slice(0, 1)
 												: props.item.rooms.slice(0, 1)
 										props.setCheckedRooms((prevCheckedRooms) => ({
 											...prevCheckedRooms,
 											[props.item.id]:
-												(prevCheckedRooms &&
-													prevCheckedRooms[props.item.id] &&
-													prevCheckedRooms[props.item.id].concat(newCheckedRooms.map((room) => room.id))) ||
+												(prevCheckedRooms && prevCheckedRooms[props.item.id] && prevCheckedRooms[props.item.id].concat(newCheckedRooms.map((room) => room.id))) ||
 												newCheckedRooms.map((room) => room.id),
 										}))
 									}}
@@ -243,7 +227,7 @@ function AvailableRooms(props: AvailableRoomsProps) {
 					</div>
 					<Disclosure.Group>
 						<Disclosure defaultOpen={false}>
-							<Disclosure.Button className="my-2 flex justify-between rounded-md border px-5 py-2">
+							<Disclosure.Button className="my-2 flex justify-between rounded-md border px-5 py-2  shadow-sm">
 								{props.item.rooms ? (
 									<span className="text-xl font-semibold text-primary dark:text-light">
 										{props.item.available_room_count} <span className="font-light">uygun oda</span>
@@ -271,16 +255,59 @@ function AvailableRooms(props: AvailableRoomsProps) {
 						</Disclosure>
 					</Disclosure.Group>
 					{props.item.rooms && (
-						<div className="flex items-center justify-between">
-							<span className="rounded-md bg-slate-100 px-4 py-1 text-lg font-semibold text-primary dark:bg-darkmode-700 dark:text-light">
+						<div className="flex flex-col items-stretch justify-between gap-4 xl:flex-row xl:items-start">
+							<span className=" rounded-md border bg-slate-100 px-4 py-1 text-center text-lg font-semibold text-primary shadow-sm xl:text-left dark:bg-darkmode-700 dark:text-light">
 								{accommodationType}
 							</span>
-							<span className="rounded-md bg-slate-100 px-3 py-1 text-xl dark:bg-darkmode-700 ">
-								Toplam Tutar :
-								<span className="ml-2 text-xl font-semibold text-danger">
-									{formatToTurkishLira(calcTotalPrice)} {props.currency}
-								</span>
-							</span>
+							<div className="min-w-80 rounded-md border shadow-sm">
+								<Menu>
+									<Menu.Button className="mb-0 flex w-full items-center justify-between gap-2 rounded-t-md border-b bg-slate-100 px-1.5 py-2 font-semibold dark:bg-darkmode-700 dark:text-light">
+										<span className="flex items-center justify-center gap-1">
+											<Lucide
+												icon="ChevronsRight"
+												className="h-5 w-5 text-pending"
+											/>
+											{props.selectedPrice ? (props.selectedPrice[props.item.id] === 'agency' ? 'Acente Fiyatı' : 'Resepsiyon Fiyatı') : 'Resepsiyon Fiyatı'}
+										</span>
+										{Object.keys(props.item.prices).length > 1 && (
+											<Lucide
+												icon="ChevronDown"
+												className="h-5 w-5 text-danger"
+											/>
+										)}
+									</Menu.Button>
+									{Object.keys(props.item.prices).length > 1 && (
+										<Menu.Items className="bg-white p-0 font-semibold text-slate-900">
+											{Object.keys(props.item.prices).map((price) => (
+												<Menu.Item
+													key={price}
+													className="flex items-center justify-start gap-2 hover:rounded-none hover:bg-slate-100 first:hover:rounded-t-md last:hover:rounded-b-md"
+													onClick={() =>
+														props.setSelectedPrice((prevState: any) => {
+															return {
+																...prevState,
+																[props.item.id]: price,
+															}
+														})
+													}>
+													<Lucide
+														icon="ChevronsRight"
+														className="h-4 w-4 text-primary"
+													/>
+
+													{price === 'agency' ? 'Acente Fiyatı' : 'Resepsiyon Fiyatı'}
+												</Menu.Item>
+											))}
+										</Menu.Items>
+									)}
+								</Menu>
+								<div className="flex w-full justify-between rounded-b-md bg-slate-100 px-3 py-1 text-xl dark:bg-darkmode-700">
+									<span>Toplam Tutar : </span>
+									<span className="ml-2 text-xl font-semibold text-danger">
+										{formatToTurkishLira(calcTotalPrice)} {props.currency}
+									</span>
+								</div>
+							</div>
 						</div>
 					)}
 				</div>

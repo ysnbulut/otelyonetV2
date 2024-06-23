@@ -83,12 +83,45 @@ class BookingWebhookController extends Controller
                     $channel_id = $channel->id;
                 }
                 $unavailableRoomsIds = Booking::getUnavailableRoomsIds($webhookData['checkin_date'], $webhookData['checkout_date']);
+
                 if ($webhookData['reason'] === 'cancel') {
                     $cMBooking = CMBooking::where('cm_booking_code', $webhookData['hr_number'])->first();
-
                     $booking = $cMBooking !== NULL ? Booking::find($cMBooking->booking_id) : NULL;
                     if ($booking !== NULL) {
                         BookingRoom::withoutEvents(function () use ($booking, $webhookData) {
+                            $booking->rooms->each(function ($room) {
+                                $room->documents->each(function ($document) {
+                                    $document->items->each(function ($item) {
+                                        $item->delete();
+                                    });
+                                    $document->total->each(function ($total) {
+                                        $total->delete();
+                                    });
+                                    $document->payments->each(function ($payment) {
+                                        $payment->delete();
+                                    });
+                                    $document->delete();
+                                });
+                                $room->tasks->each(function ($task) {
+                                    $task->delete();
+                                });
+                                $room->booking_guests->each(function ($guest) {
+                                    $guest->delete();
+                                });
+                                $room->prices->each(function ($price) {
+                                    $price->delete();
+                                });
+                                $room->cancelReason->delete();
+                                $room->delete();
+                            });
+                            $booking->cMBooking->delete();
+                            $booking->notes->each(function ($note) {
+                                $note->delete();
+                            });
+                            $booking->tasks->each(function ($task) {
+                                $task->delete();
+                            });
+                            $booking->cancelReason->delete();
                             $booking->delete();
                             $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                         });

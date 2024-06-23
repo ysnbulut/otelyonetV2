@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use AllowDynamicProperties;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCMRoomRequest extends FormRequest
+#[AllowDynamicProperties] class StoreCMRoomRequest extends FormRequest
 {
     public function rules(): array
     {

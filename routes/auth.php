@@ -10,19 +10,17 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
-Route::middleware('guest')->group(function () {
+
+Route::middleware(['guest'])->group(function () {
 //    Route::get('register', [RegisteredUserController::class, 'create'])
 //                ->name('register');
 //
 //    Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('/', [AuthenticatedSessionController::class, 'create'])
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
-
-//    Route::get('/login', function () {
-//        return redirect('/');
-//    });
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
@@ -54,7 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('password-confirm');
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 

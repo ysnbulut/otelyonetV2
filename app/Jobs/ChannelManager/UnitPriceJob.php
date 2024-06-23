@@ -42,7 +42,7 @@ class UnitPriceJob implements ShouldQueue
             if ($cmRoom === null) {
                 Log::error('CMRoom not found for unit price id: ' . $this->unitPrice->id);
             } else {
-                $channelManager->updateRoomDateRange($cmRoom->room_code, $this->start_date, $this->end_date, $this->unit_price, $this->unitPrice->channel->code);
+                $channelManager->updateRoomDateRange($cmRoom->room_code, $this->start_date, $this->end_date, $this->unit_price, (string)$this->unitPrice->channel->code);
             }
         }
     }

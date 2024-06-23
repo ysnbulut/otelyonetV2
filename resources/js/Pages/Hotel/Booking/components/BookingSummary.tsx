@@ -3,13 +3,7 @@ import {twMerge} from 'tailwind-merge'
 import Tippy from '@/Components/Tippy'
 import Lucide from '@/Components/Lucide'
 import Button from '@/Components/Button'
-import {
-	BookingResultProps,
-	CheckedRoomsDailyPriceProps,
-	CheckedRoomsProps,
-	RoomDailyPriceProps,
-	RoomTypeRoomGuestsProps,
-} from '@/Pages/Hotel/Booking/types/steps'
+import {BookingResultProps, CheckedRoomsDailyPriceProps, CheckedRoomsProps, RoomDailyPriceProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
 import {CustomerProps, DailyPriceProps, StepOneDataProps} from '@/Pages/Hotel/Booking/types/response'
 import CurrencyInput from 'react-currency-input-field'
 import SummarySelectedRoom from '@/Pages/Hotel/Booking/components/SummarySelectedRoom'
@@ -19,6 +13,7 @@ import withReactContent from 'sweetalert2-react-content'
 import {router} from '@inertiajs/react'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
 import {floor} from 'lodash'
+
 interface BookingSummaryProps {
 	number_of_adults: number
 	number_of_children: number
@@ -66,8 +61,7 @@ function BookingSummary(props: BookingSummaryProps) {
 
 	useEffect(() => {
 		if (props.step === 2) {
-			props.checkedRooms &&
-				setNextStepDisabled(Object.values(props.checkedRooms).filter((item) => item.length > 0).length === 0)
+			props.checkedRooms && setNextStepDisabled(Object.values(props.checkedRooms).filter((item) => item.length > 0).length === 0)
 			!props.checkedRooms && setDiscountableDailyPrices(undefined)
 		}
 		if (props.step === 3) {
@@ -129,7 +123,6 @@ function BookingSummary(props: BookingSummaryProps) {
 			})
 		}
 		//newDailyPrices için içi boş dizi elamanlarının hepsini temizle
-		console.log(newDailyPrices)
 		setDiscountableDailyPrices(newDailyPrices)
 	}, [grandTotal])
 
@@ -247,11 +240,7 @@ function BookingSummary(props: BookingSummaryProps) {
 						<legend className="items-centerm flex w-full justify-between text-xs font-thin">
 							<span>Oda Misafir Bilgileri</span>
 							<hr className="mx-0.5 mt-2 flex-grow border border-x-0 border-b border-t-0" />
-							{props.checkinRequired && (
-								<span className="rounded bg-slate-100 px-1 py-0.5 font-extrabold text-danger dark:bg-darkmode-700 dark:text-danger/70">
-									Check in yapılacak.
-								</span>
-							)}
+							{props.checkinRequired && <span className="rounded bg-slate-100 px-1 py-0.5 font-extrabold text-danger dark:bg-darkmode-700 dark:text-danger/70">Check in yapılacak.</span>}
 						</legend>
 						{props.data.map(
 							(room_type, index) =>
@@ -321,10 +310,7 @@ function BookingSummary(props: BookingSummaryProps) {
 																				<td
 																					data-label="Uyruk"
 																					className="border-none text-xs">
-																					{
-																						props.citizens.find((citizen) => citizen.id === parseInt(guest.citizen_id))
-																							?.name
-																					}
+																					{props.citizens.find((citizen) => citizen.id === parseInt(guest.citizen_id))?.name}
 																				</td>
 																				<td
 																					data-label="Kimlik No"
@@ -338,9 +324,7 @@ function BookingSummary(props: BookingSummaryProps) {
 																			<div
 																				key={index}
 																				className="flex items-center justify-center py-1">
-																				<span className="text-xs font-semibold text-danger">
-																					Misafir bilgisi girilmedi.
-																				</span>
+																				<span className="text-xs font-semibold text-danger">Misafir bilgisi girilmedi.</span>
 																			</div>
 																		)
 																	}

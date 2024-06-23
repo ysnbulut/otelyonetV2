@@ -6,6 +6,7 @@ export interface StepOneRequestProps {
 	number_of_children: number
 	children_ages: number[]
 }
+
 export interface StepOneResponseProps {
 	currency: string
 	request: StepOneRequestProps
@@ -72,6 +73,10 @@ export interface PriceProps extends IdAndProps {
 	total_price: TotalPriceProps
 }
 
+export interface PricesProps {
+	[key: string]: PriceProps
+}
+
 export interface StepOneDataProps {
 	id: number
 	name: string
@@ -83,7 +88,7 @@ export interface StepOneDataProps {
 	child_capacity: number
 	beds: BedProps[]
 	rooms: RoomProps[]
-	price: PriceProps
+	prices: PricesProps
 }
 
 export interface CustomerProps {

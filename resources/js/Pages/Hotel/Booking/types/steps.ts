@@ -1,10 +1,4 @@
-import {
-	CustomerProps,
-	GuestProps,
-	StepOneResponseProps,
-	StepOneDataProps,
-	DailyPriceProps,
-} from '@/Pages/Hotel/Booking/types/response'
+import {CustomerProps, GuestProps, StepOneResponseProps, StepOneDataProps, DailyPriceProps} from '@/Pages/Hotel/Booking/types/response'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
 
 export interface StepOneRequestProps {
@@ -63,9 +57,11 @@ export interface BookingResultProps {
 
 export interface StepTwoProps extends StepsProps {
 	accommodationType: string
+	selectedPrice: {[key: number]: string} | undefined
 	stepOneResults: StepOneResponseProps
 	bookingType: string
 	checkedRooms: CheckedRoomsProps | undefined
+	setSelectedPrice: React.Dispatch<React.SetStateAction<{[key: number]: string} | undefined>>
 	setCheckedRooms: React.Dispatch<React.SetStateAction<CheckedRoomsProps | undefined>>
 	setRoomsGuests: React.Dispatch<React.SetStateAction<RoomTypeRoomGuestsProps>>
 	setDailyPrices: React.Dispatch<React.SetStateAction<CheckedRoomsDailyPriceProps | undefined>>

@@ -5,12 +5,7 @@ import {CustomerProps, DailyPriceProps, StepOneResponseProps} from '@/Pages/Hote
 import One from '@/Pages/Hotel/Booking/Steps/One'
 import Two from '@/Pages/Hotel/Booking/Steps/Two'
 import Three from '@/Pages/Hotel/Booking/Steps/Three'
-import {
-	BookingResultProps,
-	CheckedRoomsDailyPriceProps,
-	CheckedRoomsProps,
-	RoomTypeRoomGuestsProps,
-} from '@/Pages/Hotel/Booking/types/steps'
+import {BookingResultProps, CheckedRoomsDailyPriceProps, CheckedRoomsProps, RoomTypeRoomGuestsProps} from '@/Pages/Hotel/Booking/types/steps'
 import Four from '@/Pages/Hotel/Booking/Steps/Four'
 import BookingSummary from '@/Pages/Hotel/Booking/components/BookingSummary'
 import {CitizenProps} from '@/Pages/Hotel/Booking/types/show'
@@ -33,10 +28,9 @@ function Create(props: CreateProps) {
 	const [bookingResult, setBookingResult] = useState<BookingResultProps | undefined>(undefined)
 	const [grandTotal, setGrandTotal] = useState<number>(0)
 	const [customerId, setCustomerId] = useState<number | undefined>()
-	const [bookingCustomer, setBookingCustomer] = useState<CustomerProps | undefined>(
-		customerId && stepOneResults ? stepOneResults.customers.find((customer) => customer.id === customerId) : undefined,
-	)
+	const [bookingCustomer, setBookingCustomer] = useState<CustomerProps | undefined>(customerId && stepOneResults ? stepOneResults.customers.find((customer) => customer.id === customerId) : undefined)
 	const [roomsGuests, setRoomsGuests] = useState<RoomTypeRoomGuestsProps>({})
+	const [selectedPrice, setSelectedPrice] = useState<{[key: number]: string} | undefined>()
 
 	useEffect(() => {
 		if (stepOneResults) {
@@ -58,20 +52,24 @@ function Create(props: CreateProps) {
 			})
 
 			stepOneResults.data.forEach((item) => {
-				if (checkedRooms && checkedRooms[item.id] && checkedRooms[item.id].length > 0) {
+				setSelectedPrice((prevState: any) => {
+					return {
+						...prevState,
+						[item.id]: (prevState && prevState[item.id]) || 'reception',
+					}
+				})
+				if (checkedRooms && checkedRooms[item.id] && checkedRooms[item.id].length > 0 && selectedPrice && selectedPrice[item.id]) {
 					setBookingResult((prevState: any) => {
 						return {
 							...prevState,
 							number_of_adults_total:
 								checkedRooms?.[item.id]?.length <= 1
 									? stepOneResults?.request.number_of_adults * checkedRooms?.[item.id]?.length
-									: prevState?.number_of_adults_total +
-									  stepOneResults?.request.number_of_adults * (checkedRooms?.[item.id]?.length - 1),
+									: prevState?.number_of_adults_total + stepOneResults?.request.number_of_adults * (checkedRooms?.[item.id]?.length - 1),
 							number_of_children_total:
 								checkedRooms?.[item.id]?.length <= 1
 									? stepOneResults?.request.number_of_children * checkedRooms?.[item.id]?.length
-									: (prevState?.number_of_children_total || 0) +
-									  stepOneResults?.request.number_of_children * (checkedRooms?.[item.id]?.length - 1),
+									: (prevState?.number_of_children_total || 0) + stepOneResults?.request.number_of_children * (checkedRooms?.[item.id]?.length - 1),
 							typed_rooms:
 								prevState && Array.isArray(prevState.typed_rooms)
 									? [
@@ -80,19 +78,19 @@ function Create(props: CreateProps) {
 												id: item.id,
 												name: item.name,
 												count: checkedRooms[item.id].length,
-												price: item.price.total_price.price,
-												total_price: item.price.total_price.price * checkedRooms[item.id].length,
+												price: item.prices[selectedPrice[item.id]].total_price.price,
+												total_price: item.prices[selectedPrice[item.id]].total_price.price * checkedRooms[item.id].length,
 											},
-									  ]
+										]
 									: [
 											{
 												id: item.id,
 												name: item.name,
 												count: checkedRooms[item.id].length,
-												price: item.price.total_price.price,
-												total_price: item.price.total_price.price * checkedRooms[item.id].length,
+												price: item.prices[selectedPrice[item.id]].total_price.price,
+												total_price: item.prices[selectedPrice[item.id]].total_price.price * checkedRooms[item.id].length,
 											},
-									  ],
+										],
 						}
 					})
 				}
@@ -138,10 +136,12 @@ function Create(props: CreateProps) {
 							{stepOneResults && step === 2 && (
 								<Two
 									accommodationType={props.accommodation_type}
+									selectedPrice={selectedPrice}
 									stepOneResults={stepOneResults}
 									bookingType={bookingType}
 									setStep={setStep}
 									checkedRooms={checkedRooms}
+									setSelectedPrice={setSelectedPrice}
 									setCheckedRooms={setCheckedRooms}
 									setDailyPrices={setDailyPrices}
 									setRoomsGuests={setRoomsGuests}

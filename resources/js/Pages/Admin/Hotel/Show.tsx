@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios'
 import ChannelManagerRooms from '@/Pages/Admin/Hotel/components/ChannelManagerRooms'
+
 dayjs.extend(customParseFormat)
 
 interface HotelProps {
@@ -63,6 +64,7 @@ interface TypeHasViewProps {
 	label: string
 	count: number
 }
+
 interface SettingProps {
 	channel_manager: ChannelManagerProps
 	api_settings: ApiSettingsProps | ''
@@ -130,8 +132,6 @@ function Show(props: PageProps) {
 		},
 	})
 
-	console.log(props.tenant.type_has_views)
-
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		axios
@@ -144,6 +144,25 @@ function Show(props: PageProps) {
 				setRooms(response.data.rooms)
 			})
 			.catch((error) => {
+				if (error.response.status === 422) {
+					setError('channel_manager', error.response.data.errors.channel_manager[0])
+				}
+			})
+	}
+
+	const setActiveChannels = (e: any) => {
+		e.preventDefault()
+		axios
+			.get(route('admin.hotels.active_channels', props.hotel.id))
+			.then((response) => {
+				console.log(response.data)
+				Toast.fire({
+					icon: response.data.status === 'success' ? 'success' : 'error',
+					title: response.data.message,
+				})
+			})
+			.catch((error) => {
+				console.log(error)
 				if (error.response.status === 422) {
 					setError('channel_manager', error.response.data.errors.channel_manager[0])
 				}
@@ -257,12 +276,9 @@ function Show(props: PageProps) {
 							<Select
 								ref={ref}
 								id={props.tenant.settings.channel_manager.name}
-								defaultValue={props.tenant.settings.channel_manager.options.find(
-									(option) => option.value === data.channel_manager,
-								)}
+								defaultValue={props.tenant.settings.channel_manager.options.find((option) => option.value === data.channel_manager)}
 								onChange={(e: any, action: any) => {
 									if (action.action === 'select-option') {
-										console.log(e)
 										e && setData((data) => ({...data, channel_manager: e.value}))
 									} else if (action.action === 'clear') {
 										setData((data) => ({...data, channel_manager: 'closed'}))
@@ -292,9 +308,7 @@ function Show(props: PageProps) {
 								name={props.tenant.settings.channel_manager.name}
 								type="text"
 								value={data.channel_manager}
-								onChange={(e) =>
-									setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))
-								}
+								onChange={(e) => setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))}
 							/>
 						)}
 						{props.tenant.settings.channel_manager.type === 'number' && (
@@ -303,9 +317,7 @@ function Show(props: PageProps) {
 								name={props.tenant.settings.channel_manager.name}
 								type="number"
 								value={data.channel_manager}
-								onChange={(e) =>
-									setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))
-								}
+								onChange={(e) => setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))}
 							/>
 						)}
 						{errors.channel_manager && <div className="text-theme-6 mt-2 text-danger">{errors.channel_manager}</div>}
@@ -339,7 +351,22 @@ function Show(props: PageProps) {
 							</div>
 						</>
 					)}
-					<div className="mt-3 flex items-center justify-end">
+					<div className="mt-3 flex items-center justify-between">
+						{data.channel_manager !== 'closed' && data.api_hr_id && data.api_token && (
+							<Button
+								variant="soft-pending"
+								type="button"
+								onClick={(e: any) => {
+									setActiveChannels(e)
+								}}
+								className="flex gap-2">
+								Aktif Kanalları İşle
+								<Lucide
+									icon="ReplaceAll"
+									className="h-5 w-5 text-danger"
+								/>
+							</Button>
+						)}
 						<Button
 							variant="soft-secondary"
 							type="submit"

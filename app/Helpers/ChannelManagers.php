@@ -11,7 +11,7 @@ class ChannelManagers
 
     public function __construct(string $channel_manager, array $options = [])
     {
-        if ($channel_manager == 'hotelrunner') {
+        if ($channel_manager === 'hotelrunner') {
             $this->channelManagerApi = new HotelRunnerApi($options['token'], $options['hr_id']);
         }
     }
@@ -36,7 +36,7 @@ class ChannelManagers
      * @throws GuzzleException
      * @throws JsonException
      */
-    public function updateRoomDateRange(string|int $room_code, string $start_date, string $end_date, string|int|float|bool $price, array $channel_codes):
+    public function updateRoomDateRange(string|int $room_code, string $start_date, string $end_date, string|int|float|bool $price, string $channel_codes):
     array
     {
         return $this->channelManagerApi->updateRoomDateRange($room_code, $start_date, $end_date, $price, $channel_codes);

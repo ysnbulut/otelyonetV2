@@ -2,7 +2,6 @@ import {PropsWithChildren, useState} from 'react'
 import DarkModeSwitcher from '@/Components/DarkModeSwitcher'
 import MainColorSwitcher from '@/Components/MainColorSwitcher'
 import clsx from 'clsx'
-import OneSignal from 'react-onesignal'
 
 export default function Guest({children}: PropsWithChildren) {
 	return (

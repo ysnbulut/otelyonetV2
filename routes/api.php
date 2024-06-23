@@ -18,7 +18,6 @@ use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 |
 */
 
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

@@ -83,7 +83,7 @@ class HotelRunnerApi
      * @throws GuzzleException
      * @throws JsonException
      */
-    public function updateRoomDateRange(string|int $room_id, string $start_date, string $end_date, string|int|float|bool $price, array $channel_codes): array
+    public function updateRoomDateRange(string|int $room_id, string $start_date, string $end_date, string|int|float|bool $price, string $channel_codes): array
     {
         $query = [
             'token' => $this->token,
@@ -92,7 +92,7 @@ class HotelRunnerApi
             'start_date' => $start_date,
             'end_date' => $end_date,
             'price' => $price,
-            'channel_codes' => $channel_codes
+            'channel_codes[]' => $channel_codes
         ];
         $response = $this->client->put('rooms/~', [
             'query' => $query

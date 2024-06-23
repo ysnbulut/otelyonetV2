@@ -40,7 +40,7 @@ class UnitPrice extends Model
 
     public function channel(): BelongsTo
     {
-        return $this->belongsTo(BookingChannel::class);
+        return $this->belongsTo(BookingChannel::class, 'booking_channel_id');
     }
 
     public function typeHasView(): BelongsTo
