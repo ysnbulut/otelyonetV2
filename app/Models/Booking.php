@@ -2,137 +2,211 @@
 
 namespace App\Models;
 
-use App\Settings\GeneralSettings;
 use Carbon\Carbon;
 use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use ShiftOneLabs\LaravelCascadeDeletes\CascadesDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Sqids\Sqids;
 
+/**
+ * App\Models\Booking
+ *
+ * @property-read Customer|null $customer
+ * @property-read Collection<int, Guest> $guests
+ * @property-read int|null $guests_count
+ * @property-read Collection<int, Room> $rooms
+ * @property-read int|null $rooms_count
+ * @property mixed $channel
+ * @property mixed $messages
+ * @method static Builder|Booking newModelQuery()
+ * @method static Builder|Booking newQuery()
+ * @method static Builder|Booking onlyTrashed()
+ * @method static Builder|Booking query()
+ * @method static Builder|Booking remainingBalance()
+ * @method static Builder|Booking stayDurationDay()
+ * @method static Builder|Booking stayDurationNight()
+ * @method static Builder|Booking withTrashed()
+ * @method static Builder|Booking withoutTrashed()
+ * @property-read Collection<int, Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read int|null $messages_count
+ * @property-read Collection<int, \App\Models\BookingNote> $notes
+ * @property-read int|null $notes_count
+ * @property-read \App\Models\ReasonForCancellation|null $cancelReason
+ * @property mixed $check_out
+ * @property mixed $documents
+ * @method static Builder|Booking filter(array $filters)
+ * @mixin Eloquent
+ */
 class Booking extends Model
 {
-	use SoftDeletes;
+    use SoftDeletes, LogsActivity, CascadesDeletes;
 
 
-	protected $fillable = [
-		'customer_id',
-		'check_in',
-		'check_out',
-		'number_of_adults',
-		'number_of_children',
-		'payment_status',
-	];
+    protected $fillable = [
+        'booking_code',
+        'customer_id',
+        'check_in',
+        'check_out',
+        'channel_id',
+        'number_of_rooms',
+        'number_of_adults',
+        'number_of_children',
+        'calendar_colors',
+    ];
 
-    private static function bookingFormat($booking): array
+    protected $cascadeDeletes = ['rooms', 'cMBooking', 'notes', 'tasks', 'cancelReason'];
+
+    protected static function boot(): void
     {
-        $settings = new GeneralSettings();
-        return [
-            'id' => $booking->id,
-            'check_in' => Carbon::parse($booking->check_in)->format('d.m.Y'),
-            'check_out' => $booking->check_out != NULL ? Carbon::parse($booking->check_out)->format('d.m.Y') : NULL,
-            'open_booking' => $booking->check_out === null,
-            'customer_id' => $booking->customer->id,
-            'customer' => $booking->customer->title,
-            'rooms' => $booking->rooms->pluck('name')->implode(', '), // $booking->rooms->pluck('name')->implode(', ')
-            'rooms_count' => $booking->rooms->count(),
-            'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
-            'number_of_children' => $booking->rooms->sum('pivot.number_of_children'),
-            'amount' => $booking->amount ? $booking->amount->grand_total : null,
-            'amount_formatted' => $booking->amount ? number_format($booking->amount->grand_total, 2, '.', ',') . ' ' . $settings->currency : null,
-            'remaining_balance' => $booking->amount ? $booking->remainingBalance() : null,
-            'remaining_balance_formatted' => $booking->amount ? number_format($booking->remainingBalance(), 2, '.', ',') . ' ' . $settings->currency : null,
-        ];
+        parent::boot();
+
+        static::creating(static function ($booking) {
+            $sqids = new Sqids('ABCDEFGHJKLMNPQRSTUVWXYZ', 9);
+            $randomNumber = random_int(1000, 9999);
+            $datePart = date('Ym');
+            $count = static::whereYear('created_at', date('Y'))
+                    ->whereMonth('created_at', date('m'))
+                    ->count() + 1;
+            $count = str_pad($count, 4, '0', STR_PAD_LEFT);
+
+            $booking_code = $sqids->encode([$datePart . $count . $randomNumber]);
+
+            $booking->booking_code = $booking_code;
+        });
     }
 
-	public static function getBookings(): array|\Illuminate\Contracts\Pagination\LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|\LaravelIdea\Helper\App\Models\_IH_Booking_C
-	{
-
-		return self::orderBy('id', 'desc')
-			->with(['customer', 'rooms', 'amount'])
-			->paginate(10)
-			->withQueryString()
-			->through(fn($booking) => Booking::bookingFormat($booking));
-	}
-
-	/**
-	 * @param $check_in
-	 * @param $check_out
-	 * @return array
-	 */
-	public static function getUnavailableRoomsIds($check_in, $check_out): array
+    /**
+     * @param $check_in
+     * @param $check_out
+     * @return array
+     */
+    public static function getUnavailableRoomsIds($check_in, $check_out): array
     {
-		return Booking::select('id')
-			->where(function ($query) use ($check_in, $check_out) {
-				$query->where('check_in', '>=', $check_in)
-					->where('check_in', '<', $check_out);
-			})
-			->orWhere(function ($query) use ($check_in, $check_out) {
-				$query->where('check_out', '>', $check_in)
-					->where('check_out', '<=', $check_out)->orWhereNull('check_out');
-			})
-			->orWhere(function ($query) use ($check_in, $check_out) {
-				$query->where('check_in', '<=', $check_in)
-					->where('check_out', '>=', $check_out)->orWhereNull('check_out');
-			})->with('rooms')->get()->pluck('rooms')->flatten()->pluck('id')->unique();
-	}
+        return self::select('id')
+            ->whereHas('rooms', function ($query) use ($check_in, $check_out) {
+                $query->whereDate('check_in', '>=', $check_in)
+                    ->whereDate('check_in', '<', $check_out);
+            })
+            ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
+                $query->whereDate('check_out', '>', $check_in)
+                    ->whereDate('check_out', '<=', $check_out);
+            })
+            ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
+                $query->whereDate('check_in', '<=', $check_in)
+                    ->whereDate('check_out', '>=', $check_out);
+            })->with('rooms')->get()->pluck('rooms')->flatten()->pluck('room_id')->unique()->toArray();
+    }
 
-	public function rooms(): BelongsToMany
-	{
-		return $this->belongsToMany(Room::class, 'booking_rooms', 'booking_id', 'room_id')->orderByDesc('name')->withPivot('number_of_adults', 'number_of_children');
-	}
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['customer_id', 'channel_id', 'number_of_rooms', 'number_of_adults', 'number_of_children']);
+    }
 
-	public function guests(): BelongsToMany
-	{
-		return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_id', 'guest_id');
-	}
+    public function channel(): BelongsTo
+    {
+        return $this->belongsTo(BookingChannel::class, 'channel_id', 'id');
+    }
 
-	public function customer(): BelongsTo
-	{
-		return $this->belongsTo(Customer::class, 'customer_id', 'id');
-	}
+    public function cMBooking(): HasOne
+    {
+        return $this->hasOne(CMBooking::class, 'booking_id', 'id');
+    }
 
-	public function scopeRemainingBalance($query)
-	{
-		$balance = $this->amount->grand_total - $this->payments()->sum('amount_paid');
-		return $balance < 1 ? 0 : $balance;
-	}
+    public function documents(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Document::class,
+            BookingRoom::class,
+            'booking_id', // Foreign key on BookingRoom table...
+            'unit_id', // Foreign key on Document table...
+            'id', // Local key on Booking table...
+            'id' // Local key on BookingRoom table...
+        );
+    }
 
-	public function payments(): HasMany
-	{
-		return $this->hasMany(CustomerPayments::class, 'booking_id', 'id');
-	}
+    public function rooms(): hasMany
+    {
+        return $this->hasMany(BookingRoom::class);
+    }
 
-	public function amount(): HasOne
-	{
-		return $this->hasOne(BookingAmounts::class);
-	}
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
 
-	public function scopeStayDurationNight(): string
-	{
-		$checkIn = $this->check_in;
-		if ($this->check_out == null) {
-			return 'Açık Rezervasyon';
-		}
-		$checkOut = $this->check_out;
-		$checkIn = Carbon::createFromFormat('Y-m-d', $checkIn);
-		$checkOut = Carbon::createFromFormat('Y-m-d', $checkOut);
-		return $checkIn->diffInDays($checkOut) + 1 . ' Gece';
-	}
+    public function scopeRemainingBalance($query)
+    {
+        $balance = $this->total_price->grand_total - $this->payments()->sum('amount_paid');
+        return $balance < 1 ? 0 : $balance;
+    }
 
-	public function scopeStayDurationDay(): ?string
-	{
-		$checkIn = $this->check_in;
-		if ($this->check_out == null) {
-			return NULL;
-		}
-		$checkOut = $this->check_out;
-		$checkIn = Carbon::createFromFormat('Y-m-d', $checkIn);
-		$checkOut = Carbon::createFromFormat('Y-m-d', $checkOut);
-		return $checkIn->diffInDays($checkOut) . ' Gün';
-	}
+    public function tasks(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
+
+    public function notes(): HasMany
+    {
+        return $this->hasMany(BookingNote::class, 'booking_id', 'id');
+    }
+
+    public function cancelReason(): HasOne
+    {
+        return $this->hasOne(ReasonForCancellation::class, 'booking_id', 'id');
+    }
+
+    public function scopeStayDurationNight(): string
+    {
+        $checkIn = $this->rooms->min('check_in');
+        $checkOut = $this->rooms->max('check_out');
+        $checkIn = Carbon::createFromFormat('Y-m-d H:i:s', $checkIn);
+        $checkOut = Carbon::createFromFormat('Y-m-d H:i:s', $checkOut);
+        return $checkIn->diffInDays($checkOut) . ' Gece';
+    }
+
+    public function scopeStayDurationDay(): ?string
+    {
+        $checkIn = $this->rooms->min('check_in');
+        $checkOut = $this->rooms->max('check_out');
+        $checkIn = Carbon::createFromFormat('Y-m-d H:i:s', $checkIn);
+        $checkOut = Carbon::createFromFormat('Y-m-d H:i:s', $checkOut);
+        return $checkIn->diffInDays($checkOut) . ' Gün';
+    }
+
+    public function scopeFilter($query, array $filters): void
+    {
+        $query
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->whereHas('customer', function ($query) use ($search) {
+                            $query->where('title', 'like', '%' . $search . '%')
+                                ->orWhere('tax_number', 'like', '%' . $search . '%')
+                                ->orWhere('phone', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                        });
+                });
+            });
+//            ->when($filters['trashed'] ?? null, function ($query, $trashed) {
+//                if ($trashed === 'with') {
+//                    $query->withTrashed();
+//                } elseif ($trashed === 'only') {
+//                    $query->onlyTrashed();
+//                }
+//            });
+    }
 }

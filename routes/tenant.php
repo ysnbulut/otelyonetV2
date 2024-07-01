@@ -3,31 +3,52 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\BedTypeController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\CaseAndBanksController;
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\CustomerPaymentsController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FloorController;
-use App\Http\Controllers\GeneralSettingsController;
-use App\Http\Controllers\GuestController;
-use App\Http\Controllers\PossibilitiesMultiplierController;
-use App\Http\Controllers\PossibilitiesOfGuestsRoomTypeController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\RoomController;
-use App\Http\Controllers\RoomTypeController;
-use App\Http\Controllers\RoomTypeFeatureController;
-use App\Http\Controllers\RoomViewController;
-use App\Http\Controllers\SeasonController;
-use App\Http\Controllers\UnitPriceRoomTypeAndViewController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Hotel\BankController;
+use App\Http\Controllers\Hotel\BedTypeController;
+use App\Http\Controllers\Hotel\BookingController;
+use App\Http\Controllers\Hotel\BookingGuestsController;
+use App\Http\Controllers\Hotel\BookingRoomsController;
+use App\Http\Controllers\Hotel\CustomerController;
+use App\Http\Controllers\Hotel\DashboardController;
+use App\Http\Controllers\Hotel\DocumentController;
+use App\Http\Controllers\Hotel\FloorController;
+use App\Http\Controllers\Hotel\GuestController;
+use App\Http\Controllers\Hotel\GuestVariationMultiplierController;
+use App\Http\Controllers\Hotel\HotelRunnerController;
+use App\Http\Controllers\Hotel\ItemsController;
+use App\Http\Controllers\Hotel\PricingPolicySettingsController;
+use App\Http\Controllers\Hotel\RoleController;
+use App\Http\Controllers\Hotel\RoomController;
+use App\Http\Controllers\Hotel\RoomTypeController;
+use App\Http\Controllers\Hotel\RoomTypeFeatureController;
+use App\Http\Controllers\Hotel\RoomViewController;
+use App\Http\Controllers\Hotel\SalesUnitController;
+use App\Http\Controllers\Hotel\SeasonController;
+use App\Http\Controllers\Hotel\UnitPriceController;
+use App\Http\Controllers\Hotel\UserController;
+use App\Models\Booking;
+use App\Models\BookingChannel;
+use App\Models\BookingRoom;
+use App\Models\CMRoom;
+use App\Models\Document;
+use App\Helpers\ChannelManagers;
+use App\Settings\HotelSettings;
+
+use App\Models\Tax;
+use App\Models\TypeHasView;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
-use Illuminate\Foundation\Application;
 
+use Cknow\Money\Money;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,10 +67,63 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    require __DIR__.'/auth.php';
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('hotel.dashboard.index');
+
+    Route::get('/test', static function () {
+        $document = Document::find(4);
+        return $document->transactions;
+    })->name('test');
+
+    Route::middleware('guest')->group(function () {
+        //    Route::get('register', [RegisteredUserController::class, 'create'])
+        //                ->name('register');
+        //
+        //    Route::post('register', [RegisteredUserController::class, 'store']);
+
+        Route::get('/', [AuthenticatedSessionController::class, 'create'])
+            ->name('login');
+
+        Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+        Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+            ->name('password.request');
+
+        Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+            ->name('password.email');
+
+        Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+            ->name('password.reset');
+
+        Route::post('reset-password', [NewPasswordController::class, 'store'])
+            ->name('password.store');
+    });
+
+    Route::middleware('auth')->group(function () {
+        Route::get('verify-email', EmailVerificationPromptController::class)
+            ->name('verification.notice');
+
+        Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('verification.verify');
+
+        Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
+
+        Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+            ->name('password.confirm');
+
+        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('password-confirm');
+
+        Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+
+        Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+            ->name('logout');
+    });
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web', 'auth', 'verified'])->name
+    ('hotel.dashboard.index');
     //users
-    Route::prefix('users')->middleware('auth')->group(function () {
+    Route::prefix('users')->middleware(['web', 'auth'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('hotel.users.index');
         Route::get('/create', [UserController::class, 'create'])->name('hotel.users.create');
         Route::post('/', [UserController::class, 'store'])->name('hotel.users.store');
@@ -78,32 +152,46 @@ Route::middleware([
         Route::put('/{floor}', [FloorController::class, 'update'])->name('hotel.floors.update');
         Route::delete('/{floor}', [FloorController::class, 'destroy'])->name('hotel.floors.destroy');
     });
+
     //bed_types
     Route::prefix('bed_types')->middleware('auth')->group(function () {
-        Route::get('/', [bedTypeController::class, 'index'])->name('hotel.bed_types.index');
-        Route::get('/create', [bedTypeController::class, 'create'])->name('hotel.bed_types.create');
-        Route::post('/', [bedTypeController::class, 'store'])->name('hotel.bed_types.store');
-        //Route::get('/{bed_type}', [bedTypeController::class, 'show'])->name('hotel.bed_types.show');
-        Route::get('/{bed_type}/edit', [bedTypeController::class, 'edit'])->name('hotel.bed_types.edit');
-        Route::put('/{bed_type}', [bedTypeController::class, 'update'])->name('hotel.bed_types.update');
-        Route::delete('/{bed_type}', [bedTypeController::class, 'destroy'])->name('hotel.bed_types.destroy');
+        Route::get('/', [BedTypeController::class, 'index'])->name('hotel.bed_types.index');
+        Route::get('/create', [BedTypeController::class, 'create'])->name('hotel.bed_types.create');
+        Route::post('/', [BedTypeController::class, 'store'])->name('hotel.bed_types.store');
+        //Route::get('/{bed_type}', [BedTypeController::class, 'show'])->name('hotel.bed_types.show');
+        Route::get('/{bed_type}/edit', [BedTypeController::class, 'edit'])->name('hotel.bed_types.edit');
+        Route::put('/{bed_type}', [BedTypeController::class, 'update'])->name('hotel.bed_types.update');
+        Route::delete('/{bed_type}', [BedTypeController::class, 'destroy'])->name('hotel.bed_types.destroy');
     });
+
     //room_type_features
     Route::prefix('room_type_features')->middleware('auth')->group(function () {
         Route::get('/', [RoomTypeFeatureController::class, 'index'])->name('hotel.room_type_features.index');
-        Route::get('/create', [RoomTypeFeatureController::class, 'create'])->name('hotel.room_type_features.create');
         Route::post('/', [RoomTypeFeatureController::class, 'store'])->name('hotel.room_type_features.store');
-        //Route::get('/{room_type_feature}', [RoomTypeFeatureController::class, 'show'])->name('hotel.room_type_features.show');
-        Route::get('/{room_type_feature}/edit', [RoomTypeFeatureController::class, 'edit'])->name('hotel.room_type_features.edit');
-        Route::put('/{room_type_feature}', [RoomTypeFeatureController::class, 'update'])->name('hotel.room_type_features.update');
-        Route::delete('/{room_type_feature}', [RoomTypeFeatureController::class, 'destroy'])->name('hotel.room_type_features.destroy');
+        Route::post('/{room_type_feature}', [RoomTypeFeatureController::class, 'update'])->name('hotel.room_type_features.update');
+        Route::post('/{room_type_feature}/destroy', [RoomTypeFeatureController::class, 'destroy'])->name('hotel.room_type_features.destroy');
+        Route::post('/{room_type_feature}/restore', [RoomTypeFeatureController::class, 'restore'])->name('hotel.room_type_features.restore');
+        Route::delete('/{room_type_feature}', [RoomTypeFeatureController::class, 'forceDelete'])->name('hotel.room_type_features.delete');
     });
+
     //room_types
     Route::prefix('room_types')->middleware('auth')->group(function () {
         Route::get('/', [RoomTypeController::class, 'index'])->name('hotel.room_types.index');
         Route::get('/create', [RoomTypeController::class, 'create'])->name('hotel.room_types.create');
-        Route::post('/', [RoomTypeController::class, 'store'])->name('hotel.room_types.store');
-        //Route::get('/{room_type}', [RoomTypeController::class, 'show'])->name('hotel.room_types.show');
+        Route::post('/', [RoomTypeController::class, 'store'])->middleware('precognitive')->name('hotel.room_types.store');
+        Route::post('/{room_type}', [RoomTypeController::class, 'imageAdd'])->name('hotel.room_types.image_add');
+        Route::delete('/{room_type}/image/{image_id}/delete', [RoomTypeController::class, 'imageDelete'])->name('hotel.room_types.image_delete');
+        Route::post('/{room_type}/beds/add', [RoomTypeController::class, 'roomTypeBedAdd'])->name
+        ('hotel.room_types.bed_add');
+        Route::put('/{room_type}/beds/{bed_id}', [RoomTypeController::class, 'roomTypeBedEdit'])->name
+        ('hotel.room_types.bed_edit');
+        Route::delete('/{room_type}/beds/{bed_id}/delete', [RoomTypeController::class, 'roomTypeBedDelete'])->name
+        ('hotel.room_types.bed_delete');
+        Route::post('/{room_type}/views/add', [RoomTypeController::class, 'roomTypeViewAdd'])->name
+        ('hotel.room_types.view_add');
+        Route::delete('/{room_type}/views/{view_id}/delete', [RoomTypeController::class, 'roomTypeViewDelete'])->name
+        ('hotel.room_types.view_delete');
+        Route::post('/{room_type}/images', [RoomTypeController::class, 'imagesOrdersUpdate'])->name('hotel.room_types.images_orders_update');
         Route::get('/{room_type}/edit', [RoomTypeController::class, 'edit'])->name('hotel.room_types.edit');
         Route::put('/{room_type}', [RoomTypeController::class, 'update'])->name('hotel.room_types.update');
         Route::delete('/{room_type}', [RoomTypeController::class, 'destroy'])->name('hotel.room_types.destroy');
@@ -148,115 +236,113 @@ Route::middleware([
         //Route::get('/{season}', [SeasonController::class, 'show'])->name('hotel.seasons.show');
         Route::get('/{season}/edit', [SeasonController::class, 'edit'])->name('hotel.seasons.edit');
         Route::put('/{season}', [SeasonController::class, 'update'])->name('hotel.seasons.update');
+        Route::put('/{season}/drop', [SeasonController::class, 'updateForDrop'])->name('hotel.seasons.drop');
         Route::delete('/{season}', [SeasonController::class, 'destroy'])->name('hotel.seasons.destroy');
+    });
+    //Pos
+    Route::prefix('pos')->middleware('auth')->group(function () {
+        Route::get('/', [BookingController::class, 'index'])->name('hotel.pos.index');
+    });
+    //sales_units
+    Route::prefix('sales_units')->middleware('auth')->group(function () {
+        Route::get('/', [SalesUnitController::class, 'index'])->name('hotel.sales_units.index');
+        Route::get('/create', [SalesUnitController::class, 'create'])->name('hotel.sales_units.create');
+        Route::post('/', [SalesUnitController::class, 'store'])->name('hotel.sales_units.store');
+        Route::get('/{sales_unit}/edit', [SalesUnitController::class, 'edit'])->name('hotel.sales_units.edit');
+        Route::put('/{sales_unit}', [SalesUnitController::class, 'update'])->name('hotel.sales_units.update');
+        Route::delete('/{sales_unit}', [SalesUnitController::class, 'destroy'])->name('hotel.sales_units.destroy');
+    });
+    //items
+    Route::prefix('items')->middleware('auth')->group(function () {
+        Route::get('/', [ItemsController::class, 'index'])->name('hotel.items.index');
+        Route::post('/image_upload', [ItemsController::class, 'imageUpload'])->name('hotel.items.image_upload');
+        Route::get('/create', [ItemsController::class, 'create'])->name('hotel.items.create');
+        Route::post('/', [ItemsController::class, 'store'])->name('hotel.items.store');
     });
     //bookings
     Route::prefix('bookings')->middleware('auth')->group(function () {
         Route::get('/', [BookingController::class, 'index'])->name('hotel.bookings.index');
-        Route::get('/calendar', [BookingController::class, 'calendar'])->name('hotel.bookings.calendar');
         Route::get('/upcomings', [BookingController::class, 'upcoming'])->name('hotel.bookings.upcoming');
-
-        Route::get('/create', [BookingController::class, 'create'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create');
-
-        Route::get('/create/step/1')
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.step.one');
-
-        Route::get('/create/single/step/1', [BookingController::class, 'createSingleStepOne'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.one');
-        Route::get('/create/group/step/1', [BookingController::class, 'createGroupStepOne'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.group.step.one');
-        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.two');
-        Route::get('/create/single/step/2', [BookingController::class, 'createStepTwoCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.group.step.two');
-        Route::get('/create/step/3', [BookingController::class, 'createStepThreeCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.three.create');
-        Route::post('/create/step/3', [BookingController::class, 'createStepThreeStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.three.store');
-        Route::get('/create/step/4', [BookingController::class, 'createStepFourCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.four.create');
-        Route::post('/create/step/4', [BookingController::class, 'createStepFourStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.four.store');
-        Route::get('/create/step/5', [BookingController::class, 'createStepFiveCreate'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.five.create');
-        Route::post('/create/step/5', [BookingController::class, 'createStepFiveStore'])
-            ->middleware('booking_request')
-            ->name('hotel.bookings.create.single.step.five.store');
         Route::post('/', [BookingController::class, 'store'])->name('hotel.bookings.store');
         Route::get('/{booking}', [BookingController::class, 'show'])->name('hotel.bookings.show');
+        Route::post('/{booking}/transaction', [BookingController::class, 'transactionAdd'])
+            ->name('hotel.bookings.transaction.store');
+        Route::post('/booking_room/add_guest', [BookingRoomsController::class, 'addGuests'])
+            ->name('hotel.bookings.booking_room.add_guest');
         Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.bookings.edit');
         Route::put('/{booking}', [BookingController::class, 'update'])->name('hotel.bookings.update');
         Route::delete('/{booking}', [BookingController::class, 'destroy'])->name('hotel.bookings.destroy');
     });
 
+    Route::prefix('booking_calendar')->middleware('auth')->group(function () {
+        Route::get('/', [BookingController::class, 'calendar'])->name('hotel.booking_calendar');
+    });
+
+    Route::prefix('booking_create')->group(function () {
+        Route::get('/', [BookingController::class, 'create'])
+            ->name('hotel.booking_create');
+        Route::post('/step/1', [BookingController::class, 'getAvailableRoomsAndPrices'])
+            ->name('hotel.booking_create.step.one');
+        Route::post('/customer_add', [CustomerController::class, 'storeApi'])->name('hotel.bookings.customer_add');
+    });
+    Route::prefix('booking_create')->middleware('auth')->group(function () {
+        Route::get('/', [BookingController::class, 'create'])
+            ->name('hotel.booking_create');
+        Route::post('/step/1', [BookingController::class, 'getAvailableRoomsAndPrices'])
+            ->name('hotel.booking_create.step.one');
+        Route::post('/customer_add', [CustomerController::class, 'storeApi'])->name('hotel.bookings.customer_add');
+    });
+
+    //booking_rooms
+    Route::prefix('booking_rooms')->middleware('auth')->group(function () {
+//        Route::get('/', [BookingController::class, 'index'])->name('hotel.booking_rooms.index');
+//        Route::get('/create', [BookingController::class, 'create'])->name('hotel.booking_rooms.create');
+//        Route::post('/', [BookingController::class, 'store'])->name('hotel.booking_rooms.store');
+//        Route::get('/{booking_room}', [BookingController::class, 'show'])->name('hotel.booking_rooms.show');
+//        Route::get('/{booking_room}/edit', [BookingController::class, 'edit'])->name('hotel.booking_rooms.edit');
+//        Route::put('/{booking_room}', [BookingController::class, 'update'])->name('hotel.booking_rooms.update');
+        Route::delete('/{booking_room}', [BookingRoomsController::class, 'destroy'])->name('hotel.booking_rooms.destroy');
+    });
+
+    //booking_guests
+    Route::prefix('booking_guests')->middleware('auth')->group(function () {
+//        Route::get('/', [BookingController::class, 'index'])->name('hotel.booking_guests.index');
+//        Route::get('/create', [BookingController::class, 'create'])->name('hotel.booking_guests.create');
+//        Route::post('/', [BookingController::class, 'store'])->name('hotel.booking_guests.store');
+//        Route::get('/{booking_guest}', [BookingController::class, 'show'])->name('hotel.booking_guests.show');
+//        Route::get('/{booking_guest}/edit', [BookingController::class, 'edit'])->name('hotel.booking_guests.edit');
+//        Route::put('/{booking_guest}', [BookingController::class, 'update'])->name('hotel.booking_guests.update');
+//        Route::delete('/{booking_guest}', [BookingController::class, 'destroy'])->name('hotel.booking_guests.destroy');
+        Route::post('/check_out', [BookingGuestsController::class, 'checkOut'])
+            ->name('hotel.booking_guests.check_out');
+        Route::post('/check_in', [BookingGuestsController::class, 'checkIn'])
+            ->name('hotel.booking_guests.check_in');
+    });
+
     //unit_prices
     Route::prefix('unit_prices')->middleware('auth')->group(function () {
-        Route::get('/', [UnitPriceRoomTypeAndViewController::class, 'index'])->name('hotel.unit_prices.index');
-        //Route::post('/create', [UnitPriceRoomTypeAndViewController::class, 'create'])->name('hotel.unit_prices.create');
-        Route::post('/', [UnitPriceRoomTypeAndViewController::class, 'store'])->name('hotel.unit_prices.store');
-        Route::get('/{type_has_view}', [UnitPriceRoomTypeAndViewController::class, 'show'])->name('hotel.unit_prices.show');
-        //Route::get('/{type_has_view}/edit', [UnitPriceRoomTypeAndViewController::class, 'edit'])->name('hotel.unit_prices.edit');
-        Route::put('/{unit_price}', [UnitPriceRoomTypeAndViewController::class, 'update'])->name('hotel.unit_prices.update');
-        //Route::delete('/{unit_price}', [UnitPriceRoomTypeAndViewController::class, 'destroy'])->name('hotel.unit_prices.destroy');
+        Route::get('/', [UnitPriceController::class, 'index'])->name('hotel.unit_prices.index');
+        Route::post('/', [UnitPriceController::class, 'store'])->name('hotel.unit_prices.store');
+        Route::get('/{type_has_view}', [UnitPriceController::class, 'show'])->name('hotel.unit_prices.show');
+        Route::put('/{unit_price}', [UnitPriceController::class, 'update'])->name('hotel.unit_prices.update');
     });
-    //possibilities_of_guests
-    Route::prefix('possibilities_of_guests')->middleware('auth')->group(function () {
-        Route::get('/', [PossibilitiesOfGuestsRoomTypeController::class, 'index'])->name('hotel.possibilities_of_guests.index');
-        Route::get('/{room_type}/create', [PossibilitiesOfGuestsRoomTypeController::class, 'create'])->name(
-            'hotel.possibilities_of_guests.create'
+    //guest_variations
+    Route::prefix('variations')->middleware('auth')->group(function () {
+        Route::get('/', [GuestVariationMultiplierController::class, 'index'])->name('hotel.variations.index');
+        Route::post('/', [GuestVariationMultiplierController::class, 'store'])->name(
+            'hotel.variations.store'
         );
-        Route::post('/{room_type}', [PossibilitiesOfGuestsRoomTypeController::class, 'store'])->name(
-            'hotel.possibilities_of_guests.store'
+        Route::put('/{variation}', [GuestVariationMultiplierController::class, 'update'])->name(
+            'hotel.variations.update'
         );
-        Route::get('/{room_type}', [PossibilitiesOfGuestsRoomTypeController::class, 'show'])->name(
-            'hotel.possibilities_of_guests.show'
+        Route::delete('/{variation}', [GuestVariationMultiplierController::class, 'destroy'])->name(
+            'hotel.variations.destroy'
         );
-        Route::get('/{room_type}/edit', [PossibilitiesOfGuestsRoomTypeController::class, 'edit'])->name(
-            'hotel.possibilities_of_guests.edit'
-        );
-        Route::put('/{possibilities_of_guest}', [PossibilitiesOfGuestsRoomTypeController::class, 'update'])->name(
-            'hotel.possibilities_of_guests.update'
-        );
-        Route::delete('/{possibilities_of_guest}', [PossibilitiesOfGuestsRoomTypeController::class, 'destroy'])->name(
-            'hotel.possibilities_of_guests.destroy'
-        );
-    });
-    //possibilities_multipliers
-    Route::prefix('possibilities_multipliers')->middleware('auth')->group(function () {
-        Route::get('/', [PossibilitiesMultiplierController::class, 'index'])->name('hotel.possibilities_multipliers.index');
-        //Route::get('/{room_type}/create', [PossibilitiesMultiplierController::class, 'create'])->name(
-        // 'hotel.possibilities_multipliers.create'
-        //);
-        Route::post('/', [PossibilitiesMultiplierController::class, 'store'])->name('hotel.possibilities_multipliers.store');
-        Route::get('/{room_type}', [PossibilitiesMultiplierController::class, 'show'])->name(
-            'hotel.possibilities_multipliers.show'
-        );
-        //Route::get('/{room_type}/edit', [PossibilitiesMultiplierController::class, 'edit'])->name(
-        // 'hotel.possibilities_multipliers.edit'
-        //);
-        Route::put('/{possibilities_multiplier}', [PossibilitiesMultiplierController::class, 'update'])->name(
-            'hotel.possibilities_multipliers.update'
-        );
-        //Route::delete('/{unit_price}', [PossibilitiesMultiplierController::class, 'destroy'])->name(
-        // 'hotel.possibilities_multipliers.destroy'
-        //);
     });
     //settings
-    Route::prefix('settings')->middleware('auth')->group(function () {
-        Route::get('/', [GeneralSettingsController::class, 'index'])->name('hotel.settings.index');
-        Route::put('/', [GeneralSettingsController::class, 'update'])->name('hotel.settings.update');
+    Route::prefix('pricing_policy_settings')->middleware('auth')->group(function () {
+        Route::get('/', [PricingPolicySettingsController::class, 'index'])->name('hotel.pricing_policy_settings.index');
+        Route::put('/', [PricingPolicySettingsController::class, 'update'])->name('hotel.pricing_policy_settings.update');
     });
 
     //customers
@@ -267,6 +353,7 @@ Route::middleware([
         Route::get('/search/{query}', [CustomerController::class, 'search'])->name('hotel.customers.search');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('hotel.customers.show');
         Route::get('/{customer}/transactions', [CustomerController::class, 'transactions'])->name('hotel.customers.transactions');
+        Route::post('/{customer}/transaction', [CustomerController::class, 'transactionAdd'])->name('hotel.customers.transaction.store');
         Route::get('/{customer}/get', [CustomerController::class, 'get'])->name('hotel.customers.get');
         Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('hotel.customers.edit');
         Route::put('/{customer}', [CustomerController::class, 'update'])->name('hotel.customers.update');
@@ -277,24 +364,46 @@ Route::middleware([
     Route::prefix('customer_payments')->middleware('auth')->group(function () {
         /*Route::get('/', [CustomerController::class, 'index'])->name('hotel.customer_payments.index');
         Route::get('/create', [CustomerController::class, 'create'])->name('hotel.customer_payments.create');*/
-        Route::post('/', [CustomerPaymentsController::class, 'store'])
-            ->middleware('customer_payment_request')
-            ->name('hotel.customer_payments.store');
+//        Route::post('/', [TransactionController::class, 'store'])
+//            ->name('hotel.customer_payments.store');
         /*	Route::get('/{customer_payment}', [CustomerController::class, 'show'])->name('hotel.customer_payments.show');
             Route::get('/{customer_payment}/edit', [CustomerController::class, 'edit'])->name('hotel.customer_payments.edit');
             Route::put('/{customer_payment}', [CustomerController::class, 'update'])->name('hotel.customer_payments.update');
             Route::delete('/{customer_payment}', [CustomerController::class, 'destroy'])->name('hotel.customer_payments.destroy');*/
     });
 
-    //case_and_banks
-    Route::prefix('case_and_banks')->middleware('auth')->group(function () {
-        Route::get('/', [CaseAndBanksController::class, 'index'])->name('hotel.case_and_banks.index');
-        Route::get('/create', [CaseAndBanksController::class, 'create'])->name('hotel.case_and_banks.create');
-        Route::post('/', [CaseAndBanksController::class, 'store'])->name('hotel.case_and_banks.store');
-        //Route::get('/{case_and_banks}', [CaseAndBanksController::class, 'show'])->name('hotel.guests.show');
-        Route::get('/{case_and_banks}/edit', [CaseAndBanksController::class, 'edit'])->name('hotel.case_and_banks.edit');
-        Route::put('/{case_and_banks}', [CaseAndBanksController::class, 'update'])->name('hotel.case_and_banks.update');
-        Route::delete('/{case_and_banks}', [CaseAndBanksController::class, 'destroy'])->name('hotel.case_and_banks.destroy');
+    //banks
+    Route::prefix('banks')->middleware('auth')->group(function () {
+        Route::get('/', [BankController::class, 'index'])->name('hotel.banks.index');
+        Route::get('/create', [BankController::class, 'create'])->name('hotel.banks.create');
+        Route::post('/', [BankController::class, 'store'])->name('hotel.banks.store');
+        //Route::get('/{banks}', [BankController::class, 'show'])->name('hotel.guests.show');
+        Route::get('/{banks}/edit', [BankController::class, 'edit'])->name('hotel.banks.edit');
+        Route::put('/{banks}', [BankController::class, 'update'])->name('hotel.banks.update');
+        Route::delete('/{banks}', [BankController::class, 'destroy'])->name('hotel.banks.destroy');
+    });
+
+    //documents
+    Route::prefix('documents')->middleware('auth')->group(function () {
+//        Route::get('/', [DocumentController::class, 'index'])->name('hotel.documents.index');
+//        Route::get('/create', [DocumentController::class, 'create'])->name('hotel.documents.create');
+//        Route::post('/', [DocumentController::class, 'store'])->name('hotel.documents.store');
+//        Route::get('/{document}', [DocumentController::class, 'show'])->name('hotel.documents.show');
+//        Route::get('/{document}/edit', [DocumentController::class, 'edit'])->name('hotel.documents.edit');
+        Route::post('/{document}/item_add', [DocumentController::class, 'itemAdd'])->name('hotel.documents.item_add');
+//        Route::put('/{document}', [DocumentController::class, 'update'])->name('hotel.documents.update');
+//        Route::delete('/{document}', [DocumentController::class, 'destroy'])->name('hotel.documents.destroy');
+    });
+
+    //hotelrunner
+    Route::prefix('channel_managers')->middleware('auth')->group(function () {
+//        Route::get('/', function () {
+//            $hotelRunner = new \App\Helpers\HotelRunnerApi('VX-KhEctGz9y_wQbgdqaVLrkUcPFH55m8bwlNFFX', '810878391');
+//            return $hotelRunner->getRooms();
+//        })->name('hotel.channel_managers.index');
+
+        Route::get('/hotelrunner', [HotelRunnerController::class, 'api'])->name('hotel.channel_managers.hotelrunner');
+//        Route::get('/hotelrunner', [ChannelManagerController::class, 'index'])->name('hotel.channel_managers.hotelrunner.index');
+//        Route::get('/create', [ChannelManagerController::class, 'create'])->name('hotel.channel_managers.create');
     });
 });
-

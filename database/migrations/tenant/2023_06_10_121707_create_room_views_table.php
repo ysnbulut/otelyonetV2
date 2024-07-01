@@ -12,7 +12,7 @@ return new class extends Migration {
 	{
 		Schema::create('room_views', function (Blueprint $table) {
 			$table->id();
-			$table->string('name');
+			$table->string('name', 50)->unique();
 			$table->text('description')->nullable();
 			$table->timestamps();
 			$table->softDeletes();

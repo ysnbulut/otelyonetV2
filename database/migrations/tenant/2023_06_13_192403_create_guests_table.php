@@ -12,10 +12,16 @@ return new class extends Migration {
 	{
 		Schema::create('guests', function (Blueprint $table) {
 			$table->id();
-			$table->string('name', 100);
-			$table->string('surname', 100);
-			$table->string('nationality', 50);
+			$table->string('name', 50);
+			$table->string('surname', 50);
+            $table->boolean('is_foreign_national')->default(false);
+			$table->foreignId('citizen_id')
+                ->nullable()
+                ->constrained('citizens')
+                ->onUpdate('cascade')
+                ->onDelete('set null');
 			$table->string('identification_number', 25);
+            $table->date('birthday');
 			$table->string('phone', 25)->nullable();
 			$table->string('email', 100)->nullable();
 			$table->enum('gender', ['male', 'female', 'unspecified'])->default('unspecified');

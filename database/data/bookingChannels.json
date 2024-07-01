@@ -1,0 +1,617 @@
+[
+  {
+    "name": "Booking.com",
+    "code": "bookingcom",
+    "active": false
+  },
+  {
+    "name": "HRS",
+    "code": "hrs",
+    "active": false
+  },
+  {
+    "name": "Expedia",
+    "code": "expedia",
+    "active": false
+  },
+  {
+    "name": "Lastminute.com",
+    "code": "lastminute",
+    "active": false
+  },
+  {
+    "name": "Hotelbeds",
+    "code": "hotelbeds",
+    "active": false
+  },
+  {
+    "name": "InHores.com",
+    "code": "inhores",
+    "active": false
+  },
+  {
+    "name": "Touricoholidays.com",
+    "code": "tourico",
+    "active": false
+  },
+  {
+    "name": "Wotif",
+    "code": "wotif",
+    "active": false
+  },
+  {
+    "name": "Destinations of the World (DOTW)",
+    "code": "dotw",
+    "active": false
+  },
+  {
+    "name": "JacTravel (JacobOnline)",
+    "code": "jactravel",
+    "active": false
+  },
+  {
+    "name": "Keytel Global",
+    "code": "keytelglobal",
+    "active": false
+  },
+  {
+    "name": "Atel-Hotel",
+    "code": "atelhotels",
+    "active": false
+  },
+  {
+    "name": "Booked.net",
+    "code": "booked",
+    "active": false
+  },
+  {
+    "name": "Tatilsepeti.com",
+    "code": "tatilsepeti",
+    "active": false
+  },
+  {
+    "name": "Tobook",
+    "code": "tobook",
+    "active": false
+  },
+  {
+    "name": "Splendia",
+    "code": "splendia",
+    "active": false
+  },
+  {
+    "name": "Escapio",
+    "code": "escapio",
+    "active": false
+  },
+  {
+    "name": "Prestigia",
+    "code": "prestigia",
+    "active": false
+  },
+  {
+    "name": "Icastelli.net",
+    "code": "icastelli",
+    "active": false
+  },
+  {
+    "name": "SunHotels",
+    "code": "sunhotels",
+    "active": false
+  },
+  {
+    "name": "Adonis.com",
+    "code": "adonis",
+    "active": false
+  },
+  {
+    "name": "TripAdvisor",
+    "code": "tripadvisor",
+    "active": false
+  },
+  {
+    "name": "Gezinomi",
+    "code": "gezinomi",
+    "active": false
+  },
+  {
+    "name": "Jolly Tours",
+    "code": "jollytour",
+    "active": false
+  },
+  {
+    "name": "iCal",
+    "code": "ical",
+    "active": false
+  },
+  {
+    "name": "Airbnb - iCal",
+    "code": "airbnb",
+    "active": false
+  },
+  {
+    "name": "Wimdu",
+    "code": "wimdu",
+    "active": false
+  },
+  {
+    "name": "FlipKey",
+    "code": "flipkey",
+    "active": false
+  },
+  {
+    "name": "HomeAway",
+    "code": "homeaway",
+    "active": false
+  },
+  {
+    "name": "HouseTrip",
+    "code": "housetrip",
+    "active": false
+  },
+  {
+    "name": "HolidayLettings",
+    "code": "holidaylettings",
+    "active": false
+  },
+  {
+    "name": "9Flats",
+    "code": "9flats",
+    "active": false
+  },
+  {
+    "name": "VRBO",
+    "code": "vrbo",
+    "active": false
+  },
+  {
+    "name": "Ostrovok.ru / Emerging Travel Group",
+    "code": "ostrovok",
+    "active": false
+  },
+  {
+    "name": "HostelWorld",
+    "code": "hostelworldxml",
+    "active": false
+  },
+  {
+    "name": "HalalBooking.com",
+    "code": "halalbooking",
+    "active": false
+  },
+  {
+    "name": "Owners Direct",
+    "code": "ownersdirect",
+    "active": false
+  },
+  {
+    "name": "Top Rural",
+    "code": "toprural",
+    "active": false
+  },
+  {
+    "name": "WayToStay",
+    "code": "waytostay",
+    "active": false
+  },
+  {
+    "name": "Homelidays",
+    "code": "homelidays",
+    "active": false
+  },
+  {
+    "name": "CitiesReference",
+    "code": "citiesreference",
+    "active": false
+  },
+  {
+    "name": "Abritel",
+    "code": "arbitel",
+    "active": false
+  },
+  {
+    "name": "Despegar.com",
+    "code": "despegar",
+    "active": false
+  },
+  {
+    "name": "Instant World Booking",
+    "code": "instantworldbooking",
+    "active": false
+  },
+  {
+    "name": "Agoda",
+    "code": "agodaycs5",
+    "active": false
+  },
+  {
+    "name": "Hoojoozat",
+    "code": "hoojoozatxml",
+    "active": false
+  },
+  {
+    "name": "HostelsClub.com",
+    "code": "hostelsclubxml",
+    "active": false
+  },
+  {
+    "name": "Odamax.com",
+    "code": "odamax",
+    "active": false
+  },
+  {
+    "name": "Trip.com (Ctrip.com)",
+    "code": "ctrip",
+    "active": false
+  },
+  {
+    "name": "Revato by HotelsCombined",
+    "code": "hotelscombined",
+    "active": false
+  },
+  {
+    "name": "Jumia Travel",
+    "code": "jumia",
+    "active": false
+  },
+  {
+    "name": "Asiatravel.com",
+    "code": "asiatravel",
+    "active": false
+  },
+  {
+    "name": "ODIGEO Connect",
+    "code": "odigeo",
+    "active": false
+  },
+  {
+    "name": "Tablet Hotel",
+    "code": "tablethotels",
+    "active": false
+  },
+  {
+    "name": "Traveloka",
+    "code": "traveloka",
+    "active": false
+  },
+  {
+    "name": "Booking247.com",
+    "code": "booking247com",
+    "active": false
+  },
+  {
+    "name": "Goibibo &amp; MakeMyTrip",
+    "code": "goibibo",
+    "active": false
+  },
+  {
+    "name": "HotelREZ GDS",
+    "code": "hotelrez",
+    "active": false
+  },
+  {
+    "name": "Airbnb",
+    "code": "airbnb-api",
+    "active": false
+  },
+  {
+    "name": "Roomiroom.com",
+    "code": "roomiroom",
+    "active": false
+  },
+  {
+    "name": "Travel Destination Online (TDOnlines)",
+    "code": "tdonlines",
+    "active": false
+  },
+  {
+    "name": "Mr and Mrs Smith",
+    "code": "mrandmrssmith",
+    "active": false
+  },
+  {
+    "name": "HotelTonight",
+    "code": "hoteltonight",
+    "active": false
+  },
+  {
+    "name": "Pegipegi",
+    "code": "pegipegi",
+    "active": false
+  },
+  {
+    "name": "STglobe",
+    "code": "stglobe",
+    "active": false
+  },
+  {
+    "name": "Dnata",
+    "code": "dnata",
+    "active": false
+  },
+  {
+    "name": "Bedandbreakfast.eu",
+    "code": "bedandbreakfast",
+    "active": false
+  },
+  {
+    "name": "Travco",
+    "code": "travco",
+    "active": false
+  },
+  {
+    "name": "Pitchup.com",
+    "code": "pitchup",
+    "active": false
+  },
+  {
+    "name": "Tatilbudur.com",
+    "code": "tatilbudur",
+    "active": false
+  },
+  {
+    "name": "Setur",
+    "code": "seturapi",
+    "active": false
+  },
+  {
+    "name": "Fidorento",
+    "code": "fidorento",
+    "active": false
+  },
+  {
+    "name": "OtelFiyat.com",
+    "code": "otelfiyat",
+    "active": false
+  },
+  {
+    "name": "Coral Travel",
+    "code": "oti",
+    "active": false
+  },
+  {
+    "name": "Otelz.com V2",
+    "code": "otelzv2",
+    "active": false
+  },
+  {
+    "name": "Finbat",
+    "code": "finbat",
+    "active": false
+  },
+  {
+    "name": "Global Travel Services (GTS)",
+    "code": "gtsglobal",
+    "active": false
+  },
+  {
+    "name": "Tiket V2",
+    "code": "tiketv2",
+    "active": false
+  },
+  {
+    "name": "HIS Travel Turkey",
+    "code": "histravel",
+    "active": false
+  },
+  {
+    "name": "Turkish Airlines Holidays",
+    "code": "thyholidays",
+    "active": false
+  },
+  {
+    "name": "Delux Tur",
+    "code": "deluxturizm",
+    "active": false
+  },
+  {
+    "name": "HyperGuest",
+    "code": "hyperguest",
+    "active": false
+  },
+  {
+    "name": "Within Earth",
+    "code": "withinearth",
+    "active": false
+  },
+  {
+    "name": "BookingAgora",
+    "code": "bookingagora",
+    "active": false
+  },
+  {
+    "name": "Peak Point",
+    "code": "peakpoint",
+    "active": false
+  },
+  {
+    "name": "Homaturkey",
+    "code": "homaturkey",
+    "active": false
+  },
+  {
+    "name": "Touristica",
+    "code": "touristica",
+    "active": false
+  },
+  {
+    "name": "Halal Holiday Check",
+    "code": "halalholidaycheck",
+    "active": false
+  },
+  {
+    "name": "HPro Travel",
+    "code": "hprotravel",
+    "active": false
+  },
+  {
+    "name": "Serafina",
+    "code": "serafina",
+    "active": false
+  },
+  {
+    "name": "Bedsconnect",
+    "code": "bedsconnect",
+    "active": false
+  },
+  {
+    "name": "Atlas Voyages",
+    "code": "atlasvoyages",
+    "active": false
+  },
+  {
+    "name": "Mercan Tourism",
+    "code": "mercantourism",
+    "active": false
+  },
+  {
+    "name": "Otel F\u0131rsat\u0131",
+    "code": "otelfirsati",
+    "active": false
+  },
+  {
+    "name": "Otel Time",
+    "code": "oteltime",
+    "active": false
+  },
+  {
+    "name": "World2Meet (W2M)",
+    "code": "world2meet",
+    "active": false
+  },
+  {
+    "name": "CatchBeds",
+    "code": "catchbeds",
+    "active": false
+  },
+  {
+    "name": "Hotperia",
+    "code": "hotperia",
+    "active": false
+  },
+  {
+    "name": "Juni Travel",
+    "code": "junitravel",
+    "active": false
+  },
+  {
+    "name": "Prime Travel V3",
+    "code": "primeV3",
+    "active": false
+  },
+  {
+    "name": "Babylon Holiday",
+    "code": "babylon",
+    "active": false
+  },
+  {
+    "name": "Price Travel",
+    "code": "pricetravel",
+    "active": false
+  },
+  {
+    "name": "Abreu",
+    "code": "abreu",
+    "active": false
+  },
+  {
+    "name": "Jet2Holidays",
+    "code": "jet2holidays",
+    "active": false
+  },
+  {
+    "name": "Arkas",
+    "code": "arkas",
+    "active": false
+  },
+  {
+    "name": "TBO.com V2",
+    "code": "tboV2",
+    "active": false
+  },
+  {
+    "name": "Otelegidelim.com",
+    "code": "otelegidelim",
+    "active": false
+  },
+  {
+    "name": "Antur",
+    "code": "antur",
+    "active": false
+  },
+  {
+    "name": "Golden Bay",
+    "code": "goldenbay",
+    "active": false
+  },
+  {
+    "name": "OCT Turizm",
+    "code": "octturizm",
+    "active": false
+  },
+  {
+    "name": "Plaza Turizm",
+    "code": "plazaturizm",
+    "active": false
+  },
+  {
+    "name": "TatilDorukta.com",
+    "code": "tatildorukta",
+    "active": false
+  },
+  {
+    "name": "Namila Tour",
+    "code": "namilatour",
+    "active": false
+  },
+  {
+    "name": "Hegoba",
+    "code": "hegoba",
+    "active": false
+  },
+  {
+    "name": "Premier World Choice",
+    "code": "premierworldchoice",
+    "active": false
+  },
+  {
+    "name": "Tripholi",
+    "code": "tripholi",
+    "active": false
+  },
+  {
+    "name": "Caria Holidays",
+    "code": "cariaholidays",
+    "active": false
+  },
+  {
+    "name": "KTI Voyages",
+    "code": "ktivoyages",
+    "active": false
+  },
+  {
+    "name": "Roibos",
+    "code": "roibos",
+    "active": false
+  },
+  {
+    "name": "Online",
+    "code": "online",
+    "active": true
+  },
+  {
+    "name": "Web",
+    "code": "web",
+    "active": true
+  },
+  {
+    "name": "Resepsiyon",
+    "code": "reception",
+    "active": true
+  },
+  {
+    "name": "Acente",
+    "code": "agency",
+    "active": true
+  }
+]

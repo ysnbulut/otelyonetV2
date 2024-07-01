@@ -45,7 +45,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Giriş bilgileri bulunamadı. Lütfen tekrar deneyiniz.',
             ]);
         }
 
@@ -81,5 +81,24 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
+    }
+
+    public function messages()
+    {
+      return [
+        'email.required' => 'Email is required',
+        'email.email' => 'Email is invalid 1',
+        'email.exists' => 'Email is invalid 2',
+        'email.string' => 'Email is invalid 3',
+        'password.required' => 'Password is required',
+        'password.string' => 'Password is invalid 1',
+        'password.exists' => 'Password is invalid 2',
+        'password.min' => 'Password is invalid 3',
+        'password.max' => 'Password is invalid 4',
+        'password.confirmed' => 'Password is invalid 5',
+        'password.current_password' => 'Password is invalid 6',
+        'password.same' => 'Password is invalid 7',
+        'password.regex' => 'Password is invalid 8',
+      ];
     }
 }

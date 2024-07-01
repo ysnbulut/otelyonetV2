@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateGuestRequest extends FormRequest
@@ -17,18 +18,20 @@ class UpdateGuestRequest extends FormRequest
 	/**
 	 * Get the validation rules that apply to the request.
 	 *
-	 * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+	 * @return array<string, ValidationRule|array|string>
 	 */
 	public function rules(): array
 	{
 		return [
-			'name' => ['required', 'string', 'max:255'],
-			'surname' => ['required', 'string', 'max:255'],
-			'nationality' => ['required', 'string', 'max:255'],
-			'identification_number' => ['required', 'string', 'max:255'],
-			'phone' => ['required', 'string', 'max:255'],
-			'email' => ['required', 'string', 'email', 'max:255'],
-			'gender' => ['required', 'in:male,female,unspecified'],
+			'name' => ['required', 'string', 'max:255', 'min:2'],
+			'surname' => ['required', 'string', 'max:255', 'min:2'],
+            'is_foreign_national' => ['required', 'boolean'],
+			'citizen_id' => ['required', 'integer', 'exists:citizens,id'],
+            'birthday' => ['required', 'date'],
+			'identification_number' => ['required', 'string', 'max:255', 'min:6'], //, 'unique:guests,identification_number'
+			'phone' => ['nullable', 'string', 'max:255'],
+			'email' => ['nullable', 'string', 'email', 'max:255'],
+			'gender' => ['nullable', 'in:male,female,unspecified'],
 		];
 	}
 }

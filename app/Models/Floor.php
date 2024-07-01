@@ -2,27 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\Floor
  *
- * @property-read \App\Models\Building|null $building
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Room> $rooms
+ * @property-read Building|null $building
+ * @property-read Collection<int, Room> $rooms
  * @property-read int|null $rooms_count
- * @method static \Illuminate\Database\Eloquent\Builder|Floor newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Floor newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Floor onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Floor query()
- * @method static \Illuminate\Database\Eloquent\Builder|Floor withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Floor withoutTrashed()
- * @mixin \Eloquent
+ * @method static Builder|Floor newModelQuery()
+ * @method static Builder|Floor newQuery()
+ * @method static Builder|Floor onlyTrashed()
+ * @method static Builder|Floor query()
+ * @method static Builder|Floor withTrashed()
+ * @method static Builder|Floor withoutTrashed()
+ * @mixin Eloquent
  */
 class Floor extends Model
 {
-	use HasFactory, SoftDeletes;
+	use SoftDeletes;
 
 	protected $fillable = ['building_id', 'name'];
 

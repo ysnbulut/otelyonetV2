@@ -1,216 +1,349 @@
 .full-calendar {
-  .fc-toolbar {
-    @media (max-width: calc(theme("screens.lg") - 1px)) {
-      flex-direction: column;
-    }
-    .fc-toolbar-chunk {
-      &:nth-child(1) {
-        order: 3;
-      }
-      &:nth-child(2) {
-        order: 1;
-      }
-      &:nth-child(3) {
-        order: 2;
+    .fc-toolbar {
         @media (max-width: calc(theme("screens.lg") - 1px)) {
-          margin-top: theme("spacing.3");
-          margin-bottom: theme("spacing.3");
+            flex-direction: column;
         }
-        .fc-button-group {
-          @media (max-width: calc(theme("screens.sm") - 1px)) {
-            display: block;
-          }
-          button {
-            width: theme("spacing.20");
-            @media (max-width: calc(theme("screens.sm") - 1px)) {
-              width: 100%;
-              border-radius: theme("borderRadius.md");
-              margin-bottom: theme("spacing.2");
+
+        .fc-toolbar-chunk {
+            &:nth-child(1) {
+                order: 3;
             }
-          }
+
+            &:nth-child(2) {
+                order: 1;
+            }
+
+            &:nth-child(3) {
+                order: 2;
+                @media (max-width: calc(theme("screens.lg") - 1px)) {
+                    margin-top: theme("spacing.3");
+                    margin-bottom: theme("spacing.3");
+                }
+
+                .fc-button-group {
+                    @media (max-width: calc(theme("screens.sm") - 1px)) {
+                        display: block;
+                    }
+
+                    button {
+                        width: theme("spacing.20");
+                        @media (max-width: calc(theme("screens.sm") - 1px)) {
+                            width: 100%;
+                            border-radius: theme("borderRadius.md");
+                            margin-bottom: theme("spacing.2");
+                        }
+                    }
+                }
+            }
         }
-      }
+
+        .fc-toolbar-title {
+            font-size: theme("fontSize.lg");
+            font-weight: theme("fontWeight.medium");
+        }
     }
-    .fc-toolbar-title {
-      font-size: theme("fontSize.lg");
-      font-weight: theme("fontWeight.medium");
+
+    .fc-toolbar-chunk .fc-button-primary {
+        &:first-child {
+            border-top-left-radius: theme("borderRadius.md");
+            border-bottom-left-radius: theme("borderRadius.md");
+        }
+
+        &:last-child {
+            border-top-right-radius: theme("borderRadius.md");
+            border-bottom-right-radius: theme("borderRadius.md");
+        }
     }
-  }
-  .fc-toolbar-chunk .fc-button-primary {
-    &:first-child {
-      border-top-left-radius: theme("borderRadius.md");
-      border-bottom-left-radius: theme("borderRadius.md");
+
+    .fc-theme-standard {
+        .fc-scrollgrid,
+        th,
+        td,
+        .fc-list {
+            border-color: theme("colors.slate.200" / 60%);
+        }
     }
-    &:last-child {
-      border-top-right-radius: theme("borderRadius.md");
-      border-bottom-right-radius: theme("borderRadius.md");
+
+    table {
+        border-radius: theme("borderRadius.md");
+
+        tr th .fc-scrollgrid-sync-inner {
+            padding-top: theme("spacing.3");
+            padding-bottom: theme("spacing.3");
+        }
     }
-  }
-  .fc-theme-standard {
-    .fc-scrollgrid,
-    th,
-    td,
-    .fc-list {
-      border-color: theme("colors.slate.200" / 60%);
+
+    .fc-daygrid-event-harness {
+        margin-left: theme("spacing.5");
+        margin-right: theme("spacing.5");
     }
-  }
-  table {
-    border-radius: theme("borderRadius.md");
-    tr th .fc-scrollgrid-sync-inner {
-      padding-top: theme("spacing.3");
-      padding-bottom: theme("spacing.3");
+
+    .fc-h-event {
+        background-color: theme("colors.primary");
+        border-color: theme("colors.primary");
+        border-radius: theme("borderRadius.md");
     }
-  }
-  .fc-daygrid-event-harness {
-    margin-left: theme("spacing.5");
-    margin-right: theme("spacing.5");
-  }
-  .fc-h-event {
-    background-color: theme("colors.primary");
-    border-color: theme("colors.primary");
-    border-radius: theme("borderRadius.md");
-  }
-  .fc-event-title-container {
-    padding: theme("spacing.1") theme("spacing.2");
-    font-size: theme("fontSize.xs");
-  }
-  .fc-daygrid-event {
-    font-size: theme("fontSize.xs");
-  }
-  .fc-daygrid-event-dot {
-    border-color: theme("colors.primary");
-    margin-right: theme("spacing.2");
-  }
-  .fc-daygrid-dot-event .fc-event-title {
-    font-weight: theme("fontWeight.medium");
-  }
-  .fc-col-header-cell-cushion {
-    font-weight: theme("fontWeight.medium");
-  }
-  &.fc .fc-view-harness {
-    @media (max-width: calc(theme("screens.sm") - 1px)) {
-      min-height: 400px !important;
+
+    .fc-event-title-container {
+        padding: theme("spacing.1") theme("spacing.2");
+        font-size: theme("fontSize.xs");
     }
-  }
-  &.fc .fc-daygrid-day-frame {
-    @media (max-width: calc(theme("screens.sm") - 1px)) {
-      min-height: 60px !important;
+
+    .fc-daygrid-event {
+        font-size: theme("fontSize.xs");
     }
-  }
-  .fc-daygrid-more-link {
-    font-size: theme("fontSize.sm");
-    @media (max-width: calc(theme("screens.md") - 1px)) {
-      color: theme("colors.slate.500");
-      font-size: 10px;
+
+    .fc-daygrid-event-dot {
+        border-color: theme("colors.primary");
+        margin-right: theme("spacing.2");
     }
-    @media (max-width: calc(theme("screens.sm") - 1px)) {
-      padding-left: 0;
-      display: block;
-      margin-top: calc(theme("spacing.3") * -1);
-      leading: 10px;
+
+    .fc-daygrid-dot-event .fc-event-title {
+        font-weight: theme("fontWeight.medium");
     }
-  }
-  .fc-daygrid-day-bottom {
-    padding-top: theme("spacing.1");
-  }
-  .fc-day-other {
-    background-color: theme("colors.slate.100" / 50%);
-  }
-  .fc-button-primary {
-    font-weight: theme("fontWeight.normal") !important;
-    display: inline-block !important;
-    border: 1px solid theme("colors.slate.200" / 60%) !important;
-    color: theme("colors.slate.500") !important;
-    background-color: transparent !important;
-    text-transform: capitalize !important;
-    padding: 0.4em 0.65em !important;
-    transition-property: color, background-color, border-color,
-      text-decoration-color, fill, stroke, opacity, box-shadow, transform,
-      filter, backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
-    box-shadow: theme("boxShadow.sm");
-    align-items: center;
-    justify-content: center;
-    border-radius: theme("borderRadius.md");
-    cursor: pointer;
-    &:focus {
-      box-shadow: theme("ringWidth.4");
-      --tw-ring-color: theme("colors.primary");
-      --tw-text-opacity: 0.2;
+
+    .fc-col-header-cell-cushion {
+        font-weight: theme("fontWeight.medium");
     }
-    &:hover:not(:disabled) {
-      --tw-background-opacity: 0.9;
-      --tw-border-opacity: 0.9;
+
+    &.fc .fc-view-harness {
+        @media (max-width: calc(theme("screens.sm") - 1px)) {
+            min-height: 400px !important;
+        }
     }
-    &:not(button) {
-      text-align: center;
+
+    &.fc .fc-daygrid-day-frame {
+        @media (max-width: calc(theme("screens.sm") - 1px)) {
+            min-height: 60px !important;
+        }
     }
-    &:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
+
+    .fc-daygrid-more-link {
+        font-size: theme("fontSize.sm");
+        @media (max-width: calc(theme("screens.md") - 1px)) {
+            color: theme("colors.slate.500");
+            font-size: 10px;
+        }
+        @media (max-width: calc(theme("screens.sm") - 1px)) {
+            padding-left: 0;
+            display: block;
+            margin-top: calc(theme("spacing.3") * -1);
+            leading: 10px;
+        }
     }
-    .fc-icon {
-      font-size: 1.2em !important;
+
+    .fc-daygrid-day-bottom {
+        padding-top: theme("spacing.1");
     }
-    &:focus {
-      box-shadow: none !important;
+
+    .fc-day-other {
+        background-color: theme("colors.slate.100" / 50%);
     }
-  }
-  .fc-button-primary:not(:disabled):active,
-  .fc-button-primary:not(:disabled).fc-button-active {
-    color: white !important;
-    background-color: theme("colors.primary") !important;
-    border-color: theme("colors.primary") !important;
-  }
-  .fc-list-day-cushion {
-    background-color: theme("colors.slate.100" / 50%) !important;
-    padding: 0.75rem 1.25rem !important;
-  }
-  .fc-list-event td {
-    padding: theme("spacing.3") theme("spacing.5");
-  }
-  .fc-list-event-dot {
-    border-color: theme("colors.primary") !important;
-  }
-  .fc-event-time {
-    padding-left: theme("spacing.[0.5]");
-    padding-right: theme("spacing.[0.5]");
-    font-size: 0.75rem !important;
-  }
-  .fc-daygrid-more-link {
-    padding-left: theme("spacing.2");
-  }
+
+    .fc-button-primary {
+        font-weight: theme("fontWeight.normal") !important;
+        display: inline-block !important;
+        border: 1px solid theme("colors.slate.200" / 60%) !important;
+        color: theme("colors.slate.500") !important;
+        background-color: transparent !important;
+        text-transform: capitalize !important;
+        padding: 0.4em 0.65em !important;
+        transition-property: color, background-color, border-color,
+        text-decoration-color, fill, stroke, opacity, box-shadow, transform,
+        filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+        box-shadow: theme("boxShadow.sm");
+        align-items: center;
+        justify-content: center;
+        border-radius: theme("borderRadius.md");
+        cursor: pointer;
+
+        &:focus {
+            box-shadow: theme("ringWidth.4");
+            --tw-ring-color: theme("colors.primary");
+            --tw-text-opacity: 0.2;
+        }
+
+        &:hover:not(:disabled) {
+            --tw-background-opacity: 0.9;
+            --tw-border-opacity: 0.9;
+        }
+
+        &:not(button) {
+            text-align: center;
+        }
+
+        &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .fc-icon {
+            font-size: 1.2em !important;
+        }
+
+        &:focus {
+            box-shadow: none !important;
+        }
+    }
+
+    .fc-button-primary:not(:disabled):active,
+    .fc-button-primary:not(:disabled).fc-button-active {
+        color: white !important;
+        background-color: theme("colors.primary") !important;
+        border-color: theme("colors.primary") !important;
+    }
+
+    .fc-list-day-cushion {
+        background-color: theme("colors.slate.100" / 50%) !important;
+        padding: 0.75rem 1.25rem !important;
+    }
+
+    .fc-list-event td {
+        padding: theme("spacing.3") theme("spacing.5");
+    }
+
+    .fc-list-event-dot {
+        border-color: theme("colors.primary") !important;
+    }
+
+    .fc-event-time {
+        padding-left: theme("spacing.[0.5]");
+        padding-right: theme("spacing.[0.5]");
+        font-size: 0.75rem !important;
+    }
+
+    .fc-daygrid-more-link {
+        padding-left: theme("spacing.2");
+    }
+
 }
 
 .dark {
-  .full-calendar {
-    .fc-button-primary {
-      background-color: theme("colors.darkmode.400") !important;
-      border-color: theme("colors.darkmode.400") !important;
+    .full-calendar {
+        .fc-button-primary {
+            background-color: theme("colors.darkmode.400") !important;
+            border-color: theme("colors.darkmode.400") !important;
+        }
+
+        .fc-list-day-cushion {
+            background-color: theme("colors.darkmode.400") !important;
+        }
+
+        .fc-event:hover td {
+            border-color: theme("colors.darkmode.400") !important;
+            background-color: theme("colors.darkmode.400") !important;
+        }
+
+        .fc-theme-standard {
+            .fc-scrollgrid,
+            th,
+            td,
+            .fc-list {
+                border-color: theme("colors.darkmode.400");
+            }
+        }
+
+        .fc-day-other {
+            background-color: theme("colors.darkmode.700");
+        }
+
+        .fc-button-primary:focus {
+            --tw-ring-color: theme("colors.slate.700");
+            --tw-ring-opacity: 0.5;
+            transition-property: none;
+        }
     }
-    .fc-list-day-cushion {
-      background-color: theme("colors.darkmode.400") !important;
-    }
-    .fc-event:hover td {
-      border-color: theme("colors.darkmode.400") !important;
-      background-color: theme("colors.darkmode.400") !important;
-    }
-    .fc-theme-standard {
-      .fc-scrollgrid,
-      th,
-      td,
-      .fc-list {
-        border-color: theme("colors.darkmode.400");
-      }
-    }
-    .fc-day-other {
-      background-color: theme("colors.darkmode.700");
-    }
-    .fc-button-primary:focus {
-      --tw-ring-color: theme("colors.slate.700");
-      --tw-ring-opacity: 0.5;
-      transition-property: none;
-    }
-  }
 }
+
+.resource-label > .fc-datagrid-cell-frame {
+    @apply h-[4rem] flex items-center justify-center !important;
+}
+
+.fc-timeline-lane-frame {
+    @apply h-[4rem] !important;
+}
+
+.fc-list-day-cushion {
+    @apply bg-slate-100 dark:bg-darkmode-700 !important;
+}
+
+.fc-event {
+    @apply h-auto !important;
+}
+
+.fc-scrollgrid {
+    @apply border-slate-200 dark:border-darkmode-500 !important;
+}
+
+.fc-datagrid-body {
+    @apply -mb-3 !important;
+}
+
+.fc-listYear-view {
+    @apply border-slate-100 dark:border-darkmode-300 !important;
+}
+
+.fc-highlight {
+    @apply bg-primary/40 dark:bg-primary/20 !important;
+}
+
+.fc-daygrid-day-frame {
+    @apply border border-slate-400 dark:border-darkmode-500 !important;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    @apply bg-slate-300 dark:bg-darkmode-800 !important
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    @apply bg-slate-100 rounded-full dark:bg-darkmode-400 !important
+}
+
+.holidays {
+    @apply bg-red-500/20 dark:bg-red-500/30 dark:opacity-20 opacity-30 h-full !important;
+}
+
+.holidays > .text-center {
+    @apply text-red-500  text-xs lg:text-opacity-80 text-opacity-0 !important;
+}
+
+.holidays > .text-center > .text-sm {
+    @apply text-red-700 text-xs !important;
+}
+
+.fc-timeline-now-indicator-container > .fc-timeline-now-indicator-line.now-indicator {
+    @apply border-spacing-3 border-l-4 border-dotted border-teal-700 dark:border-teal-300 opacity-90 !important;
+}
+
+.fc-daygrid-day-top {
+    @apply border-b border-slate-200 dark:border-darkmode-500 p-0 !important;
+}
+
+.fc-daygrid-day-number {
+    @apply flex w-full p-0 !important;
+}
+
+.fc-daygrid-month-start {
+    @apply bg-yellow-300 dark:bg-yellow-700 shadow-sm text-xs font-extrabold rounded-bl-md m-0 !important;
+}
+
+.fc-datagrid-cell-frame.fc-datagrid-cell-frame-liquid {
+    @apply flex max-w-fit h-full justify-center items-center !important;
+}
+
+
+.fc-datagrid-cell-cushion.fc-sticky {
+    @apply text-xl font-semibold min-w-max whitespace-nowrap !important;
+}
+
+.fc-datagrid-cell-cushion.fc-scrollgrid-sync-inner {
+    @apply text-center !important;
+}
+
+
+.context-menu {
+    @apply absolute z-50 bg-white dark:bg-gray-800 shadow rounded-md p-2 text-sm font-semibold overflow-hidden !important;
+}
+

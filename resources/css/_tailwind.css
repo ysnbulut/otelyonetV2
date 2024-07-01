@@ -1,3 +1,180 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    #responsive-table {
+        table {
+            @apply w-full;
+        }
+
+        thead {
+            @apply hidden lg:table-header-group;
+        }
+
+        tr {
+            @apply max-w-full block relative
+            lg:table-row;
+        }
+
+        tr:last-child {
+            @apply border-b-0;
+        }
+
+        th {
+            @apply lg:py-2 lg:px-6 lg:align-bottom;
+        }
+
+        td {
+            @apply flex justify-between text-right py-2 px-3 align-top border-b flex-wrap whitespace-pre-wrap
+            lg:table-cell lg:text-left lg:px-6 lg:py-2 lg:align-middle;
+        }
+
+        td:before {
+            content: attr(data-label);
+            text-decoration: none !important;
+            @apply font-bold pr-3 text-left lg:hidden whitespace-nowrap my-auto dark:text-darkmode-100 no-underline;
+        }
+    }
+
+}
+
+@layer utilities {
+    .dark-scrollbars-compat {
+        scrollbar-color: rgb(71, 85, 105) rgb(30, 41, 59);
+    }
+
+    .dark-scrollbars::-webkit-scrollbar-track {
+        @apply bg-neutral-800;
+    }
+
+    .dark-scrollbars::-webkit-scrollbar-thumb {
+        @apply bg-slate-600;
+    }
+
+    .dark-scrollbars::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-500;
+    }
+}
+
+
+::-webkit-scrollbar {
+    @apply w-3 h-3 !important;
+}
+
+::-webkit-scrollbar-corner {
+    @apply bg-slate-300; /* Yatay scrollbar arka plan rengi */
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-primary !important
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full !important
+}
+
+[data-color-scheme="dark"] {
+    ::-webkit-scrollbar-track {
+        @apply bg-darkmode-800 !important
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-darkmode-400 rounded-full !important
+    }
+    ::-webkit-scrollbar-corner {
+        @apply bg-darkmode-800; /* Yatay scrollbar arka plan rengi */
+    }
+}
+
+@layer components {
+    /* .my-select-container {
+    } */
+    .my-select-container .my-select__control {
+        @apply disabled:bg-slate-100 disabled:cursor-not-allowed disabled:dark:bg-darkmode-800/50
+        [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50
+        transition duration-200 ease-in-out w-full text-sm border-slate-200 dark:border-none shadow-sm rounded-md
+        dark:bg-darkmode-800 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 focus:ring-4 focus:ring-slate-500 focus:outline-none;
+    }
+
+    .my-select-container .my-select__control--is-focused {
+        @apply dark:border-slate-400 dark:hover:border-slate-400 shadow ring-4 ring-primary
+        ring-opacity-20 border-primary border-opacity-40 dark:bg-darkmode-800 dark:border-transparent
+        dark:ring-slate-700 dark:ring-opacity-50;
+    }
+
+    .my-select-container .my-select__menu {
+        @apply bg-slate-100 dark:bg-darkmode-700 dark:border-slate-600;
+    }
+
+    .my-select-container .my-select__option {
+        @apply text-slate-600 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-darkmode-700 dark:hover:bg-darkmode-800;
+    }
+
+    .my-select-container .my-select__indicator-separator {
+        @apply bg-slate-400;
+    }
+
+    .my-select-container .my-select__input-container,
+    .my-select-container .my-select__placeholder,
+    .my-select-container .my-select__single-value {
+        @apply text-slate-900 dark:text-slate-100 ;
+    }
+
+    /*****************************************************/
+
+    .my-search-select-container .my-select__control {
+        @apply border disabled:bg-slate-100 disabled:cursor-not-allowed disabled:dark:bg-darkmode-800/50
+        [&[readonly]]:bg-slate-100 [&[readonly]]:cursor-not-allowed [&[readonly]]:dark:bg-darkmode-800/50
+        transition duration-200 ease-in-out w-full text-sm border-slate-200 dark:border-none shadow-sm rounded-md
+        dark:bg-darkmode-600 dark:focus:ring-slate-700 dark:focus:ring-opacity-50;
+    }
+
+    .my-search-select-container .my-select__control--is-focused {
+        @apply border-slate-500 hover:border-slate-500 dark:border-slate-400 dark:hover:border-slate-400 shadow-none;
+    }
+
+    .my-search-select-container .my-select__menu {
+        @apply bg-slate-100 dark:bg-darkmode-700 dark:border-slate-600 z-10;
+    }
+
+    .my-search-select-container .my-select__option {
+        @apply text-slate-600 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-darkmode-700 dark:hover:bg-darkmode-800;
+    }
+
+    .my-search-select-container .my-select__indicator-separator {
+        @apply bg-slate-400;
+    }
+
+    .my-search-select-container .my-select__input-container,
+    .my-search-select-container .my-select__placeholder,
+    .my-search-select-container .my-select__single-value {
+        @apply text-slate-400 dark:text-slate-500 ;
+    }
+
+    .my-search-select-container .my-select__multi-value {
+        @apply bg-slate-200 dark:bg-darkmode-700 text-slate-400 dark:text-slate-500;
+    }
+
+    .my-search-select-container .my-select__multi-value .my-select__multi-value__label {
+        @apply text-slate-600 dark:text-slate-500;
+    }
+
+    .my-search-select-container .my-select__multi-value .my-select__multi-value__remove {
+        @apply hover:bg-danger/20;
+    }
+
+
+}
+
+.my-select__menu-list::-webkit-scrollbar-track {
+    @apply bg-slate-300 dark:bg-darkmode-500 !important
+}
+
+.my-select__menu-list::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full dark:bg-darkmode-800 !important
+}
+
+.my-simple-select {
+    @apply rounded-md border-slate-200 px-1.5 py-1 text-xs shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50;
+}

@@ -12,7 +12,7 @@ return new class extends Migration {
 	{
 		Schema::create('bed_types', function (Blueprint $table) {
 			$table->id();
-			$table->string('name');
+			$table->string('name', 50);
 			$table->integer('person_num');
 			$table->text('description')->nullable();
 			$table->timestamps();

@@ -1,8 +1,11 @@
 <?php
 
-use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\BookingWebhookController;
+use App\Http\Controllers\Hotel\CurrencyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,5 +22,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware(['api'])->post('/currency/exchange', [CurrencyController::class, 'exchange'])->name('currency.exchange');
+
+Route::middleware(['api'])->get('/', function () {
+    return response()->json(['message' => 'Welcome to Multi-Tenancy API']);
+})->name('mb.currency.exchange');
+
 Route::middleware(['api'])->post('/exchange/amount', [CurrencyController::class, 'amountConvert'])->name('amount.exchange');
+
+Route::middleware(['api'])->post('/{tenant}/webhook/booking', [BookingWebhookController::class, 'handleWebhook'])->name
+('booking.webhook');

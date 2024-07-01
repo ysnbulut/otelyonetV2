@@ -42,7 +42,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -70,7 +70,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Europe/Istanbul',
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'tr',
 
     /*
     |--------------------------------------------------------------------------
@@ -96,7 +96,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+    'fallback_locale' => 'tr',
 
     /*
     |--------------------------------------------------------------------------
@@ -109,7 +109,7 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    'faker_locale' => 'tr_Tr',
 
     /*
     |--------------------------------------------------------------------------
@@ -168,8 +168,10 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-	      Spatie\Permission\PermissionServiceProvider::class,
-	      App\Providers\TenancyServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+        Plank\Mediable\MediableServiceProvider::class,
+        App\Providers\TenancyServiceProvider::class,
+        Artisaninweb\SoapWrapper\ServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -185,6 +187,9 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'MediaUploader' => Plank\Mediable\Facades\MediaUploader::class,
+        'ImageManipulator' => Plank\Mediable\Facades\ImageManipulator::class,
+        'SoapWrapper' => Artisaninweb\SoapWrapper\Facade::class,
     ])->toArray(),
 
 ];

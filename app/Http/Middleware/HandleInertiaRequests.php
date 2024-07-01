@@ -2,10 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Settings\PricingPolicySettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Stancl\Tenancy\Facades\Tenancy;
 use Tightenco\Ziggy\Ziggy;
-use App\Settings\GeneralSettings;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -31,19 +32,36 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $settings = new GeneralSettings();
+        $tenant = tenancy()->tenant !== null;
+        $settings = $tenant ? new PricingPolicySettings() : null;
+        $pricingPolicyValue = null;
+        if ($tenant && $settings) {
+            $pricingPolicyValue = $settings->pricing_policy['value'];
+        }
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
                 'role' => $request->user()?->roles->first()?->name ?? 'User',
                 'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
-                'pricing_policy' => $settings->pricing_policy,
+                'pricing_policy' => $pricingPolicyValue,
             ],
-            'ziggy' => fn () => [
+            'csrf_token' => csrf_token(),
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'message' => $request->session()->get('message'),
+                'info' => $request->session()->get('info'),
+                'warning' => $request->session()->get('warning'),
+                'status' => $request->session()->get('status'),
+                'errors' => $request->session()->get('errors'),
+                'old' => $request->session()->get('old'),
+            ],
+            'ziggy' => fn() => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
+                'route' => collect(new Ziggy)['routes'][$request->route()?->getName()] ?? null,
             ],
+            'is_tenant' => (bool)$tenant
         ];
     }
 }

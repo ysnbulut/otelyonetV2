@@ -23,6 +23,24 @@ class StoreRoomTypeFeatureRequest extends FormRequest
 	{
 		return [
 			'name' => ['required', 'string', 'max:255', 'unique:room_type_features'],
+            'is_paid' => ['required', 'boolean'],
 		];
 	}
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Olanak adı gerekli.',
+            'name.string' => 'Olanak adı metin olmalı.',
+            'name.max' => 'Olanak adı en fazla 255 karakter olmalı.',
+            'name.unique' => 'Olanak adı daha önce kullanılmış.',
+            'is_paid.required' => 'Ücretli olup olmadığı gerekli.',
+            'is_paid.boolean' => 'Ücretli olup olmadığı doğru formatta değil.',
+        ];
+    }
 }

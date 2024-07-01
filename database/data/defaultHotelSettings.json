@@ -1,0 +1,20 @@
+{
+  "channel_manager": {
+    "label": "Kanal Yöneticisi",
+    "description": "Otelin kullanacağı kanal yöneticisini belirler Örn: HotelRunner, SiteMinder, Reseliva, Cloudbeds gibi...",
+    "name": "channel_manager",
+    "type": "select",
+    "options": [
+      {
+        "label": "HotelRunner",
+        "value": "hotelrunner"
+      },
+      {
+        "label": "Kapalı",
+        "value": "closed"
+      }
+    ],
+    "value": "closed"
+  },
+  "api_settings" : {}
+}

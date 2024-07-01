@@ -2,69 +2,96 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\Season
  *
- * @property-read mixed $season_name
- * @property-write mixed $end_date
- * @property-write mixed $start_date
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\UnitPriceRoomTypeAndView> $unitPrices
+ * @method static Builder|Season avilableSeasons()
+ * @method static Builder|Season newModelQuery()
+ * @method static Builder|Season newQuery()
+ * @method static Builder|Season onlyTrashed()
+ * @method static Builder|Season query()
+ * @method static Builder|Season unitPrices()
+ * @method static Builder|Season withTrashed()
+ * @method static Builder|Season withoutTrashed()
+ * @property-read Collection<int, UnitPrice> $unitPrices
  * @property-read int|null $unit_prices_count
- * @method static \Illuminate\Database\Eloquent\Builder|Season avilableSeasons()
- * @method static \Database\Factories\SeasonFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Season newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Season newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Season onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Season query()
- * @method static \Illuminate\Database\Eloquent\Builder|Season withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Season withoutTrashed()
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class Season extends Model
 {
- use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
-	protected $fillable = ['uid', 'name', 'start_date', 'end_date'];
-	/**
-	 * @var mixed|string
-	 */
-	private mixed $name;
+    protected $fillable = [
+        'uid',
+        'name',
+        'description',
+        'start_date',
+        'end_date',
+        'channels',
+        'web',
+        'agency',
+        'reception',
+        'calendar_colors'
+    ];
 
-	public function unitPrices()
- {
-  return $this->hasMany(UnitPriceRoomTypeAndView::class);
- }
+    protected $appends = ['season_name'];
 
- public function setStartDateAttribute($value)
- {
-  $this->attributes['start_date'] = date('Y-m-d', strtotime($value));
- }
+    protected array $dates = ['start_date', 'end_date'];
 
- public function setEndDateAttribute($value)
- {
-  $this->attributes['end_date'] = date('Y-m-d', strtotime($value));
- }
+    protected $casts = [
+        'channels' => 'boolean',
+        'web' => 'boolean',
+        'agency' => 'boolean',
+        'reception' => 'boolean'
+    ];
 
- public function getSeasonNameAttribute()
- {
-  return $this->name .
-   ' (' .
-   date('d.m.Y', strtotime($this->start_date)) .
-   ' - ' .
-   date('d.m.Y', strtotime($this->end_date)) .
-   ')';
- }
+    protected $attributes = [
+        'start_date' => null,
+        'end_date' => null,
+        'channels' => false,
+        'web' => false,
+        'agency' => false,
+        'reception' => false
+    ];
 
- public function scopeAvilableSeasons($query)
- {
-  return $query
-   ->orderBy('start_date')
-   ->where('start_date', '<=', date('Y-m-d'))
-   ->where('end_date', '>=', date('Y-m-d'))
-   ->orWhere('start_date', '>=', date('Y-m-d'));
- }
+    public function unitPrices(): HasMany
+    {
+        return $this->hasMany(UnitPrice::class);
+    }
+
+    public function setStartDateAttribute($value): void
+    {
+        $this->attributes['start_date'] = date('Y-m-d', strtotime($value));
+    }
+
+    public function setEndDateAttribute($value): void
+    {
+        $this->attributes['end_date'] = date('Y-m-d', strtotime($value));
+    }
+
+    public function getSeasonNameAttribute(): string
+    {
+        return $this->name .
+            ' (' .
+            date('d.m.Y', strtotime($this->start_date)) .
+            ' - ' .
+            date('d.m.Y', strtotime($this->end_date)) .
+            ')';
+    }
+
+    public function scopeAvilableSeasons($query)
+    {
+        return $query
+            ->orderBy('start_date')
+            ->whereDate('start_date', '<=', date('Y-m-d'))
+            ->whereDate('end_date', '>=', date('Y-m-d'))
+            ->orWhereDate('start_date', '>=', date('Y-m-d'));
+    }
 }
