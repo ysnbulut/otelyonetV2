@@ -55,7 +55,7 @@ function Create(props: CreateProps) {
 				setSelectedPrice((prevState: any) => {
 					return {
 						...prevState,
-						[item.id]: (prevState && prevState[item.id]) || 'reception',
+						[item.id]: 'reception', //(prevState && prevState[item.id]) ||
 					}
 				})
 				if (checkedRooms && checkedRooms[item.id] && checkedRooms[item.id].length > 0 && selectedPrice && selectedPrice[item.id]) {

@@ -76,7 +76,8 @@ class UnitPriceController extends Controller
                                         ->get();
                                     $unit_prices = array_merge($unit_prices, $agency_unit_prices->toArray());
                                 }
-                                $warning = count($unit_prices) < count($activedChannels) || collect($unit_prices)->filter(fn($unit_price) => $unit_price->unit_price === null)->count() > 0;
+                                $unit_prices = array_unique($unit_prices, SORT_REGULAR);
+                                $warning = count($unit_prices) < count($activedChannels) || collect($unit_prices)->filter(fn($unit_price) => $unit_price['unit_price'] === null)->count() > 0;
                                 return [
                                     'id' => $season->id,
                                     'name' => $season->name,

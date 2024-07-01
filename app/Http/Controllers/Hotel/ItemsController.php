@@ -27,43 +27,44 @@ class ItemsController extends Controller
     {
         $this->settings = $settings;
     }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         //Inertia::render('Hotel/Item/Index',
-        return Inertia::render('Hotel/Item/Index',[
+        return Inertia::render('Hotel/Item/Index', [
             'currency' => $this->settings->currency['value'] ?? 'TRY',
             'filters' => Request::all('search', 'trashed', 'categories', 'sales_units', 'sales_channels'),
             'items' => Item::with(['units' => function ($query) {
-                    $query->with(['channels' => function ($query) {
-                        $query->with(['unitPrices' => function ($query) {
-                            $query->select('unit_channel_item_prices.id', 'unit_channel_item_prices.sales_unit_channel_id', 'unit_channel_item_prices.sales_unit_item_id', 'unit_channel_item_prices.price_rate');
-                        }])->select('sales_channels.id', 'sales_channels.name');
-                    }])->select('sales_units.id', 'sales_units.name', 'sales_unit_items.id as item_unit_id');
-                }])->filter(Request::only('search', 'trashed', 'categories', 'sales_units', 'sales_channels'))->paginate(Request::get
+                $query->with(['channels' => function ($query) {
+                    $query->with(['unitPrices' => function ($query) {
+                        $query->select('unit_channel_item_prices.id', 'unit_channel_item_prices.sales_unit_channel_id', 'unit_channel_item_prices.sales_unit_item_id', 'unit_channel_item_prices.price_rate');
+                    }])->select('sales_channels.id', 'sales_channels.name');
+                }])->select('sales_units.id', 'sales_units.name', 'sales_unit_items.id as item_unit_id');
+            }])->filter(Request::only('search', 'trashed', 'categories', 'sales_units', 'sales_channels'))->paginate(Request::get
             ('per_page') ??
                 12)
-                    ->withQueryString()
-                    ->through(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'image' => $item->media->last()?->hasVariant('small') ? $item->media->last()
-                                ?->findVariant('small')->getUrl() : $item->media->last()?->getUrl(),
-                            'name' => $item->name,
-                            'category' => $item->category->name,
-                            'sku' => $item->sku,
-                            'price' => $item->price,
-                            'description' => $item->description,
-                            'units' => $item->units->map(function ($unit) {
-                                return [
-                                    'id' => $unit->id,
-                                    'name' => $unit->name,
-                                    'channels' => $unit->channels->map(function ($channel) use ($unit) {
-                                        return [
-                                            'id' => $channel->id,
-                                            'name' => $channel->name,
+                ->withQueryString()
+                ->through(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'image' => $item->media->last()?->hasVariant('small') ? $item->media->last()
+                            ?->findVariant('small')->getUrl() : $item->media->last()?->getUrl(),
+                        'name' => $item->name,
+                        'category' => $item->category->name,
+                        'sku' => $item->sku,
+                        'price' => $item->price,
+                        'description' => $item->description,
+                        'units' => $item->units->map(function ($unit) {
+                            return [
+                                'id' => $unit->id,
+                                'name' => $unit->name,
+                                'channels' => $unit->channels->map(function ($channel) use ($unit) {
+                                    return [
+                                        'id' => $channel->id,
+                                        'name' => $channel->name,
 //                                    'prices' => $channel->unitPrices->filter(function ($price) use ($unit) {
 //                                        return $price->sales_unit_item_id == $unit->item_unit_id;
 //                                    })->map(function ($price) {
@@ -72,12 +73,12 @@ class ItemsController extends Controller
 //                                            'price' => $price->price,
 //                                        ];
 //                                    }),
-                                        ];
-                                    }),
-                                ];
-                            }),
-                        ];
-                    }),
+                                    ];
+                                }),
+                            ];
+                        }),
+                    ];
+                }),
             'categories' => ItemCategory::all(['id', 'name']),
             'sales_units' => SalesUnit::all(['id', 'name']),
             'sales_channels' => SalesChannel::all(['id', 'name']),
@@ -89,12 +90,12 @@ class ItemsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Hotel/Item/Create',[
+        return Inertia::render('Hotel/Item/Create', [
             'currency' => $this->settings->currency['value'] ?? 'TRY',
             'categories' => ItemCategory::all(['id', 'name']),
-            'taxes' => Tax::where('enabled', true)->get(['id', 'name', 'rate'])->map(fn ($tax) => ['rate' => $tax->rate,
+            'taxes' => Tax::where('enabled', true)->get(['id', 'name', 'rate'])->map(fn($tax) => ['rate' => $tax->rate,
                 'value'
-            => $tax->id, 'label' => $tax->name]),
+                => $tax->id, 'label' => $tax->name]),
             'sales_units' => SalesUnit::all(['id', 'name'])->map(function ($unit) {
                 return [
                     'id' => $unit->id,
@@ -117,7 +118,7 @@ class ItemsController extends Controller
             $requestImage = Request::file('file');
             $tenant = tenancy()->tenant->id;
             $media = MediaUploader::fromSource($requestImage)
-                ->toDestination('digitalocean', $tenant.'/items/images')
+                ->toDestination('digitalocean', $tenant . '/items/images')
                 ->useHashForFilename('sha1')
                 ->makePublic()
                 ->upload();
@@ -130,7 +131,9 @@ class ItemsController extends Controller
                 ],
             ], 200);
         } catch (\Exception $e) {
-            dd($e);
+            return response()->json([
+                'message' => 'Fotoğraf yüklenirken bir hata oluştu.',
+            ], 500);
         }
     }
 
@@ -143,13 +146,13 @@ class ItemsController extends Controller
         $item = Item::create([
             'item_category_id' => $data['category_id'],
             'name' => $data['name'],
-            'description' =>  $data['description'],
+            'description' => $data['description'],
             'type' => $data['type'],
-            'price' =>  (float) $data['price'],
-            'tax_id' =>  $data['tax_id'],
-            'tax' =>  $data['tax'],
-            'total_price' =>  str_replace(',', '.', $data['total_price']),
-            'preparation_time' =>  $data['preparation_time'],
+            'price' => (float)$data['price'],
+            'tax_id' => $data['tax_id'],
+            'tax' => $data['tax'],
+            'total_price' => str_replace(',', '.', $data['total_price']),
+            'preparation_time' => $data['preparation_time'],
             'enabled' => 1,
         ]);
 
@@ -157,7 +160,7 @@ class ItemsController extends Controller
 
         $item->units()->attach($data['sales_units']);
 
-        if(count($data['unit_channel_item_prices']) >= 1) {
+        if (count($data['unit_channel_item_prices']) >= 1) {
             foreach ($data['unit_channel_item_prices'] as $value) {
                 $item->units->each(function ($unit) use ($value) {
                     $unit->channels->each(function ($channel) use ($value, $unit) {
@@ -165,7 +168,7 @@ class ItemsController extends Controller
                             $channel->unitPrices()->create([
                                 'sales_unit_channel_id' => $channel->pivot->id,
                                 'sales_unit_item_id' => $unit->pivot->id,
-                                'price_rate' => (float) $value['price_rate'],
+                                'price_rate' => (float)$value['price_rate'],
                             ]);
                         }
                     });

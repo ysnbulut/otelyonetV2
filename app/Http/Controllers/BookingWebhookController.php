@@ -19,10 +19,14 @@ use App\Settings\HotelSettings;
 use App\Settings\PricingPolicySettings;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use JsonException;
 use LaravelIdea\Helper\App\Models\_IH_Tax_C;
 use Random\RandomException;
+use Seld\JsonLint\JsonParser;
+use Seld\JsonLint\ParsingException;
 
 class BookingWebhookController extends Controller
 {
@@ -35,6 +39,7 @@ class BookingWebhookController extends Controller
     /**
      * @throws JsonException
      * @throws RandomException
+     * @throws ParsingException
      */
     public function handleWebhook(Tenant $tenant, WebHookRequest $request)
     {
@@ -49,13 +54,17 @@ class BookingWebhookController extends Controller
             $webhookDataRoomsCollect = collect($webhookData['rooms']);
             $unavailableRoomsIds = Booking::getUnavailableRoomsIds($webhookData['checkin_date'], $webhookData['checkout_date']);
             $bookableRooms = true;
-            CMRoom::whereIn('room_code', $webhookDataRoomsCollect->pluck('code')->unique()->map
+            CMRoom::whereIn('room_code', $webhookDataRoomsCollect->pluck('inv_code')->unique()->map
             (function ($code) {
+                Log::info('HR: ' . $code);
                 return str_replace('HR:', '', $code);
             })->toArray())->get()->each(function ($cm_room) use ($unavailableRoomsIds, &$bookableRooms) {
                 $typeHasViewsRooms = $cm_room->typeHasView->rooms->pluck('id');
+                Log::info('TypeHasViewsRooms: ' . $typeHasViewsRooms);
                 $unavailableRIDSDiff = array_intersect($unavailableRoomsIds, $typeHasViewsRooms->toArray());
+                Log::info('UnavailableRIDSDiff: ' . json_encode($unavailableRIDSDiff));
                 $availableStock = collect(array_diff($typeHasViewsRooms->toArray(), $unavailableRIDSDiff))->flatten()->count();
+                Log::info('AvailableStock: ' . $availableStock);
                 $CMStockDiff = max($typeHasViewsRooms->count() - $cm_room->stock, 0);
                 if ($availableStock < $CMStockDiff || $availableStock === 0) {
                     $bookableRooms = false;
@@ -88,7 +97,7 @@ class BookingWebhookController extends Controller
                     $cMBooking = CMBooking::where('cm_booking_code', $webhookData['hr_number'])->first();
                     $booking = $cMBooking !== NULL ? Booking::find($cMBooking->booking_id) : NULL;
                     if ($booking !== NULL) {
-                        BookingRoom::withoutEvents(function () use ($booking, $webhookData) {
+                        BookingRoom::withoutEvents(static function () use ($booking, $webhookData) {
                             $booking->rooms->each(function ($room) {
                                 $room->documents->each(function ($document) {
                                     $document->items->each(function ($item) {
@@ -111,7 +120,8 @@ class BookingWebhookController extends Controller
                                 $room->prices->each(function ($price) {
                                     $price->delete();
                                 });
-                                $room->cancelReason->delete();
+                                //TODO: burayı morphTo yapman lazım.  çünkü cancelReason hem booking hem de room için olabilir mi acaba ????
+//                                $room->cancelReason->delete();
                                 $room->delete();
                             });
                             $booking->cMBooking->delete();
@@ -123,7 +133,7 @@ class BookingWebhookController extends Controller
                             });
                             $booking->cancelReason->delete();
                             $booking->delete();
-                            $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+//                            $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                         });
                     }
                     return [
@@ -152,7 +162,7 @@ class BookingWebhookController extends Controller
                             $booking->customer->update($booking->customer->getDirty());
                         }
                         foreach ($webhookData['rooms'] as $room) {
-                            $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['code']))->first();
+                            $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['inv_code']))->first();
                             if ($CMRoom !== null) {
                                 $typeHasViewsRooms = TypeHasView::where('id', $CMRoom->type_has_view_id)->whereHas('rooms')->first()
                                     ->rooms->pluck('id');
@@ -350,7 +360,6 @@ class BookingWebhookController extends Controller
                         $customerData['tax_number'], 'email' => $customerData['email'], 'phone' => $customerData['phone']],
                         $customerData);
                     $booking_data = [
-                        'booking_code' => $webhookData['hr_number'],
                         'customer_id' => $customer->id,
                         'channel_id' => $channel_id,
                         'number_of_rooms' => $webhookData['total_rooms'],
@@ -363,114 +372,116 @@ class BookingWebhookController extends Controller
                         'cm_booking_code' => $webhookData['hr_number'],
                     ]);
                     foreach ($webhookData['rooms'] as $room) {
-                        $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['code']))->first();
+                        $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['inv_code']))->first();
                         if ($CMRoom !== null) {
                             $typeHasViewsRooms = $CMRoom->typeHasView->rooms->pluck('id');
                             $unavailableRIDSDiff = array_intersect($unavailableRoomsIds, $typeHasViewsRooms->toArray());
                             $availableStockRoomsIds = collect(array_diff($typeHasViewsRooms->toArray(),
                                 $unavailableRIDSDiff))
                                 ->flatten();
-                            $randomRoom = Room::find($availableStockRoomsIds->random(1)->first());
-                            $bookingRoom = BookingRoom::withoutEvents(static function () use (
-                                $booking, $randomRoom, $room
-                            ) {
-                                return BookingRoom::create([
-                                    'booking_id' => $booking->id,
-                                    'room_id' => $randomRoom->id,
-                                    'check_in' => $room['checkin_date'],
-                                    'check_out' => $room['checkout_date'],
-                                    'number_of_adults' => $room['total_adult'],
-                                    'number_of_children' => count($room['child_ages']),
-                                    'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
-                                    'created_at' => Carbon::now(),
-                                    'updated_at' => Carbon::now(),
-                                ]);
-                            });
-                            $unavailableRoomsIds[] = $randomRoom->id;
-                            $document = $bookingRoom->documents()->create([
-                                'type' => 'invoice',
-                                'customer_id' => $customer->id,
-                                'status' => 'received',
-                                'currency' => $webhookData['currency'],
-                                'currency_rate' => 1, //TODO: Burada merkez bankasından döviz kuru alınabilir.
-                                'issue_date' => $room['checkin_date'],
-                                'due_date' => $room['checkout_date'],
-                            ]);
-                            $itemName = $randomRoom->TypeAndViewName . ' (' . Carbon::parse($room['checkin_date'])->format('d.m.Y') . ' - '
-                                . Carbon::parse($room['checkout_date'])->format('d.m.Y') . ') ' . $room['nights'] . ' Gece ' .
-                                $room['total_adult'] . ' Yetişkin';
-                            if (count($room['child_ages']) > 0) {
-                                $itemName .= ' ' . count($room['child_ages']) . ' Çocuk ';
-                            }
-                            $itemName .= 'Konaklama Bedeli.';
-                            $subTotal = $room['price'] * (1 - $this->getSettingBookingTax->rate / 100);
-                            $tax = $this->getSettingBookingTax->rate * $room['price'] / 100;
-                            $total = $room['price'];
-                            $document->items()->create([
-                                'item_id' => null,
-                                'name' => $itemName,
-                                'description' => '',
-                                'price' => $subTotal,
-                                'quantity' => 1,
-                                'tax_name' => $this->getSettingBookingTax->name,
-                                'tax_rate' => $this->getSettingBookingTax->rate,
-                                'tax' => $tax,
-                                'total' => $total,
-                                'discount' => 0,
-                                'grand_total' => $room['price'],
-                            ]);
-                            $document->total()->create([
-                                'type' => 'subtotal',
-                                'sort_order' => 1,
-                                'amount' => $subTotal,
-                            ]);
-                            $document->total()->create([
-                                'type' => 'tax',
-                                'sort_order' => 2,
-                                'amount' => $tax,
-                            ]);
-                            $document->total()->create([
-                                'type' => 'total',
-                                'sort_order' => 3,
-                                'amount' => $total,
-                            ]);
-                            foreach ($room['daily_prices'] as $daily_price) {
-                                BookingDailyPrice::firstOrCreate([
-                                    'booking_room_id' => $bookingRoom->id,
-                                    'date' => $daily_price['date'],
-                                    'original_price' => $daily_price['original_price'],
-                                    'discount' => $daily_price['discount'],
-                                    'price' => $daily_price['price'],
+                            if ($availableStockRoomsIds->count() > 0) {
+                                $randomRoom = Room::find($availableStockRoomsIds->random(1)->first());
+                                $bookingRoom = BookingRoom::withoutEvents(static function () use (
+                                    $booking, $randomRoom, $room
+                                ) {
+                                    return BookingRoom::create([
+                                        'booking_id' => $booking->id,
+                                        'room_id' => $randomRoom->id,
+                                        'check_in' => $room['checkin_date'],
+                                        'check_out' => $room['checkout_date'],
+                                        'number_of_adults' => $room['total_adult'],
+                                        'number_of_children' => count($room['child_ages']),
+                                        'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
+                                        'created_at' => Carbon::now(),
+                                        'updated_at' => Carbon::now(),
+                                    ]);
+                                });
+                                $unavailableRoomsIds[] = $randomRoom->id;
+                                $document = $bookingRoom->documents()->create([
+                                    'type' => 'invoice',
+                                    'customer_id' => $customer->id,
+                                    'status' => 'received',
                                     'currency' => $webhookData['currency'],
-                                ], [
-                                    'original_price' => $daily_price['original_price'],
-                                    'discount' => $daily_price['discount'],
-                                    'price' => $daily_price['price'],
-                                    'currency' => $webhookData['currency'],
+                                    'currency_rate' => 1, //TODO: Burada merkez bankasından döviz kuru alınabilir.
+                                    'issue_date' => $room['checkin_date'],
+                                    'due_date' => $room['checkout_date'],
                                 ]);
+                                $itemName = $randomRoom->TypeAndViewName . ' (' . Carbon::parse($room['checkin_date'])->format('d.m.Y') . ' - '
+                                    . Carbon::parse($room['checkout_date'])->format('d.m.Y') . ') ' . $room['nights'] . ' Gece ' .
+                                    $room['total_adult'] . ' Yetişkin';
+                                if (count($room['child_ages']) > 0) {
+                                    $itemName .= ' ' . count($room['child_ages']) . ' Çocuk ';
+                                }
+                                $itemName .= 'Konaklama Bedeli.';
+                                $subTotal = $room['price'] * (1 - $this->getSettingBookingTax->rate / 100);
+                                $tax = $this->getSettingBookingTax->rate * $room['price'] / 100;
+                                $total = $room['price'];
+                                $document->items()->create([
+                                    'item_id' => null,
+                                    'name' => $itemName,
+                                    'description' => '',
+                                    'price' => $subTotal,
+                                    'quantity' => 1,
+                                    'tax_name' => $this->getSettingBookingTax->name,
+                                    'tax_rate' => $this->getSettingBookingTax->rate,
+                                    'tax' => $tax,
+                                    'total' => $total,
+                                    'discount' => 0,
+                                    'grand_total' => $room['price'],
+                                ]);
+                                $document->total()->create([
+                                    'type' => 'subtotal',
+                                    'sort_order' => 1,
+                                    'amount' => $subTotal,
+                                ]);
+                                $document->total()->create([
+                                    'type' => 'tax',
+                                    'sort_order' => 2,
+                                    'amount' => $tax,
+                                ]);
+                                $document->total()->create([
+                                    'type' => 'total',
+                                    'sort_order' => 3,
+                                    'amount' => $total,
+                                ]);
+                                foreach ($room['daily_prices'] as $daily_price) {
+                                    BookingDailyPrice::firstOrCreate([
+                                        'booking_room_id' => $bookingRoom->id,
+                                        'date' => $daily_price['date'],
+                                        'original_price' => $daily_price['original_price'],
+                                        'discount' => $daily_price['discount'],
+                                        'price' => $daily_price['price'],
+                                        'currency' => $webhookData['currency'],
+                                    ], [
+                                        'original_price' => $daily_price['original_price'],
+                                        'discount' => $daily_price['discount'],
+                                        'price' => $daily_price['price'],
+                                        'currency' => $webhookData['currency'],
+                                    ]);
+                                }
                             }
                         }
                     }
-                    $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+//                    $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                     return [
 //                        'message' => 'Booking ' . $webhookData['reason'] . ' successfully',
                         'status' => 'ok',
 //                        'data' => $webhookData,
                     ];
-                } else {
-                    return [
-//                        'message' => 'The request was not understood.',
-                        'status' => 'error',
-//                        'data' => $webhookData,
-                    ];
                 }
-            } else {
+
                 return [
-//                    'message' => 'There is not enough room inventory available. Please try again later.',
+//                        'message' => 'The request was not understood.',
                     'status' => 'error',
-//                    'data' => $webhookData,
+//                        'data' => $webhookData,
                 ];
             }
+
+            return [
+//                    'message' => 'There is not enough room inventory available. Please try again later.',
+                'status' => 'error',
+//                    'data' => $webhookData,
+            ];
         });
     }
 

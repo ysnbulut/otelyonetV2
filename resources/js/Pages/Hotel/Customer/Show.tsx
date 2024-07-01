@@ -58,17 +58,19 @@ function Show({...props}: PageProps) {
 	const paymentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		post(route('hotel.customers.transaction.store', props.customer.id), {
+			preserveState: true,
+			preserveScroll: true,
 			onSuccess: () => {
 				setShowPaymentForm(false)
-				setData((data) => ({
-					...data,
-					payment_date: dayjs().format('DD.MM.YYYY'),
-					bank_id: '',
-					currency: 'TRY',
-					payment_method: '',
-					amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
-					description: '',
-				}))
+				// setData((data) => ({
+				// 	...data,
+				// 	payment_date: dayjs().format('DD.MM.YYYY'),
+				// 	bank_id: '',
+				// 	currency: 'TRY',
+				// 	payment_method: '',
+				// 	amount: props.customer.remaining_balance < 0 ? Math.abs(props.customer.remaining_balance).toString() : '0',
+				// 	description: '',
+				// }))
 			},
 		})
 	}
@@ -98,9 +100,7 @@ function Show({...props}: PageProps) {
 							<span className="text-2xl font-extrabold">{props.customer.title}</span>
 						</div>
 						<fieldset className="col-span-12 mb-5 rounded-md border bg-slate-50 px-4 py-2 dark:bg-darkmode-400/70">
-							<legend className="rounded-md border-primary bg-primary px-2 py-1 font-semibold text-light">
-								Müşteri
-							</legend>
+							<legend className="rounded-md border-primary bg-primary px-2 py-1 font-semibold text-light">Müşteri</legend>
 							<Link
 								href={route('hotel.customers.edit', props.customer.id)}
 								className="text-base font-semibold">
@@ -118,11 +118,7 @@ function Show({...props}: PageProps) {
 					<div className="xl:h-full xl:border-l xl:p-5">
 						<div className="box flex items-center justify-between p-5">
 							<h3 className="font-semibold xl:text-lg 2xl:text-2xl">Bakiye</h3>
-							<span
-								className={twMerge([
-									'font-sans font-bold xl:text-xl 2xl:text-3xl',
-									props.customer.remaining_balance < 0 ? 'text-red-600' : 'text-green-700',
-								])}>
+							<span className={twMerge(['font-sans font-bold xl:text-xl 2xl:text-3xl', props.customer.remaining_balance < 0 ? 'text-red-600' : 'text-green-700'])}>
 								{props.customer.remaining_balance_formatted}
 							</span>
 						</div>
@@ -192,9 +188,7 @@ function Show({...props}: PageProps) {
 										value={data.amount}
 										decimalsLimit={2}
 										required={true}
-										onValueChange={(value, name, values) =>
-											setData((data) => ({...data, amount: values?.float?.toFixed(2) || '0'}))
-										}
+										onValueChange={(value, name, values) => setData((data) => ({...data, amount: values?.float?.toFixed(2) || '0'}))}
 										name="amount"
 										className="w-full rounded-md border-slate-200 text-right text-xl font-extrabold shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 									/>
@@ -242,13 +236,11 @@ function Show({...props}: PageProps) {
 										<option value="bank_transfer">Banka Havale/EFT</option>
 										<option value="virtual_pos">Sanal Pos</option>
 									</TomSelect>
-									{errors.payment_method && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.payment_method}</div>
-									)}
+									{errors.payment_method && <div className="text-theme-6 mt-2 text-danger">{errors.payment_method}</div>}
 								</div>
 
 								<div className="form-control mt-5">
-									<FormLabel htmlFor="description">Açıkalama</FormLabel>
+									<FormLabel htmlFor="description">Açıklama</FormLabel>
 									<FormInput
 										id="payment-description"
 										type="text"

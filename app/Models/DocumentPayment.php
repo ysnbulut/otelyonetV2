@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * App\Models\DocumentPayment
@@ -17,11 +18,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class DocumentPayment extends Model
 {
+
+    use SoftDeletes;
+
     protected $fillable = [
         'document_id',
         'transaction_id',
         'amount',
     ];
+
+//    protected $cascadeDeletes = ['transaction'];
 
     public function document(): BelongsTo
     {

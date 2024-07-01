@@ -17,4 +17,12 @@ class WebHookRequest extends FormRequest
     {
         return true;
     }
+
+    public function messages(): array
+    {
+        return [
+            'data.required' => 'Data is required',
+            'data.json' => 'Data must be a valid JSON string',
+        ];
+    }
 }

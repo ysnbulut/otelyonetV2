@@ -3,7 +3,8 @@ import {EventApi} from '@fullcalendar/common'
 
 export interface SeasonAddSlideComponentProps {
 	calendarRef: React.RefObject<FullCalendar>
-	seasonsCheckForChannels: (season: EventApi, action: string) => {channels: boolean; web: boolean; reception: boolean}
+	seasonsCheckForChannels: (season: EventApi, action: string) => {channels: boolean; web: boolean; reception: boolean; agency: boolean}
+	createUid: string
 	slideOver: boolean
 	setSlideOver: React.Dispatch<React.SetStateAction<boolean>> | ((value: boolean) => void)
 	calendarValue: string | undefined

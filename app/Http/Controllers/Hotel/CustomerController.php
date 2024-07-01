@@ -134,7 +134,7 @@ class CustomerController extends Controller
             ->map(
                 fn($document) => $document->total
                     ->filter(
-                        fn($total) => $total->type == 'total'
+                        fn($total) => $total->type === 'total'
                     )
                     ->map(
                         function ($total) use ($document) {
@@ -153,7 +153,8 @@ class CustomerController extends Controller
             )
             ->flatten(1)
             ->sum();
-        $remainingBalance = $transactionsTotal - $documentsTotal;
+        $balanceTotal = $customer->transactions->sum('amount');
+        $remainingBalance = $balanceTotal - $transactionsTotal - $documentsTotal;
         return Inertia::render('Hotel/Customer/Show', [
             'currency' => $this->settings->currency['value'],
             'customer' => [
@@ -195,8 +196,8 @@ class CustomerController extends Controller
                 if ($document->currency !== $request->currency) {
                     $rate = $document->currency_rate / $request->currency_rate;
                     $dcTotal = $document->total->filter(function ($total) {
-                        return $total->type === 'total';
-                    })->first()->amount - $document->payments->sum('amount');
+                            return $total->type === 'total';
+                        })->first()->amount - $document->payments->sum('amount');
                     $exchange = $dcTotal * $rate;
                     $diff = $exchange - $amount;
                     if ($diff < 0) {
@@ -216,11 +217,11 @@ class CustomerController extends Controller
                     }
                 } else {
                     $dcTotal = $document->total->filter(function ($total) {
-                        return $total->type === 'total';
-                    })->first()->amount - $document->payments->sum('amount');
+                            return $total->type === 'total';
+                        })->first()->amount - $document->payments->sum('amount');
                     $diff = $dcTotal - $amount;
                     if ($diff < 0) {
-                        if($dcTotal > 0) {
+                        if ($dcTotal > 0) {
                             $document->payments()->create([
                                 'transaction_id' => $transaction->id,
                                 'amount' => $dcTotal,
@@ -261,6 +262,7 @@ class CustomerController extends Controller
                 'paid_at as date',
                 DB::raw('"transaction" as type'),
                 'amount',
+                'description',
             ])
             ->union($customer
                 ->documents()
@@ -271,7 +273,8 @@ class CustomerController extends Controller
                     'bank_id' => DB::raw('null'),
                     'issue_date as date',
                     DB::raw('"document" as type'),
-                    'amount' => DB::raw('(SELECT SUM(amount) FROM document_totals WHERE document_totals.document_id = documents.id AND document_totals.type = "total")')
+                    'amount' => DB::raw('(SELECT SUM(amount) FROM document_totals WHERE document_totals.document_id = documents.id AND document_totals.type = "total")'),
+                    DB::raw('null as description'),
                 ]))
             ->orderBy('date')
             ->paginate(10)
@@ -284,11 +287,11 @@ class CustomerController extends Controller
                     $amount = $payment->amount;
                     $info .= 'Folyo...';
                 } else {
-                    if ($payment->payment_method == 'cash') {
+                    if ($payment->payment_method === 'cash') {
                         $payment_method = 'Nakit';
-                    } elseif ($payment->payment_method == 'credit_card') {
+                    } elseif ($payment->payment_method === 'credit_card') {
                         $payment_method = 'Kredi Kartı';
-                    } elseif ($payment->payment_method == 'bank_transfer') {
+                    } elseif ($payment->payment_method === 'bank_transfer') {
                         $payment_method = 'Banka Havale/EFT';
                     } else {
                         $payment_method = 'Bilinmiyor.';

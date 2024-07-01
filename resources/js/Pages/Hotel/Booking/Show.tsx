@@ -72,11 +72,11 @@ function Show(props: PageProps) {
 	useEffect(() => {
 		setData((data) => ({...data, currency: 'TRY', bank_id: '', payment_method: '', description: ''}))
 		paymentTypeSelectRef.current?.selectOption(paymentTypeOptions[paymentDocumentIndex])
-		const document = props.booking.rooms.map((room) =>
-			room.documents.find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value),
-		)[0]
+		//TODO gereksiz oldu
+		const documents = props.booking.rooms.flatMap((room) => room.documents)
+		const document = documents.find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value)
 		if (document) {
-			if (paymentDocumentIndex > 0) {
+			if (paymentDocumentIndex > 0 && document.balance) {
 				setData((data) => ({
 					...data,
 					document_id: paymentTypeOptions[paymentDocumentIndex].value,
@@ -91,6 +91,10 @@ function Show(props: PageProps) {
 		} else {
 			setData((data) => ({...data, amount: props.remaining_balance.toFixed(2)}))
 			setMaxAmountErr('Girilen tutar bakiyeden fazla olamaz!')
+		}
+		//Burya scroll up ekle
+		if (window.scrollY !== 0) {
+			window.scrollTo(0, 0)
 		}
 	}, [paymentDocumentIndex])
 
@@ -174,6 +178,8 @@ function Show(props: PageProps) {
 					description: '',
 				}))
 			},
+			preserveState: true,
+			preserveScroll: true,
 		})
 	}
 
@@ -229,10 +235,7 @@ function Show(props: PageProps) {
 										Çıkış Tarihi :<span className="ml-1 font-normal">{props.booking.check_out}</span>
 									</span>
 									<span className="font-semibold">
-										Seçilen Oda Türleri :
-										<span className="ml-1 font-normal">
-											{bookingRooms.map((room) => room.room_type_full_name).join(', ')}
-										</span>
+										Seçilen Oda Türleri :<span className="ml-1 font-normal">{bookingRooms.map((room) => room.room_type_full_name).join(', ')}</span>
 									</span>
 								</Link>
 								<div className="flex w-full flex-col text-sm font-semibold lg:ml-5">
@@ -260,9 +263,7 @@ function Show(props: PageProps) {
 										className="mr-1 h-5 w-5"
 									/>
 									SÜREYİ UZAT
-									<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
-										{props.extendable_number_of_days}
-									</span>
+									<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{props.extendable_number_of_days}</span>
 								</Button>
 								<Button
 									variant="soft-pending"
@@ -354,13 +355,7 @@ function Show(props: PageProps) {
 					<div className="xl:h-full xl:border-l xl:p-5">
 						<div className="-intro-y box flex items-center justify-between p-5">
 							<h3 className="-intro-x font-semibold xl:text-lg 2xl:text-2xl">Bakiye</h3>
-							<span
-								className={twMerge([
-									'intro-y font-sans font-bold xl:text-xl 2xl:text-3xl',
-									balance.number > 0 ? 'text-red-600' : 'text-green-700',
-								])}>
-								{balance.formatted}
-							</span>
+							<span className={twMerge(['intro-y font-sans font-bold xl:text-xl 2xl:text-3xl', balance.number > 0 ? 'text-red-600' : 'text-green-700'])}>{balance.formatted}</span>
 						</div>
 						<div className="intro-x box mt-5 flex flex-col items-center justify-between gap-2 p-5">
 							<Button
@@ -515,9 +510,7 @@ function Show(props: PageProps) {
 										<option value="credit_card">Kredi Kartı</option>
 										<option value="bank_transfer">Banka Havale/EFT</option>
 									</TomSelect>
-									{errors.payment_method && (
-										<div className="text-theme-6 mt-2 text-danger">{errors.payment_method}</div>
-									)}
+									{errors.payment_method && <div className="text-theme-6 mt-2 text-danger">{errors.payment_method}</div>}
 								</div>
 
 								<div className="form-control mt-5">

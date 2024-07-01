@@ -23,7 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-//Route::middleware(['api'])->post('/currency/exchange', [CurrencyController::class, 'exchange'])->name('mb.currency.exchange');
+Route::middleware(['api'])->get('/', function () {
+    return response()->json(['message' => 'Welcome to Multi-Tenancy API']);
+})->name('mb.currency.exchange');
 
 Route::middleware(['api'])->post('/exchange/amount', [CurrencyController::class, 'amountConvert'])->name('amount.exchange');
 

@@ -68,12 +68,9 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
 
-    Route::get('/test', function () {
-        $unitPrice = \App\Models\UnitPrice::find(61);
-
-        return $unitPrice->typeHasView->unitPrices->filter(function ($value) {
-            return $value->season_id === null && $value->booking_channel_id === null;
-        })->first();
+    Route::get('/test', static function () {
+        $document = Document::find(4);
+        return $document->transactions;
     })->name('test');
 
     Route::middleware('guest')->group(function () {
@@ -83,44 +80,44 @@ Route::middleware([
         //    Route::post('register', [RegisteredUserController::class, 'store']);
 
         Route::get('/', [AuthenticatedSessionController::class, 'create'])
-            ->name('hotel.login');
+            ->name('login');
 
-        Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('hotel.login.store');
+        Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
         Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-            ->name('hotel.password.request');
+            ->name('password.request');
 
         Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-            ->name('hotel.password.email');
+            ->name('password.email');
 
         Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-            ->name('hotel.password.reset');
+            ->name('password.reset');
 
         Route::post('reset-password', [NewPasswordController::class, 'store'])
-            ->name('hotel.password.store');
+            ->name('password.store');
     });
 
     Route::middleware('auth')->group(function () {
         Route::get('verify-email', EmailVerificationPromptController::class)
-            ->name('hotel.verification.notice');
+            ->name('verification.notice');
 
         Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
             ->middleware(['signed', 'throttle:6,1'])
-            ->name('hotel.verification.verify');
+            ->name('verification.verify');
 
         Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
             ->middleware('throttle:6,1')
-            ->name('hotel.verification.send');
+            ->name('verification.send');
 
         Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-            ->name('hotel.password.confirm');
+            ->name('password.confirm');
 
-        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('hotel.password-confirm');
+        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])->name('password-confirm');
 
-        Route::put('password', [PasswordController::class, 'update'])->name('hotel.password.update');
+        Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-            ->name('hotel.logout');
+            ->name('logout');
     });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['web', 'auth', 'verified'])->name

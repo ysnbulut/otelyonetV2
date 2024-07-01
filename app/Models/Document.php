@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -52,7 +53,7 @@ class Document extends Model
     {
         parent::boot();
 
-        static::creating(function ($document) {
+        static::creating(static function ($document) {
             $datePart = date('Ym');
             $count = static::whereYear('created_at', date('Y'))
                     ->whereMonth('created_at', date('m'))
@@ -61,7 +62,7 @@ class Document extends Model
 
             $documentNumber = $datePart . $count;
 
-            $document->number = 'OYF'.$documentNumber;
+            $document->number = 'OYF' . $documentNumber;
         });
     }
 
@@ -78,6 +79,11 @@ class Document extends Model
     public function total(): HasMany
     {
         return $this->hasMany(DocumentTotal::class)->orderBy('sort_order');
+    }
+
+    public function transactions(): HasManyThrough
+    {
+        return $this->hasManyThrough(Transaction::class, DocumentPayment::class, 'document_id', 'id', 'id', 'transaction_id');
     }
 
     public function payments(): HasMany

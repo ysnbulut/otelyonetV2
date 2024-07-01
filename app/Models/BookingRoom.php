@@ -46,6 +46,7 @@ use ShiftOneLabs\LaravelCascadeDeletes\CascadesDeletes;
 class BookingRoom extends Model
 {
     use SoftDeletes, CascadesDeletes;
+
     protected $fillable = [
         'booking_id',
         'room_id',
@@ -90,7 +91,7 @@ class BookingRoom extends Model
 
     public function guests(): BelongsToMany
     {
-        return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id')->withPivot('check_in', 'check_out', 'status', 'check_in_date', 'check_out_date', 'check_in_kbs',  'check_out_kbs');
+        return $this->belongsToMany(Guest::class, 'booking_guests', 'booking_room_id', 'guest_id')->withPivot('check_in', 'check_out', 'status', 'check_in_date', 'check_out_date', 'check_in_kbs', 'check_out_kbs');
     }
 
     public function cancelReason(): HasOne

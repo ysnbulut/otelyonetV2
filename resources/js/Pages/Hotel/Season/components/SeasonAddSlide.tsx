@@ -12,13 +12,13 @@ import utc from 'dayjs/plugin/utc'
 import tz from 'dayjs/plugin/timezone'
 import customFormat from 'dayjs/plugin/customParseFormat'
 import isBetween from 'dayjs/plugin/isBetween'
-import sqids from 'sqids'
 import {EventApi} from '@fullcalendar/common'
 import {useForm} from '@inertiajs/react'
 import axios from 'axios'
 import {EventChangeArg, EventClickArg} from '@fullcalendar/core'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
+import {random} from 'lodash'
 
 moment.locale('tr')
 dayjs.extend(utc)
@@ -27,16 +27,16 @@ dayjs.extend(customFormat)
 dayjs.tz.setDefault('Europe/Istanbul')
 dayjs.extend(isBetween)
 
-function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSlideOver, calendarValue, setCalendarValue}: SeasonAddSlideComponentProps) {
-	const hashids = new sqids()
+function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSlideOver, createUid, calendarValue, setCalendarValue}: SeasonAddSlideComponentProps) {
 	const MySwal = withReactContent(Swal)
-	const [disabledSeasonCheckbox, setDisabledSeasonCheckbox] = useState<{channels: boolean; web: boolean; reception: boolean}>({
+	const [disabledSeasonCheckbox, setDisabledSeasonCheckbox] = useState<{channels: boolean; web: boolean; reception: boolean; agency: boolean}>({
 		channels: false,
 		web: false,
 		reception: false,
+		agency: false,
 	})
 	const {data, setData, reset, post, put, processing, errors} = useForm<SeasonCalendarProps>({
-		uid: hashids.encode([dayjs().unix()]),
+		uid: createUid || '',
 		name: '',
 		description: '',
 		start_date: '',
@@ -63,7 +63,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 	const listenerFunctionEventClick = (info: EventClickArg) => {
 		const seasonsCheck = seasonsCheckForChannels(info.event as unknown as EventApi, 'click')
 		setData({
-			uid: info.event.id || hashids.encode([dayjs().unix()]),
+			uid: info.event.id || createUid,
 			name: info.event.title || '',
 			description: info.event.extendedProps.description || '',
 			start_date: dayjs(info.event.start).format('DD.MM.YYYY'),
@@ -77,6 +77,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 			channels: info.event.extendedProps.channels ? false : seasonsCheck.channels,
 			web: info.event.extendedProps.web ? false : seasonsCheck.web,
 			reception: info.event.extendedProps.reception ? false : seasonsCheck.reception,
+			agency: info.event.extendedProps.agency ? false : seasonsCheck.agency,
 		})
 		setSlideOver(true)
 		setSeasonEditable(true)
@@ -85,7 +86,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 	const listenerFunctionEventChange = (info: EventChangeArg) => {
 		const seasonsCheck = seasonsCheckForChannels(info.event as unknown as EventApi, 'change')
 		let message = ''
-		if (seasonsCheck.channels || seasonsCheck.web || seasonsCheck.reception) {
+		if (seasonsCheck.channels || seasonsCheck.web || seasonsCheck.reception || seasonsCheck.agency) {
 			if (seasonsCheck.channels) {
 				message += 'Kanal, '
 			}
@@ -94,6 +95,9 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 			}
 			if (seasonsCheck.reception) {
 				message += 'Resepsiyon, '
+			}
+			if (seasonsCheck.agency) {
+				message += 'Acente, '
 			}
 			info.revert()
 			Toast.fire({
@@ -148,6 +152,10 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 	}
 
 	useEffect(() => {
+		console.log('data', data)
+	}, [data])
+
+	useEffect(() => {
 		if (calendarRef.current) {
 			let calendarApi = calendarRef.current.getApi()
 
@@ -173,6 +181,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 				channels: false,
 				web: false,
 				reception: false,
+				agency: false,
 			})
 			const split = calendarValue.split(' - ')
 			if (typeof calendarRef !== 'function' && calendarRef.current !== null) {
@@ -190,6 +199,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 								channels: prevState.channels ? prevState.channels : event.extendedProps.channels,
 								web: prevState.web ? prevState.web : event.extendedProps.web,
 								reception: prevState.reception ? prevState.reception : event.extendedProps.reception,
+								agency: prevState.agency ? prevState.agency : event.extendedProps.agency,
 							}))
 						}
 					})
@@ -205,6 +215,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 				channels: false,
 				web: false,
 				reception: false,
+				agency: false,
 			})
 			setSeasonEditable(false)
 		}
@@ -215,19 +226,15 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 			const split = calendarValue.split(' - ')
 			setData((prevState: SeasonCalendarProps) => ({
 				...prevState,
+				uid: createUid,
 				start_date: split[0],
 				end_date: split[1],
 			}))
 		}
-	}, [calendarValue])
+	}, [calendarValue, createUid])
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		let id: string = hashids.encode([dayjs().unix()])
-		setData((data: SeasonCalendarProps) => ({
-			...data,
-			uid: id,
-		}))
 		if (seasonEditable) {
 			put(route('hotel.seasons.update', {season: data.uid}), {
 				preserveState: true,
@@ -241,7 +248,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 		} else {
 			post(route('hotel.seasons.store'), {
 				preserveState: true,
-				preserveScroll: true,
+				preserveScroll: false,
 				onSuccess: () => {
 					reset()
 					setSlideOver(false)
@@ -374,6 +381,7 @@ function SeasonAddSlide({calendarRef, seasonsCheckForChannels, slideOver, setSli
 									<FormCheck.Input
 										id="agency"
 										type="checkbox"
+										disabled={disabledSeasonCheckbox.agency}
 										checked={data.agency}
 										onChange={(e) => {
 											setData((data: SeasonCalendarProps) => ({...data, agency: e.target.checked}))

@@ -29,6 +29,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use JsonException;
+use Random\RandomException;
 
 class BookingController extends Controller
 {
@@ -137,6 +138,7 @@ class BookingController extends Controller
 
     /**
      * @throws JsonException
+     * @throws RandomException
      */
     public function store(StoreBookingRequest $request): \Illuminate\Http\RedirectResponse
     {
@@ -170,7 +172,7 @@ class BookingController extends Controller
                         . $this->settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'),
                     'number_of_adults' => $number_of_adults,
                     'number_of_children' => $number_of_children,
-                    'children_ages' => json_encode($children_ages),
+                    'children_ages' => json_encode($children_ages, JSON_THROW_ON_ERROR),
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -236,7 +238,7 @@ class BookingController extends Controller
                     'amount' => $documentItemDiscountedPriceTotal,
                 ]);
                 foreach ($data['daily_prices'][$type_has_view_id][$room_id] as $dailyPrice) {
-                    if ($dailyPrice != null) {
+                    if ($dailyPrice !== null) {
                         BookingDailyPrice::firstOrCreate([
                             'booking_room_id' => $bookingRoom->id,
                             'date' => $dailyPrice['date'],
@@ -253,7 +255,7 @@ class BookingController extends Controller
         collect($data['rooms_guests'])->each(function ($room_ytpe, $key) use ($booking, $check_in_required) {
             collect($room_ytpe)->each(function ($guest, $key) use ($booking, $check_in_required) {
                 foreach ($guest as $value) {
-                    if ($value['name'] != null && $value['surname'] != null && $value['citizen_id'] != null) {
+                    if ($value['name'] !== null && $value['surname'] !== null && $value['citizen_id'] !== null) {
                         $guest = Guest::create(
                             [
                                 'name' => $value['name'],
@@ -352,9 +354,10 @@ class BookingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Booking $booking)
+    public function show(Booking $booking): Response
     {
-        $grandTotal = $booking->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type == 'total')->map(fn($total) => $total->amount))->flatten(1)->sum();
+        $grandTotal = $booking->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount))->flatten(1)
+            ->sum();
         $remainingBalance = round($grandTotal - $booking->documents->map(fn($document) => $document->payments->map(fn($payment) => $payment->amount))->flatten(1)->sum(), 2);
         $availableDatesCounts = [];
         return Inertia::render('Hotel/Booking/Show', [
@@ -363,10 +366,10 @@ class BookingController extends Controller
             'citizens' => Citizen::select(['id', 'name'])->get(),
             'taxes' => Tax::select(['id', 'name', 'rate'])->get(),
             'items' => SalesUnit::find(1)->items->map(function ($item) {
-                $price = !empty($item->prices->filter(fn($price) => !empty($price) && $price->sales_unit_channel_id == 1)) ?
+                $price = !empty($item->prices->filter(fn($price) => !empty($price) && $price->sales_unit_channel_id === 1)) ?
                     $item->prices->filter(fn($price) => !empty($price) &&
-                        $price->sales_unit_channel_id == 1)->map(function ($price) use ($item) {
-                        return $item->price * (1 + (floatval($price->price_rate) / 100));
+                        $price->sales_unit_channel_id === 1)->map(function ($price) use ($item) {
+                        return $item->price * (1 + ((float)$price->price_rate / 100));
                     })->first() : $item->price;
                 return [
                     'id' => $item->id,
@@ -427,7 +430,7 @@ class BookingController extends Controller
                         'check_out' => Carbon::parse($booking_room->check_out)->format('d.m.Y'),
                         'number_of_adults' => $booking_room->number_of_adults,
                         'number_of_children' => $booking_room->number_of_children,
-                        'children_ages' => $booking_room->children_ages !== null ? json_decode($booking_room->children_ages) :
+                        'children_ages' => $booking_room->children_ages !== null ? json_decode($booking_room->children_ages, false, 512, JSON_THROW_ON_ERROR) :
                             null,
                         'documents' => $booking_room->documents->map(fn($document) => [
                             'id' => $document->id,
@@ -487,8 +490,8 @@ class BookingController extends Controller
                                 'amount_formatted' => number_format($payment->amount, 2, ',', '.') . ' ' .
                                     $document->currency,
                             ]),
-                            'balance' => round($document->total->filter(fn($total) => $total->type == 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2),
-                            'balance_formatted' => number_format(round($document->total->filter(fn($total) => $total->type == 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2), 2, ',', '.') . ' ' . $document->currency,
+                            'balance' => round($document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2),
+                            'balance_formatted' => number_format(round($document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2), 2, ',', '.') . ' ' . $document->currency,
                         ]),
                         'guests' => $bookingGuests->map(fn($booking_guest) => [
                             'booking_guests_id' => $booking_guest->id,
@@ -676,6 +679,7 @@ class BookingController extends Controller
 
     /**
      * @return array
+     * @throws RandomException
      */
     protected function getRandomColors(): array
     {
@@ -686,10 +690,10 @@ class BookingController extends Controller
         $attempts = 0;
         do {
             // Generate a random background color
-            $backgroundColor = "#" . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
+            $backgroundColor = "#" . str_pad(dechex(random_int(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
 
             // Calculate brightness of the background color
-            list($r, $g, $b) = sscanf($backgroundColor, "#%02x%02x%02x");
+            [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
             $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
             $attempts++;
@@ -701,7 +705,7 @@ class BookingController extends Controller
         $textColor = ($brightness > 128) ? "#000000" : "#FFFFFF";
 
         // Calculate a slightly darker border color
-        list($r, $g, $b) = sscanf($backgroundColor, "#%02x%02x%02x");
+        [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
         $borderColorR = max(0, $r - 20);
         $borderColorG = max(0, $g - 20);
         $borderColorB = max(0, $b - 20);

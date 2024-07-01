@@ -75,7 +75,7 @@ class Booking extends Model
 
         static::creating(static function ($booking) {
             $sqids = new Sqids('ABCDEFGHJKLMNPQRSTUVWXYZ', 9);
-            $randomNumber = random_int(10000, 99999);
+            $randomNumber = random_int(1000, 9999);
             $datePart = date('Ym');
             $count = static::whereYear('created_at', date('Y'))
                     ->whereMonth('created_at', date('m'))

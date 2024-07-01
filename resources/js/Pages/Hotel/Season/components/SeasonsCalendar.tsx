@@ -1,4 +1,4 @@
-import React, {forwardRef, memo, useCallback, useRef} from 'react'
+import React, {forwardRef, memo, useCallback, useEffect, useRef} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import interactionPlugin from '@fullcalendar/interaction'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -17,6 +17,7 @@ import customFormat from 'dayjs/plugin/customParseFormat'
 import isBetween from 'dayjs/plugin/isBetween'
 import axios from 'axios'
 import 'dayjs/locale/tr'
+import sqids from 'sqids'
 
 moment.locale('tr')
 dayjs.extend(utc)
@@ -29,7 +30,7 @@ dayjs.locale('tr')
 const SeasonsCalendar = forwardRef(function MyCalendar({seasonsCheckForChannels, setCalendarValue, setSlideOver, seasons}: SeasonCalendarComponentProps, ref: React.Ref<FullCalendar>) {
 	const forwardCalendarRef = ref || useRef<FullCalendar>(null)
 	const MySwal = withReactContent(Swal)
-
+	const hashids = new sqids()
 	const Toast = MySwal.mixin({
 		toast: true,
 		position: 'top-end',
