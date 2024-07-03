@@ -16,6 +16,7 @@ class CurrencyController extends Controller
     {
         $this->settings = new PricingPolicySettings();
     }
+
     public function exchange(Request $request)
     {
 //        if ($this->settings->pricing_currency['value'] !== 'TRY') {
@@ -25,7 +26,7 @@ class CurrencyController extends Controller
 //        }
     }
 
-    public function convert(Request $request)
+    public function convert(Request $request): ?array
     {
         if ($request->currency !== 'TRY') {
             $doviz = new Doviz();
@@ -55,7 +56,8 @@ class CurrencyController extends Controller
         }
     }
 
-    public function amountConvert(Request $request) {
+    public function amountConvert(Request $request)
+    {
         return $this->convert($request);
     }
 }

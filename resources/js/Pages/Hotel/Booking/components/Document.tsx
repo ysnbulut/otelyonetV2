@@ -39,9 +39,11 @@ function Document(props: DocumentComProps) {
 									onClick={(e: any) => {
 										e.preventDefault()
 										props.setShowPaymentForm((prevState) => (prevState ? prevState : true))
-										props.setPaymentDocumentIndex(
-											props.paymentTypeOptions.findIndex((option) => option.value === props.document.id) || 0,
-										)
+										props.setPaymentDocumentIndex(props.paymentTypeOptions.findIndex((option) => option.value === props.document.id) || 0)
+										//Burya scroll up ekle
+										if (window.scrollY !== 0) {
+											window.scrollTo(0, 0)
+										}
 									}}
 									className="p-1 text-xs">
 									<Lucide
@@ -89,10 +91,7 @@ function Document(props: DocumentComProps) {
 						<div className="flex flex-col">
 							<div className="flex items-center justify-end border-b last:border-none">
 								<span className="mr-2">Bakiye :</span>
-								<span
-									className={twMerge('text-sm', props.documentsBalance.number > 0 ? 'text-danger' : 'text-success')}>
-									{props.documentsBalance.formatted}
-								</span>
+								<span className={twMerge('text-sm', props.documentsBalance.number > 0 ? 'text-danger' : 'text-success')}>{props.documentsBalance.formatted}</span>
 							</div>
 						</div>
 					</div>

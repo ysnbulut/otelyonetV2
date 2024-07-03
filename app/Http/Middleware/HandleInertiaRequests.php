@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Hotel;
 use App\Settings\PricingPolicySettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -61,7 +62,8 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
                 'route' => collect(new Ziggy)['routes'][$request->route()?->getName()] ?? null,
             ],
-            'is_tenant' => (bool)$tenant
+            'is_tenant' => $tenant ? true : false,
+            'hotel' => tenancy()->tenant,
         ];
     }
 }

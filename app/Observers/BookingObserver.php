@@ -8,7 +8,6 @@ class BookingObserver
 {
     public function created(Booking $booking): void
     {
-
     }
 
     public function deleted(Booking $booking): void

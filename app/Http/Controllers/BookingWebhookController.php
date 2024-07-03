@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ChannelManagers;
+use App\Helpers\Currencies;
 use App\Http\Requests\WebHookRequest;
 use App\Models\Booking;
 use App\Models\BookingChannel;
@@ -27,6 +28,7 @@ use LaravelIdea\Helper\App\Models\_IH_Tax_C;
 use Random\RandomException;
 use Seld\JsonLint\JsonParser;
 use Seld\JsonLint\ParsingException;
+use Teknomavi\Tcmb\Exception\UnknownPriceType;
 
 class BookingWebhookController extends Controller
 {
@@ -36,10 +38,13 @@ class BookingWebhookController extends Controller
     protected ChannelManagers $channelManager;
     protected _IH_Tax_C|array|null|Tax|Collection|Model $getSettingBookingTax;
 
+    protected Currencies $currencies;
+
     /**
      * @throws JsonException
      * @throws RandomException
      * @throws ParsingException
+     * @throws UnknownPriceType
      */
     public function handleWebhook(Tenant $tenant, WebHookRequest $request)
     {
@@ -51,6 +56,7 @@ class BookingWebhookController extends Controller
                 $this->hotelSettings->api_settings['token'],
                 'hr_id' => $this->hotelSettings->api_settings['hr_id']]);
             $this->getSettingBookingTax = Tax::find($this->setting->tax_rate['value']);
+            $this->currencies = new Currencies();
             $webhookDataRoomsCollect = collect($webhookData['rooms']);
             $unavailableRoomsIds = Booking::getUnavailableRoomsIds($webhookData['checkin_date'], $webhookData['checkout_date']);
             $bookableRooms = true;
@@ -62,7 +68,7 @@ class BookingWebhookController extends Controller
                 $typeHasViewsRooms = $cm_room->typeHasView->rooms->pluck('id');
                 Log::info('TypeHasViewsRooms: ' . $typeHasViewsRooms);
                 $unavailableRIDSDiff = array_intersect($unavailableRoomsIds, $typeHasViewsRooms->toArray());
-                Log::info('UnavailableRIDSDiff: ' . json_encode($unavailableRIDSDiff));
+                Log::info('UnavailableRIDSDiff: ' . json_encode($unavailableRIDSDiff, JSON_THROW_ON_ERROR));
                 $availableStock = collect(array_diff($typeHasViewsRooms->toArray(), $unavailableRIDSDiff))->flatten()->count();
                 Log::info('AvailableStock: ' . $availableStock);
                 $CMStockDiff = max($typeHasViewsRooms->count() - $cm_room->stock, 0);
@@ -92,12 +98,11 @@ class BookingWebhookController extends Controller
                     $channel_id = $channel->id;
                 }
                 $unavailableRoomsIds = Booking::getUnavailableRoomsIds($webhookData['checkin_date'], $webhookData['checkout_date']);
-
                 if ($webhookData['reason'] === 'cancel') {
                     $cMBooking = CMBooking::where('cm_booking_code', $webhookData['hr_number'])->first();
                     $booking = $cMBooking !== NULL ? Booking::find($cMBooking->booking_id) : NULL;
                     if ($booking !== NULL) {
-                        BookingRoom::withoutEvents(static function () use ($booking, $webhookData) {
+                        BookingRoom::withoutEvents(function () use ($booking, $webhookData) {
                             $booking->rooms->each(function ($room) {
                                 $room->documents->each(function ($document) {
                                     $document->items->each(function ($item) {
@@ -133,7 +138,7 @@ class BookingWebhookController extends Controller
                             });
                             $booking->cancelReason->delete();
                             $booking->delete();
-//                            $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+                            $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                         });
                     }
                     return [
@@ -161,6 +166,19 @@ class BookingWebhookController extends Controller
                         if ($booking->customer->isDirty()) {
                             $booking->customer->update($booking->customer->getDirty());
                         }
+                        if ($this->setting->currency['value'] !== $webhookData['currency']) {
+                            $currencyConvert = $this->currencies->convert($webhookData['currency'], $this->setting->currency['value'], 1);
+                            if ($currencyConvert['status']) {
+                                $documentCurrency = $currencyConvert['to_currency'];
+                                $currencyRate = $currencyConvert['exchange_rate'];
+                            } else {
+                                $documentCurrency = $webhookData['currency'];
+                                $currencyRate = 1;
+                            }
+                        } else {
+                            $documentCurrency = $webhookData['currency'];
+                            $currencyRate = 1;
+                        }
                         foreach ($webhookData['rooms'] as $room) {
                             $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['inv_code']))->first();
                             if ($CMRoom !== null) {
@@ -168,6 +186,7 @@ class BookingWebhookController extends Controller
                                     ->rooms->pluck('id');
                                 $bookingRoom = BookingRoom::where('booking_id', $booking->id)->whereIn('room_id',
                                     $typeHasViewsRooms)->first();
+                                $price = $room['price'] * $currencyRate;
                                 if ($bookingRoom !== null) {
                                     $bookingRoom->fill([
                                         'check_in' => $room['checkin_date'],
@@ -181,10 +200,10 @@ class BookingWebhookController extends Controller
                                             $bookingRoom->update($bookingRoom->getDirty());
                                         });
                                     }
-                                    $bookingRoom->documents->each(function ($document) use ($room, $bookingRoom, $webhookData) {
+                                    $bookingRoom->documents->each(function ($document) use ($room, $bookingRoom, $documentCurrency, $currencyRate, $price) {
                                         $document->fill([
-                                            'currency' => $webhookData['currency'],
-                                            'currency_rate' => 1, //TODO: Burada merkez bankasından döviz kuru alınabilir.
+                                            'currency' => $documentCurrency,
+                                            'currency_rate' => $currencyRate,
                                             'issue_date' => $room['checkin_date'],
                                             'due_date' => $room['checkout_date'],
                                         ]);
@@ -202,9 +221,9 @@ class BookingWebhookController extends Controller
                                             $itemName .= ' ' . count($room['child_ages']) . ' Çocuk';
                                         }
                                         $itemName .= ' Konaklama Bedeli.';
-                                        $subTotal = $room['price'] * (1 - $this->getSettingBookingTax->rate / 100);
-                                        $tax = $this->getSettingBookingTax->rate * $room['price'] / 100;
-                                        $total = $room['price'];
+                                        $subTotal = $price * (1 - $this->getSettingBookingTax->rate / 100);
+                                        $tax = $this->getSettingBookingTax->rate * $price / 100;
+                                        $total = $price;
                                         $document->items->first()->fill([
                                             'name' => $itemName,
                                             'description' => '',
@@ -214,7 +233,7 @@ class BookingWebhookController extends Controller
                                             'tax_rate' => $this->getSettingBookingTax->rate,
                                             'tax' => $tax,
                                             'total' => $total,
-                                            'grand_total' => $room['price'],
+                                            'grand_total' => $price,
                                         ]);
                                         if ($document->items->first()->isDirty()) {
                                             $document->items->first()->update($document->items->first()->getDirty());
@@ -275,8 +294,8 @@ class BookingWebhookController extends Controller
                                         'type' => 'invoice',
                                         'customer_id' => $booking->customer->id,
                                         'status' => 'received',
-                                        'currency' => $webhookData['currency'],
-                                        'currency_rate' => 1, //TODO: Burada merkez bankasından döviz kuru alınabilir.
+                                        'currency' => $documentCurrency,
+                                        'currency_rate' => $currencyRate,
                                         'issue_date' => $room['checkin_date'],
                                         'due_date' => $room['checkout_date'],
                                     ]);
@@ -291,9 +310,9 @@ class BookingWebhookController extends Controller
                                         $itemName .= ' ' . count($room['child_ages']) . ' Çocuk';
                                     }
                                     $itemName .= ' Konaklama Bedeli.';
-                                    $subTotal = $room['price'] * (1 - $this->getSettingBookingTax->rate / 100);
-                                    $tax = $this->getSettingBookingTax->rate * $room['price'] / 100;
-                                    $total = $room['price'];
+                                    $subTotal = $price * (1 - $this->getSettingBookingTax->rate / 100);
+                                    $tax = $this->getSettingBookingTax->rate * $price / 100;
+                                    $total = $price;
                                     $document->items()->create([
                                         'item_id' => null,
                                         'name' => $itemName,
@@ -305,7 +324,7 @@ class BookingWebhookController extends Controller
                                         'tax' => $tax,
                                         'total' => $total,
                                         'discount' => 0,
-                                        'grand_total' => $room['price'],
+                                        'grand_total' => $price,
                                     ]);
                                     $document->total()->create([
                                         'type' => 'subtotal',
@@ -327,15 +346,15 @@ class BookingWebhookController extends Controller
                                     BookingDailyPrice::firstOrCreate([
                                         'booking_room_id' => $bookingRoom->id,
                                         'date' => $daily_price['date'],
-                                        'original_price' => $daily_price['original_price'],
-                                        'discount' => $daily_price['discount'],
-                                        'price' => $daily_price['price'],
-                                        'currency' => $webhookData['currency'],
+                                        'original_price' => $daily_price['original_price'] * $currencyRate,
+                                        'discount' => $daily_price['discount'] * $currencyRate,
+                                        'price' => $daily_price['price'] * $currencyRate,
+                                        'currency' => $documentCurrency,
                                     ], [
                                         'original_price' => $daily_price['original_price'],
                                         'discount' => $daily_price['discount'],
                                         'price' => $daily_price['price'],
-                                        'currency' => $webhookData['currency'],
+                                        'currency' => $documentCurrency,
                                     ]);
                                 }
                             }
@@ -356,6 +375,14 @@ class BookingWebhookController extends Controller
                 }
 
                 if ($webhookData['reason'] === 'confirm') {
+//                    TODO: WebHooka acaba bir rezrvasyon birden fazla kez confirm olarak iletilebilirmi ?
+//                    $cMBooking = CMBooking::where('cm_booking_code', $webhookData['hr_number'])->first();
+//                    $booking = Booking::find($cMBooking->booking_id);
+//                    if ($booking === null) {
+//                        return [
+//                            'status' => 'error',
+//                        ];
+//                    }
                     $customer = Customer::firstOrCreate(['title' => $customerData['title'], 'tax_number' =>
                         $customerData['tax_number'], 'email' => $customerData['email'], 'phone' => $customerData['phone']],
                         $customerData);
@@ -371,6 +398,19 @@ class BookingWebhookController extends Controller
                     $booking->cMBooking()->create([
                         'cm_booking_code' => $webhookData['hr_number'],
                     ]);
+                    if ($this->setting->currency['value'] !== $webhookData['currency']) {
+                        $currencyConvert = $this->currencies->convert($webhookData['currency'], $this->setting->currency['value'], 1);
+                        if ($currencyConvert['status']) {
+                            $documentCurrency = $currencyConvert['to_currency'];
+                            $currencyRate = $currencyConvert['exchange_rate'];
+                        } else {
+                            $documentCurrency = $webhookData['currency'];
+                            $currencyRate = 1;
+                        }
+                    } else {
+                        $documentCurrency = $webhookData['currency'];
+                        $currencyRate = 1;
+                    }
                     foreach ($webhookData['rooms'] as $room) {
                         $CMRoom = CMRoom::where('room_code', str_replace('HR:', '', $room['inv_code']))->first();
                         if ($CMRoom !== null) {
@@ -381,14 +421,17 @@ class BookingWebhookController extends Controller
                                 ->flatten();
                             if ($availableStockRoomsIds->count() > 0) {
                                 $randomRoom = Room::find($availableStockRoomsIds->random(1)->first());
-                                $bookingRoom = BookingRoom::withoutEvents(static function () use (
+                                $bookingRoom = BookingRoom::withoutEvents(function () use (
                                     $booking, $randomRoom, $room
                                 ) {
                                     return BookingRoom::create([
                                         'booking_id' => $booking->id,
                                         'room_id' => $randomRoom->id,
-                                        'check_in' => $room['checkin_date'],
-                                        'check_out' => $room['checkout_date'],
+                                        'check_in' => Carbon::createFromFormat('Y-m-d H:i:s', $room['checkin_date'] . ' '
+                                            . $this->setting->check_in_time_policy['value'] . ':00')
+                                            ->format('Y-m-d H:i:s'),
+                                        'check_out' => Carbon::createFromFormat('Y-m-d H:i:s', $room['checkout_date'] . ' '
+                                            . $this->setting->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'),
                                         'number_of_adults' => $room['total_adult'],
                                         'number_of_children' => count($room['child_ages']),
                                         'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
@@ -401,8 +444,8 @@ class BookingWebhookController extends Controller
                                     'type' => 'invoice',
                                     'customer_id' => $customer->id,
                                     'status' => 'received',
-                                    'currency' => $webhookData['currency'],
-                                    'currency_rate' => 1, //TODO: Burada merkez bankasından döviz kuru alınabilir.
+                                    'currency' => $documentCurrency,
+                                    'currency_rate' => $currencyRate,
                                     'issue_date' => $room['checkin_date'],
                                     'due_date' => $room['checkout_date'],
                                 ]);
@@ -413,9 +456,10 @@ class BookingWebhookController extends Controller
                                     $itemName .= ' ' . count($room['child_ages']) . ' Çocuk ';
                                 }
                                 $itemName .= 'Konaklama Bedeli.';
-                                $subTotal = $room['price'] * (1 - $this->getSettingBookingTax->rate / 100);
-                                $tax = $this->getSettingBookingTax->rate * $room['price'] / 100;
-                                $total = $room['price'];
+                                $price = $room['price'] * $currencyRate;
+                                $subTotal = $price * (1 - $this->getSettingBookingTax->rate / 100);
+                                $tax = $this->getSettingBookingTax->rate * $price / 100;
+                                $total = $price;
                                 $document->items()->create([
                                     'item_id' => null,
                                     'name' => $itemName,
@@ -427,7 +471,7 @@ class BookingWebhookController extends Controller
                                     'tax' => $tax,
                                     'total' => $total,
                                     'discount' => 0,
-                                    'grand_total' => $room['price'],
+                                    'grand_total' => $price,
                                 ]);
                                 $document->total()->create([
                                     'type' => 'subtotal',
@@ -448,21 +492,21 @@ class BookingWebhookController extends Controller
                                     BookingDailyPrice::firstOrCreate([
                                         'booking_room_id' => $bookingRoom->id,
                                         'date' => $daily_price['date'],
-                                        'original_price' => $daily_price['original_price'],
-                                        'discount' => $daily_price['discount'],
-                                        'price' => $daily_price['price'],
-                                        'currency' => $webhookData['currency'],
+                                        'original_price' => $daily_price['original_price'] * $currencyRate,
+                                        'discount' => $daily_price['discount'] * $currencyRate,
+                                        'price' => $daily_price['price'] * $currencyRate,
+                                        'currency' => $documentCurrency,
                                     ], [
-                                        'original_price' => $daily_price['original_price'],
-                                        'discount' => $daily_price['discount'],
-                                        'price' => $daily_price['price'],
-                                        'currency' => $webhookData['currency'],
+                                        'original_price' => $daily_price['original_price'] * $currencyRate,
+                                        'discount' => $daily_price['discount'] * $currencyRate,
+                                        'price' => $daily_price['price'] * $currencyRate,
+                                        'currency' => $documentCurrency,
                                     ]);
                                 }
                             }
                         }
                     }
-//                    $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+                    $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                     return [
 //                        'message' => 'Booking ' . $webhookData['reason'] . ' successfully',
                         'status' => 'ok',
