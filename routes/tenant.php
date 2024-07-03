@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Helpers\Currencies;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -44,6 +45,7 @@ use App\Settings\HotelSettings;
 use App\Models\Tax;
 use App\Models\TypeHasView;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -69,8 +71,12 @@ Route::middleware([
 ])->group(function () {
 
     Route::get('/test', static function () {
-        $document = Document::find(4);
-        return $document->transactions;
+        $booking = Booking::find(14);
+        $bookig_customer = $booking->customer;
+        $booking_total_price = $booking->documents->map((static function ($document) {
+            return $document->total->where('type', 'total')->sum('amount');
+        }))->sum();
+        return $booking_total_price;
     })->name('test');
 
     Route::middleware('guest')->group(function () {

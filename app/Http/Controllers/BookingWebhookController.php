@@ -532,7 +532,7 @@ class BookingWebhookController extends Controller
                         $booking->rooms->first()->room->roomType->name,
                         $booking->channel->name
                     ));
-
+                  
                     return [
 //                        'message' => 'Booking ' . $webhookData['reason'] . ' successfully',
                         'status' => 'ok',

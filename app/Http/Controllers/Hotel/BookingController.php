@@ -400,7 +400,7 @@ class BookingController extends Controller
                 'number_of_adults' => $booking->number_of_adults,
                 'number_of_children' => $booking->number_of_children,
                 'stay_duration_days' => $booking->stayDurationDay(),
-                'stay_duration_nights' => ((int)($booking->stayDurationNight()) + 1) . 'Gece',
+                'stay_duration_nights' => ((int)($booking->stayDurationNight())) . ' Gece',
                 'rooms' => $booking->rooms->map(function ($booking_room) use (
                     $booking,
                     &$availableDatesCounts
@@ -671,7 +671,7 @@ class BookingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Booking $booking)
+    public function destroy(Booking $booking): \Illuminate\Http\RedirectResponse
     {
         $booking->delete();
         return redirect()->route('hotel.bookings.index')->with('success', 'Rezervasyon başarıyla silindi.');

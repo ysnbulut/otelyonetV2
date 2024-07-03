@@ -20,7 +20,11 @@ import Select, {SelectInstance} from 'react-select'
 import axios from 'axios'
 import {Page} from '@inertiajs/inertia'
 import {motion} from 'framer-motion'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 
+dayjs.extend(isSameOrAfter)
+dayjs.extend(isSameOrBefore)
 dayjs.extend(customParseFormat)
 
 function Show(props: PageProps) {
@@ -91,10 +95,6 @@ function Show(props: PageProps) {
 		} else {
 			setData((data) => ({...data, amount: props.remaining_balance.toFixed(2)}))
 			setMaxAmountErr('Girilen tutar bakiyeden fazla olamaz!')
-		}
-		//Burya scroll up ekle
-		if (window.scrollY !== 0) {
-			window.scrollTo(0, 0)
 		}
 	}, [paymentDocumentIndex])
 
@@ -255,36 +255,42 @@ function Show(props: PageProps) {
 								</div>
 							</div>
 							<div className="mt-2 flex w-full justify-end gap-3">
-								<Button
-									variant="soft-success"
-									className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-									<Lucide
-										icon="CalendarPlus"
-										className="mr-1 h-5 w-5"
-									/>
-									SÜREYİ UZAT
-									<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{props.extendable_number_of_days}</span>
-								</Button>
-								<Button
-									variant="soft-pending"
-									className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
-									<Lucide
-										icon="CalendarMinus"
-										className="mr-1 h-5 w-5"
-									/>
-									ERKEN BİTİR
-								</Button>
-								{dayjs(props.booking.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (
-									<Button
-										variant="soft-danger"
-										onClick={(e: any) => bookingCancel(e)}
-										className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
-										<Lucide
-											icon="CalendarX2"
-											className="mr-1 h-5 w-5"
-										/>
-										İPTAL ET
-									</Button>
+								{dayjs(props.booking.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
+									<>
+										<Button
+											variant="soft-success"
+											className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
+											<Lucide
+												icon="CalendarPlus"
+												className="mr-1 h-5 w-5"
+											/>
+											SÜREYİ UZAT
+											<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
+												{props.extendable_number_of_days}
+											</span>
+										</Button>
+										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') && (
+											<Button
+												variant="soft-pending"
+												className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+												<Lucide
+													icon="CalendarMinus"
+													className="mr-1 h-5 w-5"
+												/>
+												ERKEN BİTİR
+											</Button>
+										)}
+										<Button
+											variant="soft-danger"
+											onClick={(e: any) => bookingCancel(e)}
+											className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
+											<Lucide
+												icon="CalendarX2"
+												className="mr-1 h-5 w-5"
+											/>
+											İPTAL ET
+										</Button>
+									</>
 								)}
 							</div>
 						</div>
