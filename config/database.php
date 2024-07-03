@@ -56,10 +56,11 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
+            'strict' => false,
+            'engine' => 'InnoDB ROW_FORMAT=DYNAMIC',
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => true,
             ]) : [],
             'timezone' => '+03:00',
         ],
@@ -126,7 +127,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::snake(env('APP_NAME', 'laravel')).'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::snake(env('APP_NAME', 'laravel')). (env('APP_ENV') == 'local') ? '_local' : '_production'),
         ],
 
         'default' => [

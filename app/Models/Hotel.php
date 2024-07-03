@@ -65,6 +65,8 @@ class Hotel extends Model
 {
     use SoftDeletes;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'status',
         'name',
