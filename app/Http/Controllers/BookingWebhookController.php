@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ChannelManagers;
 use App\Helpers\Currencies;
 use App\Http\Requests\WebHookRequest;
+use App\Mail\Hotel\ReservationMail;
 use App\Models\Booking;
 use App\Models\BookingChannel;
 use App\Models\BookingDailyPrice;
@@ -12,6 +13,7 @@ use App\Models\BookingRoom;
 use App\Models\CMBooking;
 use App\Models\CMRoom;
 use App\Models\Customer;
+use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Tax;
 use App\Models\Tenant;
@@ -23,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use JsonException;
 use LaravelIdea\Helper\App\Models\_IH_Tax_C;
 use Random\RandomException;
@@ -506,7 +509,30 @@ class BookingWebhookController extends Controller
                             }
                         }
                     }
-                    $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+
+                    if(\request()->ip() != '127.0.0.1') {
+                        $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
+                    }
+
+                    $hotel = Hotel::whereTenantId(tenancy()->tenant->id)->first();
+
+                    Mail::to($hotel->email)->send(new ReservationMail(
+                        $hotel->name,
+                        $booking->customer->email,
+                        $booking->customer->title,
+                        $booking->customer->phone,
+                        $hotel->email,
+                        $booking->booking_code,
+                        $booking->rooms->pluck('check_in')->min(),
+                        $booking->rooms->pluck('check_out')->max(),
+                        $total,
+                        route('hotel.bookings.show', [
+                            'booking' => $booking->id,
+                        ]),
+                        $booking->rooms->first()->room->roomType->name,
+                        $booking->channel->name
+                    ));
+                  
                     return [
 //                        'message' => 'Booking ' . $webhookData['reason'] . ' successfully',
                         'status' => 'ok',

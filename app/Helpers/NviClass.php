@@ -46,8 +46,8 @@ class NviClass
 		return $firstChar . mb_strtolower($then, $encoding);
 	}
 
-	public function cleanLabel($label)
-	{
+	public function cleanLabel($label): string
+  {
 		$label = str_replace('İ', 'i', $label);
 		$label = str_replace('I', 'ı', $label);
 		$label = str_replace('  ', ' ', $label);

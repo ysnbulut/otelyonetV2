@@ -8,7 +8,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes

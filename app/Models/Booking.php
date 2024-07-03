@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Observers\BookingObserver;
 use Carbon\Carbon;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
@@ -73,19 +74,7 @@ class Booking extends Model
     {
         parent::boot();
 
-        static::creating(static function ($booking) {
-            $sqids = new Sqids('ABCDEFGHJKLMNPQRSTUVWXYZ', 9);
-            $randomNumber = random_int(1000, 9999);
-            $datePart = date('Ym');
-            $count = static::whereYear('created_at', date('Y'))
-                    ->whereMonth('created_at', date('m'))
-                    ->count() + 1;
-            $count = str_pad($count, 4, '0', STR_PAD_LEFT);
-
-            $booking_code = $sqids->encode([$datePart . $count . $randomNumber]);
-
-            $booking->booking_code = $booking_code;
-        });
+        Booking::observe(BookingObserver::class);
     }
 
     /**

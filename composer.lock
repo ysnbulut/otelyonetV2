@@ -4,8 +4,82 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "511ca6b95b7e64866091d6516d6ce5a3",
+    "content-hash": "1e1bc653334962e2677d5747c814f699",
     "packages": [
+        {
+            "name": "aloha/twilio",
+            "version": "5.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aloha/laravel-twilio.git",
+                "reference": "f430c272c4e21a53cab6aadade696ba8083e3207"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aloha/laravel-twilio/zipball/f430c272c4e21a53cab6aadade696ba8083e3207",
+                "reference": "f430c272c4e21a53cab6aadade696ba8083e3207",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.0",
+                "twilio/sdk": "^6.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16",
+                "illuminate/console": "~6||~7||~8",
+                "illuminate/support": "~6||~7||~8",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Aloha\\Twilio\\Support\\Laravel\\ServiceProvider"
+                    ],
+                    "aliases": {
+                        "Twilio": "Aloha\\Twilio\\Support\\Laravel\\Facade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Aloha\\Twilio\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Travis J Ryan",
+                    "email": "travisjryan@gmail.com"
+                },
+                {
+                    "name": "Hannes Van De Vreken",
+                    "email": "vandevreken.hannes@gmail.com"
+                }
+            ],
+            "description": "Twilio API for Laravel",
+            "homepage": "https://github.com/aloha/laravel-twilio",
+            "keywords": [
+                "ivr",
+                "laravel",
+                "sms",
+                "twilio"
+            ],
+            "support": {
+                "issues": "https://github.com/aloha/laravel-twilio/issues",
+                "source": "https://github.com/aloha/laravel-twilio/tree/5.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/hannesvdvreken",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-02-10T17:00:02+00:00"
+        },
         {
             "name": "artisaninweb/laravel-soap",
             "version": "0.3.0.10",
@@ -4727,6 +4801,76 @@
             "time": "2024-04-27T21:32:50+00:00"
         },
         {
+            "name": "s-ichikawa/laravel-sendgrid-driver",
+            "version": "4.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/s-ichikawa/laravel-sendgrid-driver.git",
+                "reference": "5a96a8430c834b3715543bcdfa202890b42f6b5c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/s-ichikawa/laravel-sendgrid-driver/zipball/5a96a8430c834b3715543bcdfa202890b42f6b5c",
+                "reference": "5a96a8430c834b3715543bcdfa202890b42f6b5c",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.2",
+                "illuminate/mail": "^9.0||^10.0||^11.0",
+                "illuminate/notifications": "^9.0||^10.0||^11.0",
+                "illuminate/support": "^9.0||^10.0||^11.0"
+            },
+            "require-dev": {
+                "illuminate/container": "^9.0||^10.0||^11.0",
+                "illuminate/filesystem": "^9.0||^10.0||^11.0",
+                "laravel/helpers": "^1.2",
+                "phpunit/phpunit": "^9.5.8||^10.0",
+                "vlucas/phpdotenv": "^5.4.1"
+            },
+            "suggest": {
+                "s-ichikawa/sendgrid-api-builder": "support to build json for sendgrid api"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Sichikawa\\LaravelSendgridDriver\\SendgridTransportServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Sichikawa\\LaravelSendgridDriver\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "shingo.ichikawa",
+                    "email": "ichikawa.shingo.0829@gmail.com"
+                }
+            ],
+            "description": "This library adds a 'sendgrid' mail driver to Laravel.",
+            "keywords": [
+                "laravel",
+                "sendgrid"
+            ],
+            "support": {
+                "issues": "https://github.com/s-ichikawa/laravel-sendgrid-driver/issues",
+                "source": "https://github.com/s-ichikawa/laravel-sendgrid-driver/tree/4.0.5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/s-ichikawa",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-03-15T01:27:19+00:00"
+        },
+        {
             "name": "seld/jsonlint",
             "version": "1.10.2",
             "source": {
@@ -7975,6 +8119,59 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.2.7"
             },
             "time": "2023-12-08T13:03:43+00:00"
+        },
+        {
+            "name": "twilio/sdk",
+            "version": "6.44.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twilio/twilio-php.git",
+                "reference": "08aad5f377e2245b9cd7508e7762d95e7392fa4d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/08aad5f377e2245b9cd7508e7762d95e7392fa4d",
+                "reference": "08aad5f377e2245b9cd7508e7762d95e7392fa4d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^6.3 || ^7.0",
+                "phpunit/phpunit": ">=7.0 < 10"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twilio\\": "src/Twilio/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Twilio API Team",
+                    "email": "api@twilio.com"
+                }
+            ],
+            "description": "A PHP wrapper for Twilio's API",
+            "homepage": "https://github.com/twilio/twilio-php",
+            "keywords": [
+                "api",
+                "sms",
+                "twilio"
+            ],
+            "support": {
+                "issues": "https://github.com/twilio/twilio-php/issues",
+                "source": "https://github.com/twilio/twilio-php/tree/6.44.4"
+            },
+            "time": "2023-02-22T19:59:53+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -12218,5 +12415,5 @@
         "ext-intl": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
