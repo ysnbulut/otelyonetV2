@@ -10,6 +10,7 @@
   "require": {
     "php": "^8.2",
     "ext-intl": "*",
+    "aloha/twilio": "^5.0",
     "artisaninweb/laravel-soap": "0.3.0.10",
     "cknow/laravel-money": "^8.0",
     "guzzlehttp/guzzle": "^7.2",
@@ -23,6 +24,7 @@
     "plank/laravel-mediable": "^6.1",
     "predis/predis": "^2.2",
     "pusher/pusher-php-server": "^7.2",
+    "s-ichikawa/laravel-sendgrid-driver": "^4.0",
     "seld/jsonlint": "^1.10",
     "shiftonelabs/laravel-cascade-deletes": "^2.0",
     "spatie/laravel-activitylog": "^4.7",
