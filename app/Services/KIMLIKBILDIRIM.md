@@ -6,7 +6,9 @@ Projenin kullanımı için aşağıdaki adımları izleyin:
 
 ## Servis Ayarları
 
-Kimlik Bildirim Servisi'ne erişim için aşağıdaki bilgileri projeye entegre edin:
+Kimlik Bildirim Servisi'ne erişim için gerekli olan bilgileri projeye entegre edin. Bu bilgiler, servis sağlayıcınız tarafından sağlanır.
+
+**WSDL Adres** : https://vatandas.jandarma.gov.tr/KBS_Tesis_Servis/SrvShsYtkTml.svc?singleWsdl
 
 **TSS_KOD**: Kimlik Bildirim Servisi için kullanılacak TSS (Ticari Servis Sağlayıcı) kodu.
 
