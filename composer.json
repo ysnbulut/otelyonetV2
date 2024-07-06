@@ -10,6 +10,9 @@
   "require": {
     "php": "^8.2",
     "ext-intl": "*",
+    "ext-soap": "*",
+    "ext-simplexml": "*",
+    "ext-libxml": "*",
     "aloha/twilio": "^5.0",
     "artisaninweb/laravel-soap": "0.3.0.10",
     "cknow/laravel-money": "^8.0",

@@ -1,0 +1,9 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <MusteriYabanciListele xmlns="http://tempuri.org/">
+            <KullaniciTC>{{ KULLANICI_TC }}</KullaniciTC>
+            <TssKod>{{ TSS_KOD }}</TssKod>
+            <Sifre>{{ SIFRE }}</Sifre>
+        </MusteriYabanciListele>
+    </s:Body>
+</s:Envelope>
