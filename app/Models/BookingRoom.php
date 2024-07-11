@@ -57,11 +57,15 @@ class BookingRoom extends Model
         'children_ages'
     ];
 
+    protected $casts = [
+        'children_ages' => 'json',
+    ];
+
     protected $cascadeDeletes = ['documents', 'tasks', 'booking_guests', 'prices', 'cancelReason'];
 
-    public function booking(): BelongsTo
+    public function booking() : HasOne
     {
-        return $this->belongsTo(Booking::class);
+        return $this->hasOne(Booking::class, 'id', 'booking_id');
     }
 
     public function room(): BelongsTo

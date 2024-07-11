@@ -7,7 +7,7 @@ use JsonException;
 
 class ChannelManagers
 {
-    protected HotelRunnerApi $channelManagerApi;
+    public HotelRunnerApi $channelManagerApi;
 
     public function __construct(string $channel_manager, array $options = [])
     {

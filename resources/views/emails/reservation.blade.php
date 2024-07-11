@@ -472,7 +472,7 @@
                                             <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:10px 20px;font-family:arial,helvetica,sans-serif;" align="left">
 
                                                 <div class="v-text-align v-font-size" style="font-size: 14px; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                                    <p style="font-size: 14px; line-height: 140%;"><span style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 19.6px;"><strong>MÜŞTERİNİN ADI SOYADI</strong>:{{ $customerName }}<br /><strong>REZERVASYON NUMARASI</strong>: {{ $reservationCode }}<br /><strong>ODA BİLGİLERİ</strong>: {{ $roomType }}<br /><strong>EPOSTA ADRESİ</strong>:{{ $email }}<br /><strong>TELEFON NUMARASI</strong>:{{ $phone }}<em>5<strong><br /><br /><br /><br /><span style="font-size: 34px; line-height: 47.6px;">{{ $platform }}</span></strong></em></span></p>
+                                                    <p style="font-size: 14px; line-height: 140%;"><span style="font-family: 'Open Sans', sans-serif; font-size: 14px; line-height: 19.6px;"><strong>MÜŞTERİNİN ADI SOYADI</strong>:{{ $customerName }}<br /><strong>REZERVASYON NUMARASI</strong>: {{ $reservationCode }}<br /><strong>ODA BİLGİLERİ</strong>: {{ $roomType }}<br /><strong>EPOSTA ADRESİ</strong>:{{ $customerEmail }}<br /><strong>TELEFON NUMARASI</strong>:{{ $phone }}<em>5<strong><br /><br /><br /><br /><span style="font-size: 34px; line-height: 47.6px;">{{ $platform }}</span></strong></em></span></p>
                                                 </div>
 
                                             </td>

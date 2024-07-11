@@ -21,6 +21,7 @@ class ReservationMail extends Mailable
     {
         $this->name = $name;
         $this->customerName = $customerName;
+        $this->customerEmail = $customerEmail;
         $this->phone = $phone;
         $this->email = $email;
         $this->reservationCode = $reservationCode;
@@ -59,7 +60,7 @@ class ReservationMail extends Mailable
             ->with([
                 'customerName' => $this->customerName,
                 'phone' => $this->phone,
-                'customerEmail' => $this->email,
+                'customerEmail' => $this->customerEmail,
                 'reservationCode' => $this->reservationCode,
                 'checkIn' => $this->checkIn,
                 'checkOut' => $this->checkOut,
