@@ -1,19 +1,23 @@
 import {PageProps as BasePageProps} from '@/types'
+
 interface RoomsProps {
 	id: number
 	title: string
 	building: string
 	floor: string
 	type_and_view: string
-	type_id: number
+	type_and_view_id: number
 }
 
 interface BookingsProps {
 	id: number
 	resourceId: number
+	typeHasViewId: number
 	title: string
 	start: string
 	end: string
+	nights: number
+	earlyCheckOut: boolean
 	backgroundColor: string
 	textColor: string
 	borderColor: string

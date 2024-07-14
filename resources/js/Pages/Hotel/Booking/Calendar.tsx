@@ -21,6 +21,8 @@ import {Head} from '@inertiajs/react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {ResourceInput} from '@fullcalendar/resource'
 import Tippy from '@/Components/Tippy'
+import {EventDropArg, EventSourceInput} from '@fullcalendar/core'
+import axios from 'axios'
 
 moment.locale('tr')
 dayjs.extend(utc)
@@ -53,24 +55,28 @@ function Calendar(props: PageProps) {
 			start: booking.start,
 			title: booking.title,
 			end: booking.end,
+			nights: booking.nights,
+			earlyCheckOut: booking.earlyCheckOut,
 			backgroundColor: booking.backgroundColor,
 			borderColor: booking.borderColor,
 			textColor: booking.textColor,
 			startEditable: false,
-			resourceEditable: false,
 			durationEditable: false,
+			resourceEditable: true,
 			allDay: false,
+			typeHasViewId: booking.typeHasViewId,
 		}
 	})
 
 	const resources = props.rooms.map((room) => {
 		return {
+			groupId: room.type_and_view_id,
 			id: room.id,
 			title: room.title,
 			building: room.building,
 			floor: room.floor,
 			type_and_view: room.type_and_view,
-			type_id: room.type_id,
+			type_id: room.type_and_view_id,
 		}
 	})
 
@@ -80,18 +86,10 @@ function Calendar(props: PageProps) {
 		<>
 			<Head title="Müşteriler" />
 			<h2 className="intro-y my-2 text-lg font-medium">Rezervasyon Takvimi</h2>
-			<div className="w-full">
+			<div className="full-calendar w-full">
 				<FullCalendar
 					ref={calendarRef}
-					plugins={[
-						interactionPlugin,
-						dayGridPlugin,
-						timeGridPlugin,
-						listPlugin,
-						multiMonthPlugin,
-						googleCalendarPlugin,
-						resourceTimelinePlugin,
-					]}
+					plugins={[interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin, multiMonthPlugin, googleCalendarPlugin, resourceTimelinePlugin]}
 					schedulerLicenseKey="GPL-My-Project-Is-Open-Source"
 					googleCalendarApiKey="AIzaSyAGMso60hDLROBDBs5RSwgMmLTwIRwIOl8"
 					initialView="resourceTimelineMonth"
@@ -110,19 +108,22 @@ function Calendar(props: PageProps) {
 					resourceAreaColumns={[
 						{
 							group: true,
+							isMain: true,
+							width: 120,
 							field: 'type_and_view',
-							headerContent: 'Tip',
+							headerContent: 'Tür',
 							headerClassNames: ['text-xl font-extrabold'],
 						},
 						{
+							group: false,
 							field: 'title',
 							headerContent: 'Oda',
 							headerClassNames: ['text-xl font-extrabold'],
 						},
 					]}
 					resourceAreaWidth={'12rem'}
-					// resourceAreaHeaderContent={'Oda Bilgileri'}
-					// resourceAreaHeaderClassNames={['text-xl font-extrabold']},
+					resourceAreaHeaderContent={'Oda Bilgileri'}
+					resourceAreaHeaderClassNames={['text-lg font-semibold']}
 					resourceGroupLabelContent={(arg: {groupValue: any; fieldValue: any}) => {
 						return (
 							<Tippy content={arg.groupValue ? arg.groupValue : arg.fieldValue}>
@@ -132,28 +133,20 @@ function Calendar(props: PageProps) {
 											.map((word: any) => word.charAt(0))
 											.join('')
 									: arg.fieldValue !== undefined && typeof arg.fieldValue === 'string'
-									  ? arg.fieldValue
+										? arg.fieldValue
 												.split(' ')
 												.map((word: any) => word.charAt(0))
 												.join('')
-									  : ''}
+										: ''}
 							</Tippy>
 						)
 					}}
-					slotLabelFormat={[
-						{month: 'long', year: 'numeric'},
-						{weekday: 'short'},
-						{day: 'numeric'},
-						{hour: undefined, hour12: false},
-					]}
+					slotLabelFormat={[{month: 'long', year: 'numeric'}, {weekday: 'short'}, {day: 'numeric'}, {hour: undefined, hour12: false}]}
 					slotLabelContent={(arg) => {
 						switch (arg.level) {
 							case 0:
 								return {
-									html:
-										'<span class="text-xl"> ' +
-										arg.date.toLocaleDateString('tr-TR', {month: 'long', year: 'numeric'}) +
-										' </span>',
+									html: '<span class="text-xl"> ' + arg.date.toLocaleDateString('tr-TR', {month: 'long', year: 'numeric'}) + ' </span>',
 								}
 							case 1:
 								return {
@@ -169,29 +162,6 @@ function Calendar(props: PageProps) {
 								}
 						}
 					}}
-					slotLabelClassNames={[
-						'bg-slate-300/50',
-						'dark:bg-darkmode-900/50',
-						'text-slate-600',
-						'dark:text-darkmode-50',
-					]}
-					resourceGroupLabelClassNames={[
-						'relative',
-						'bg-slate-200',
-						'dark:bg-darkmode-800',
-						'text-darkmode-50',
-						'text-lg',
-						'font-semibold',
-					]}
-					resourceLabelClassNames={[
-						'bg-slate-200',
-						'dark:bg-darkmode-800',
-						'text-darkmode-50',
-						'text-lg',
-						'font-semibold',
-						'text-center',
-						'resource-label',
-					]}
 					eventClassNames={['border-2', 'rounded-md', 'shadow-md']}
 					slotEventOverlap={false}
 					resourceOrder="type_id,title"
@@ -201,7 +171,7 @@ function Calendar(props: PageProps) {
 					editable={false}
 					locale="tr"
 					height="auto"
-					selectMirror={true}
+					selectMirror={false}
 					dayMaxEvents={true}
 					headerToolbar={{
 						left: 'prev,next today',
@@ -225,17 +195,39 @@ function Calendar(props: PageProps) {
 						},
 					]}
 					resources={resources as ResourceInput}
-					events={events as ResourceInput}
-					// eventContent={(e) => {
-					// 	return (
-					// 		<>
-					// 			<div className="h-14 text-center">
-					// 				<div className="text-sm">{e.event.title}</div>
-					// 				{e.event.extendedProps.description}
-					// 			</div>
-					// 		</>
-					// 	)
-					// }}
+					events={events as EventSourceInput}
+					eventDrop={(info) => {
+						if (info.oldEvent.extendedProps.typeHasViewId !== info.newResource?._resource.extendedProps.groupId) {
+							Toast.fire({
+								icon: 'error',
+								title: 'Oda tipi değiştirilemez',
+							})
+							info.revert()
+						} else {
+							console.log(info)
+							// axios.put(route('hotel.bookings.update', info.event.id), {
+							// 	resourceId: info.newResource.id,
+							// })
+						}
+					}}
+					eventContent={(e) => {
+						return (
+							<>
+								<Tippy content={`${e.event.title}`}>
+									<div className="relative px-0.5">
+										<p className="overflow-clip whitespace-nowrap text-sm">{e.event.title}</p>
+										<p className="overflow-clip whitespace-nowrap text-sm">{e.event.extendedProps.nights}</p>
+										{e.event.extendedProps.earlyCheckOut && (
+											<Tippy
+												className="absolute right-0 top-0 h-4 w-4 rounded-full border-2 border-white bg-warning text-xs text-red-500 shadow-inner"
+												content={'Erken Çıkış'}
+											/>
+										)}
+									</div>
+								</Tippy>
+							</>
+						)
+					}}
 				/>
 			</div>
 		</>

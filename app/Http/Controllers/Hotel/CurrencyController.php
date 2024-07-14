@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Helpers\Currencies;
 use App\Http\Controllers\Controller;
 use App\Settings\PricingPolicySettings;
 use Illuminate\Http\Request;
+use JsonException;
 use Teknomavi\Tcmb\Doviz;
 
 class CurrencyController extends Controller
@@ -26,27 +28,13 @@ class CurrencyController extends Controller
 //        }
     }
 
+    /**
+     * @throws JsonException
+     */
     public function convert(Request $request): ?array
     {
-        if ($request->currency !== 'TRY') {
-            $doviz = new Doviz();
-            $kur = $doviz->kurAlis($request->currency, Doviz::TYPE_EFEKTIFALIS);
-            if ($request->amount > 0) {
-                return [
-                    'currency' => $request->currency,
-                    'amount' => $request->amount,
-                    'exchange_rate' => $kur,
-                    'total' => round($request->amount / $kur, 2),
-                ];
-            } else {
-                return [
-                    'currency' => $request->currency,
-                    'amount' => 0,
-                    'exchange_rate' => $kur,
-                    'total' => 0,
-                ];
-            }
-        } else {
+        $currencies = (new Currencies())->convert($request->currency, 'TRY', $request->amount);
+        if ($currencies['status'] === false) {
             return [
                 'currency' => $request->currency,
                 'amount' => $request->amount,
@@ -54,9 +42,18 @@ class CurrencyController extends Controller
                 'total' => round($request->amount, 2),
             ];
         }
+        return [
+            'currency' => $request->currency,
+            'amount' => $request->amount,
+            'exchange_rate' => 1,
+            'total' => round($currencies['total'], 2),
+        ];
     }
 
-    public function amountConvert(Request $request)
+    /**
+     * @throws JsonException
+     */
+    public function amountConvert(Request $request): ?array
     {
         return $this->convert($request);
     }
