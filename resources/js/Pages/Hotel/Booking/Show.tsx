@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState, useRef, createRef} from 'react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
@@ -6,7 +6,7 @@ import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
 import {twMerge} from 'tailwind-merge'
 import {FormInput, FormLabel} from '@/Components/Form'
-import Litepicker from '@/Components/Litepicker'
+import Litepicker, {LitepickerElement} from '@/Components/Litepicker'
 import TomSelect from '@/Components/TomSelect'
 import CurrencyInput from 'react-currency-input-field'
 import {PageProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
@@ -22,16 +22,24 @@ import {Page} from '@inertiajs/inertia'
 import {motion} from 'framer-motion'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+import {DateTime} from 'litepicker/dist/types/datetime'
+import {Simulate} from 'react-dom/test-utils'
+import reset = Simulate.reset
+import ExpendBookingPeriod from '@/Pages/Hotel/Booking/components/ExpendBookingPeriod'
 
 dayjs.extend(isSameOrAfter)
 dayjs.extend(isSameOrBefore)
 dayjs.extend(customParseFormat)
 
 function Show(props: PageProps) {
+	const expendableDaysPicker = createRef<LitepickerElement>()
 	const paymentTypeSelectRef = useRef<SelectInstance>(null)
+	const buttonRef = useRef<HTMLButtonElement>(null)
 	const MySwal = withReactContent(Swal)
+	const [isLitepickerVisible, setIsLitepickerVisible] = useState(false)
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
 	const [bookingRooms, setBookingRooms] = useState<RoomsProps[]>(props.booking.rooms)
+	const [expendBookingPeriodModalOpen, setExpendBookingPeriodModalOpen] = useState<boolean>(false)
 	const [balance, setBalance] = useState<{number: number; formatted: string}>({
 		number: props.remaining_balance,
 		formatted: props.remaining_balance_formatted,
@@ -195,6 +203,54 @@ function Show(props: PageProps) {
 		})
 	}
 
+	const expendableDays =
+		props.extendable_number_of_days !== null ? (
+			props.extendable_number_of_days
+		) : (
+			<Lucide
+				icon="Infinity"
+				className="h-4 w-4"
+			/>
+		)
+
+	const showLitepicker = () => {
+		const button = buttonRef.current // Butonun referansı
+		const litepicker = expendableDaysPicker.current // Litepicker'ın referansı
+		if (button && litepicker && litepicker.litePickerInstance) {
+			const rect = button.getBoundingClientRect()
+			const top = rect.bottom + window.scrollY
+			const left = rect.left + window.scrollX
+			litepicker.litePickerInstance.setOptions({
+				parentEl: document.body,
+				buttonText: {
+					apply: 'Uzat',
+					cancel: 'İptal',
+				},
+			})
+			litepicker.litePickerInstance.show()
+			// @ts-ignore
+			const style = litepicker.litePickerInstance.ui.style
+			style.position = 'absolute'
+			style.top = `${top}px`
+			style.left = `${left}px`
+		}
+	}
+
+	const handleShowLitepicker = () => {
+		const litepicker = expendableDaysPicker.current // Litepicker'ın referansı
+
+		if (litepicker && litepicker.litePickerInstance) {
+			if (isLitepickerVisible) {
+				// Litepicker şu anda gösteriliyorsa, gizle
+				litepicker.litePickerInstance.hide()
+			} else {
+				// Litepicker şu anda gizliyse, göster
+				showLitepicker()
+			}
+		}
+		setIsLitepickerVisible(!isLitepickerVisible)
+	}
+
 	return (
 		<>
 			<Head title="Rezervasyon Detayı" />
@@ -257,18 +313,97 @@ function Show(props: PageProps) {
 							<div className="mt-2 flex w-full justify-end gap-3">
 								{dayjs(props.booking.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 									<>
-										<Button
-											variant="soft-success"
-											className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-											<Lucide
-												icon="CalendarPlus"
-												className="mr-1 h-5 w-5"
-											/>
-											SÜREYİ UZAT
-											<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
-												{props.extendable_number_of_days}
-											</span>
-										</Button>
+										{((props.extendable_number_of_days !== null && props.extendable_number_of_days > 0) || props.extendable_number_of_days === null) && (
+											<>
+												<Button
+													variant="soft-success"
+													ref={buttonRef}
+													onClick={(e: any) => {
+														e.preventDefault()
+														handleShowLitepicker()
+													}}
+													className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
+													<Lucide
+														icon="CalendarPlus"
+														className="mr-1 h-5 w-5"
+													/>
+													SÜREYİ UZAT
+													<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{expendableDays}</span>
+												</Button>
+												<Litepicker
+													ref={expendableDaysPicker}
+													className="hidden"
+													id="check_in"
+													value={`${props.booking.check_out} - ${props.booking.check_out}`}
+													options={{
+														lang: 'tr-TR',
+														singleMode: false,
+														// elementEnd: checkOutPicker.current,
+														autoApply: false,
+														selectBackward: false,
+														selectForward: true,
+														resetButton: true,
+														autoRefresh: true,
+														allowRepick: true,
+														numberOfColumns: 1,
+														numberOfMonths: 1,
+														startDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
+														endDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'), // Başlangıç için varsayılan bitiş tarihi
+														tooltipText: {
+															one: 'gece',
+															other: 'gece',
+														},
+														tooltipNumber: (totalDays) => {
+															return totalDays - 1
+														},
+														format: 'DD.MM.YYYY',
+														plugins: ['mobilefriendly'],
+														mobileFriendly: true,
+														lockDaysFormat: 'YYYY-MM-DD',
+														lockDaysFilter: (date1: DateTime | null) => {
+															if (date1) {
+																const date1Dayjs = dayjs(date1.toJSDate())
+																if (date1Dayjs.isBefore(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
+																	return true
+																}
+																if (props.extendable_number_of_days !== null) {
+																	if (date1Dayjs.isAfter(dayjs(props.booking.check_out, 'DD.MM.YYYY').add(props.extendable_number_of_days, 'day'))) {
+																		return true
+																	}
+																}
+															}
+															return false
+														},
+													}}
+													onChange={(date: string) => {
+														const dates = date.split(' - ')
+														let expendableStartDay = dates[0]
+														let expendableEndDay = dates[1]
+														if (!dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
+															Toast.fire({
+																icon: 'error',
+																title: 'Süre Uzatma başlangıç tarihi rezervasyon çıkış tarihinden farklı olamaz!',
+															})
+															//Burda Litepickerin tarihini sıfırlamak lazım
+															if (expendableDaysPicker.current?.litePickerInstance) {
+																expendableDaysPicker.current.litePickerInstance.setDateRange(
+																	dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
+																	dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'),
+																)
+															}
+														}
+														if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {
+															console.log(date)
+														}
+														console.log('date', date)
+													}}
+												/>
+												<ExpendBookingPeriod
+													open={expendBookingPeriodModalOpen}
+													onClose={setExpendBookingPeriodModalOpen}
+												/>
+											</>
+										)}
 										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') && (
 											<Button
 												variant="soft-pending"
@@ -280,16 +415,18 @@ function Show(props: PageProps) {
 												ERKEN BİTİR
 											</Button>
 										)}
-										<Button
-											variant="soft-danger"
-											onClick={(e: any) => bookingCancel(e)}
-											className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
-											<Lucide
-												icon="CalendarX2"
-												className="mr-1 h-5 w-5"
-											/>
-											İPTAL ET
-										</Button>
+										{['reception', 'agency'].includes(props.booking.channel_code) && (
+											<Button
+												variant="soft-danger"
+												onClick={(e: any) => bookingCancel(e)}
+												className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
+												<Lucide
+													icon="CalendarX2"
+													className="mr-1 h-5 w-5"
+												/>
+												İPTAL ET
+											</Button>
+										)}
 									</>
 								)}
 							</div>
@@ -355,7 +492,6 @@ function Show(props: PageProps) {
 							</div>
 						</div>
 					</div>
-					{/*<TransactionsSection customer={props.customer} />*/}
 				</div>
 				<div className="w-full xl:w-1/3">
 					<div className="xl:h-full xl:border-l xl:p-5">
@@ -417,6 +553,23 @@ function Show(props: PageProps) {
 										value={data.payment_date}
 										onChange={(e) => setData((data) => ({...data, payment_date: e}))}
 										className="w-full text-center"
+										options={{
+											lang: 'tr-TR',
+											format: 'DD.MM.YYYY',
+											numberOfColumns: 1,
+											numberOfMonths: 1,
+											plugins: ['mobilefriendly'],
+											mobileFriendly: true,
+											lockDaysFormat: 'YYYY-MM-DD',
+											lockDays: [dayjs().subtract(1, 'day').format('YYYY-MM-DD')],
+											lockDaysFilter: (date1: DateTime | null) => {
+												if (date1) {
+													const date1Dayjs = dayjs(date1.toJSDate())
+													return date1Dayjs.isBefore(dayjs().subtract(1, 'day'))
+												}
+												return false
+											},
+										}}
 									/>
 									{errors.payment_date && <div className="text-theme-6 mt-2 text-danger">{errors.payment_date}</div>}
 								</div>

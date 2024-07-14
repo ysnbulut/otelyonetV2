@@ -80,7 +80,8 @@ function Document(props: DocumentComProps) {
 									className="flex items-center justify-start border-b py-0.5 last:border-none">
 									<span className="mr-2 h-2 w-5 rounded-full bg-slate-200 shadow-inner dark:bg-slate-900/30" />
 									<span className="mr-2 text-xs font-thin">{payment.paid_at}</span>
-									<span className="text-xs">{payment.amount_formatted}</span>
+									<span className="mr-2 text-xs">{payment.amount_formatted}</span>
+									<span className="text-xs font-thin italic">{payment.description}</span>
 								</div>
 							))}
 						</div>

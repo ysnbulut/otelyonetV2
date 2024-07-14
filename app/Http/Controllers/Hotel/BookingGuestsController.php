@@ -7,58 +7,60 @@ use App\Http\Requests\UpdateBookingGuestsCheckInOutRequest;
 use App\Models\BookingGuests;
 use App\Http\Requests\StoreBookingGuestsRequest;
 use App\Http\Requests\UpdateBookingGuestsRequest;
+use App\Models\BookingRoom;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 
 class BookingGuestsController extends Controller
 {
-	/**
-	 * Display a listing of the resource.
-	 */
-	public function index()
-	{
-		//
-	}
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
 
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create()
-	{
-		//
-	}
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 */
-	public function store(StoreBookingGuestsRequest $request)
-	{
-		//
-	}
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreBookingGuestsRequest $request)
+    {
+        //
+    }
 
-	/**
-	 * Display the specified resource.
-	 */
-	public function show(BookingGuests $bookingGuests)
-	{
-		//
-	}
+    /**
+     * Display the specified resource.
+     */
+    public function show(BookingGuests $bookingGuests)
+    {
+        //
+    }
 
-	/**
-	 * Show the form for editing the specified resource.
-	 */
-	public function edit(BookingGuests $bookingGuests)
-	{
-		//
-	}
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(BookingGuests $bookingGuests)
+    {
+        //
+    }
 
-	/**
-	 * Update the specified resource in storage.
-	 */
-	public function update(UpdateBookingGuestsRequest $request, BookingGuests $bookingGuests)
-	{
-		//
-	}
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateBookingGuestsRequest $request, BookingGuests $bookingGuests)
+    {
+        //
+    }
 
     public function checkIn(UpdateBookingGuestsCheckInOutRequest $request)
     {
@@ -67,10 +69,10 @@ class BookingGuestsController extends Controller
             $bookingGuest->status = 'check_in';
             $bookingGuest->check_in = true;
             $bookingGuest->check_in_date = Carbon::now()->format('Y-m-d');
-           if($bookingGuest->isDirty(['status','check_in', 'check_in_date']) && $bookingGuest->getOriginal('status')
-               === 'pending'){
-               $bookingGuest->update($bookingGuest->getDirty());
-           }
+            if ($bookingGuest->isDirty(['status', 'check_in', 'check_in_date']) && $bookingGuest->getOriginal('status')
+                === 'pending') {
+                $bookingGuest->update($bookingGuest->getDirty());
+            }
             $bookingGuest->update([
                 'status' => 'check_in',
                 'check_in' => true,
@@ -91,12 +93,21 @@ class BookingGuestsController extends Controller
                 'check_out_date' => Carbon::now()->format('Y-m-d'),
             ]);
         }
+        return redirect()->back()->with('success', 'Guests checked out successfully');
+//        $bookingRoom = BookingRoom::find($request->booking_room_id);
+//        $check = $bookingRoom->booking_guests->filter(fn($guest) => $guest->check_out === 0)->pluck('id')->toArray();
+////        dd($check, $request->booking_guests, array_intersect($check, $request->booking_guests));
+//        Log::info('ZAAAAAAA ' . json_encode($check));
+//        if (count($check) < 1) {
+//            dd($bookingRoom->booking->delete());
+//        }
     }
-	/**
-	 * Remove the specified resource from storage.
-	 */
-	public function destroy(BookingGuests $bookingGuests)
-	{
-		//
-	}
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(BookingGuests $bookingGuests)
+    {
+        //
+    }
 }

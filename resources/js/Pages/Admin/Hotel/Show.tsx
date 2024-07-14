@@ -45,6 +45,13 @@ interface OptionProps {
 	value: string
 }
 
+interface CMRoomsProps {
+	id: number
+	type_has_view_id: number
+	room_code: string
+	stock: number
+}
+
 interface ChannelManagerProps {
 	name: string
 	type: string
@@ -60,9 +67,12 @@ interface ApiSettingsProps {
 }
 
 interface TypeHasViewProps {
-	value: number
-	label: string
-	count: number
+	id: number
+	name: string
+	stock: number
+	adult_capacity: number
+	child_capacity: number
+	cm_connected: boolean
 }
 
 interface SettingProps {
@@ -78,8 +88,10 @@ interface PageProps {
 		tenancy_db_name: string
 		domains: string[]
 		settings: SettingProps
-		type_has_views: TypeHasViewProps[]
 	}
+	type_has_views: TypeHasViewProps[]
+	cm_rooms: CMRoomsProps[] | [] | undefined
+	channel_rooms: ChannelRoomProps[] | [] | undefined
 }
 
 interface ChannelRoomProps {
@@ -112,8 +124,9 @@ interface ChannelRoomProps {
 
 function Show(props: PageProps) {
 	const MySwal = withReactContent(Swal)
-	const [rooms, setRooms] = useState<ChannelRoomProps[]>([])
-	const {data, setData, errors, setError, clearErrors} = useForm({
+	const [rooms, setRooms] = useState<ChannelRoomProps[]>(props.channel_rooms || [])
+	const [typeHasViewRooms, setTypeHasViewRooms] = useState<TypeHasViewProps[]>(props.type_has_views || [])
+	const {data, setData, errors, setError, clearErrors, put} = useForm({
 		channel_manager: props.tenant.settings.channel_manager.value,
 		api_token: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.token : '' || '',
 		api_hr_id: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.hr_id : '' || '',
@@ -134,20 +147,24 @@ function Show(props: PageProps) {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		axios
-			.put(route('admin.hotels.channe_manager', props.hotel.id), data)
-			.then((response) => {
+		put(route('admin.hotels.channe_manager', props.hotel.id), {
+			preserveState: true,
+			preserveScroll: true,
+			onSuccess: () => {
 				Toast.fire({
-					icon: response.data.status === 'success' ? 'success' : 'error',
-					title: response.data.message,
+					icon: 'success',
+					title: 'Kanal yöneticisi başarıyla güncellendi',
 				})
-				setRooms(response.data.rooms)
-			})
-			.catch((error) => {
-				if (error.response.status === 422) {
-					setError('channel_manager', error.response.data.errors.channel_manager[0])
-				}
-			})
+			},
+			//TODO: Burası olmadı sonra bakarız.
+			onError: (error) => {
+				errors.channel_manager &&
+					Toast.fire({
+						icon: 'error',
+						title: errors.channel_manager,
+					})
+			},
+		})
 	}
 
 	const setActiveChannels = (e: any) => {
@@ -381,17 +398,18 @@ function Show(props: PageProps) {
 				</div>
 			</form>
 
-			{rooms.length > 0 && (
-				<div>
-					{rooms.map((room, index) => (
+			{typeHasViewRooms.length > 0 && (
+				<>
+					{typeHasViewRooms.map((type_has_view_room, index) => (
 						<ChannelManagerRooms
 							hotel_id={props.hotel.id}
-							room={room}
+							type_room={type_has_view_room}
 							key={index}
-							type_has_views={props.tenant.type_has_views}
+							cm_rooms={props.cm_rooms}
+							channel_rooms={props.channel_rooms}
 						/>
 					))}
-				</div>
+				</>
 			)}
 		</>
 	)

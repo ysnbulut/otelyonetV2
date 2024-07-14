@@ -114,7 +114,7 @@ class BookingController extends Controller
                         'building' => $room->building->name,
                         'floor' => $room->floor->name,
                         'type_and_view' => $room->roomType->name . ' ' . $room->roomView->name,
-                        'type_id' => $room->roomType->id,
+                        'type_and_view_id' => $room->type_has_view_id,
                     ]
                 ),
             'bookings' => $bookings->flatMap(callback: function ($booking) {
@@ -122,11 +122,15 @@ class BookingController extends Controller
                     $calendarColors = json_decode($booking->calendar_colors, true, 512, JSON_THROW_ON_ERROR);
                     return [
                         'id' => $booking->id,
+                        'typeHasViewId' => $room->room->typeHasView->id,
                         'resourceId' => $room->room_id,
-                        'title' => Carbon::parse($room->check_in)->format('d.m.Y') . ' ' . Carbon::parse
-                            ($room->check_out)->format('d.m.Y') . ' ' . $booking->stayDurationNight(),
+                        'title' => $booking->customer->title,
                         'start' => Carbon::parse($room->check_in),
                         'end' => Carbon::parse($room->check_out),
+                        'nights' => $booking->stayDurationNight(),
+                        'earlyCheckOut' => $room->booking_guests->count() > 0 && $room->booking_guests->filter(
+                                fn($bookingGuest) => $bookingGuest->check_out && $bookingGuest->status === 'check_out'
+                            )->count() === $room->booking_guests->count(),
                         'backgroundColor' => $calendarColors['backgroundColor'],
                         'textColor' => $calendarColors['textColor'],
                         'borderColor' => $calendarColors['borderColor'],
@@ -279,6 +283,47 @@ class BookingController extends Controller
     }
 
     /**
+     * @return array
+     * @throws RandomException
+     */
+    protected function getRandomColors(): array
+    {
+        $maxBrightness = 200;  // Minimum brightness for background color
+        $minTextColorDiff = 150;  // Minimum difference in brightness for text color
+        $maxAttempts = 10;  // Maximum attempts to find suitable colors
+
+        $attempts = 0;
+        do {
+            // Generate a random background color
+            $backgroundColor = "#" . str_pad(dechex(random_int(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
+
+            // Calculate brightness of the background color
+            [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
+            $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
+
+            $attempts++;
+
+            // Check if the brightness and contrast conditions are met
+        } while ($brightness > $maxBrightness && $attempts < $maxAttempts);
+
+        // Calculate text color based on background brightness
+        $textColor = ($brightness > 128) ? "#000000" : "#FFFFFF";
+
+        // Calculate a slightly darker border color
+        [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
+        $borderColorR = max(0, $r - 20);
+        $borderColorG = max(0, $g - 20);
+        $borderColorB = max(0, $b - 20);
+        $borderColor = sprintf("#%02x%02x%02x", $borderColorR, $borderColorG, $borderColorB);
+
+        return array(
+            "backgroundColor" => $backgroundColor,
+            "textColor" => $textColor,
+            "borderColor" => $borderColor
+        );
+    }
+
+    /**
      * @return Response
      */
     public function create(): Response
@@ -294,10 +339,9 @@ class BookingController extends Controller
     public function getAvailableRoomsAndPrices(BookingStepOneRequest $request): array
     {
         $priceCalculator = new PriceCalculator();
-        $request->check_in = Carbon::createFromFormat('d.m.Y', $request->check_in)->format('Y-m-d');
-        $request->check_out = Carbon::createFromFormat('d.m.Y', $request->check_out)->format('Y-m-d');
+        $request->check_in = Carbon::createFromFormat('d.m.Y H:i:s', $request->check_in . ' ' . $this->settings->check_in_time_policy['value'] . ':00')->format('Y-m-d H:i:s');
+        $request->check_out = Carbon::createFromFormat('d.m.Y H:i:s', $request->check_out . ' ' . $this->settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s');
         $nightCount = Carbon::parse($request->check_in)->diffInDays($request->check_out);
-        $dayCount = $nightCount + 1;
         $unavailableRoomsIds = Booking::getUnavailableRoomsIds($request->check_in, $request->check_out);
         $roomResults = TypeHasView::with([
             'view',
@@ -308,7 +352,7 @@ class BookingController extends Controller
             $query->whereNotIn('id', $unavailableRoomsIds);
         })->whereHas('type', function ($query) use ($request) {
             $query->with(['beds', 'features'])->where('adult_capacity', '>=', $request->number_of_adults)->where('child_capacity', '>=', $request->number_of_children);
-        })->get()->map(function ($typeHasViews) use ($request, $priceCalculator, $nightCount) {
+        })->get()->map(function ($typeHasViews) use ($request, $priceCalculator) {
             return [
                 'id' => $typeHasViews->id,
                 'name' => $typeHasViews->type->name . ' ' . $typeHasViews->view->name,
@@ -393,6 +437,8 @@ class BookingController extends Controller
             'booking' => [
                 'id' => $booking->id,
                 'booking_code' => $booking->booking_code,
+                'channel_id' => $booking->channel_id,
+                'channel_code' => $booking->channel->code,
                 'channel' => $booking->channel->name,
                 'check_in' => Carbon::parse($booking->rooms->pluck('check_in')->min())->format('d.m.Y'),
                 'check_out' => Carbon::parse($booking->rooms->pluck('check_out')->max())->format('d.m.Y'),
@@ -405,19 +451,12 @@ class BookingController extends Controller
                     $booking,
                     &$availableDatesCounts
                 ) {
-                    $availableDatesCount = 0;
-                    $checkinDates = $booking_room->room->bookings->map(fn($booking) => $booking->check_in)->toArray();
-                    for ($i = 1; $i < 15; $i++) {
-                        $date = Carbon::parse($booking->check_out)->endOf('day');
-                        $date->addDay($i);
-                        $dateStr = $date->format('Y-m-d');
-                        if (!in_array($dateStr, $checkinDates, true)) {
-                            $availableDatesCount++;
-                        } else {
-                            break;
-                        }
-                    }
-                    $availableDatesCounts[$booking_room->id] = $availableDatesCount;
+                    $room = Room::find($booking_room->room_id);
+                    $afterFirstCheckinDate = $room->bookingRooms->filter(function ($br) use ($booking_room) {
+                        return Carbon::createFromFormat('Y-m-d H:i:s', $br->check_in)->greaterThan(Carbon::createFromFormat('Y-m-d H:i:s', $booking_room->check_out));
+                    })->min('check_in');
+                    $availableDatesCounts[$booking_room->id] = $afterFirstCheckinDate !== null ? Carbon::createFromFormat('Y-m-d H:i:s', $afterFirstCheckinDate)->diffInDays
+                    (Carbon::createFromFormat('Y-m-d H:i:s', $booking_room->check_out)) : null;
                     $bookingGuests = BookingGuests::where('booking_room_id', $booking_room->id)->get();
                     return [
                         'booking_room_id' => $booking_room->id,
@@ -489,6 +528,7 @@ class BookingController extends Controller
                                 'amount' => $payment->amount,
                                 'amount_formatted' => number_format($payment->amount, 2, ',', '.') . ' ' .
                                     $document->currency,
+                                'description' => $payment->transaction->description,
                             ]),
                             'balance' => round($document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2),
                             'balance_formatted' => number_format(round($document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount)->first() - $document->payments->map(fn($payment) => $payment->amount)->sum(), 2), 2, ',', '.') . ' ' . $document->currency,
@@ -504,12 +544,12 @@ class BookingController extends Controller
                             'citizen' => Citizen::find($booking_guest->guest->citizen_id)->name,
                             'identification_number' => $booking_guest->guest->identification_number,
                             'can_be_check_in' => !$booking_guest->check_in && Carbon::now()->isBetween(Carbon::parse
-                                ($booking_room->check_in),
-                                    Carbon::parse($booking_room->check_out)),
+                                ($booking_room->check_in)->sub(14, 'hours'),
+                                    Carbon::parse($booking_room->check_out)->add(13, 'hours')),
                             'can_be_check_out' => $booking_guest->check_in && !$booking_guest->check_out &&
                                 Carbon::now()->isBetween(Carbon::parse
-                                ($booking_room->check_in),
-                                    Carbon::parse($booking_room->check_out)),
+                                ($booking_room->check_in)->sub(14, 'hours'),
+                                    Carbon::parse($booking_room->check_out)->add(13, 'hours')),
                             'is_check_in' => $booking_guest->check_in,
                             'is_check_out' => $booking_guest->check_out,
                             'status' => $booking_guest->status,
@@ -520,7 +560,7 @@ class BookingController extends Controller
                             'check_in_kbs' => $booking_guest->check_in_kbs,
                             'check_out_kbs' => $booking_guest->check_out_kbs,
                         ]),
-                        'extendable_number_of_days' => $availableDatesCount,
+                        'extendable_number_of_days' => $availableDatesCounts[$booking_room->id],
                     ];
                 }),
             ],
@@ -556,7 +596,7 @@ class BookingController extends Controller
             'banks' => Bank::select(['id', 'name'])->get(),
             'remaining_balance' => $remainingBalance,
             'remaining_balance_formatted' => number_format($remainingBalance, 2, '.', ',') . ' ' . $this->settings->currency['value'],
-            'extendable_number_of_days' => collect($availableDatesCounts)->min(),
+            'extendable_number_of_days' => collect($availableDatesCounts)->unique()->min(),
             'booking_messages' => $booking->notes,
         ]);
     }
@@ -675,46 +715,5 @@ class BookingController extends Controller
     {
         $booking->delete();
         return redirect()->route('hotel.bookings.index')->with('success', 'Rezervasyon başarıyla silindi.');
-    }
-
-    /**
-     * @return array
-     * @throws RandomException
-     */
-    protected function getRandomColors(): array
-    {
-        $maxBrightness = 200;  // Minimum brightness for background color
-        $minTextColorDiff = 150;  // Minimum difference in brightness for text color
-        $maxAttempts = 10;  // Maximum attempts to find suitable colors
-
-        $attempts = 0;
-        do {
-            // Generate a random background color
-            $backgroundColor = "#" . str_pad(dechex(random_int(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
-
-            // Calculate brightness of the background color
-            [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
-            $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
-
-            $attempts++;
-
-            // Check if the brightness and contrast conditions are met
-        } while ($brightness > $maxBrightness && $attempts < $maxAttempts);
-
-        // Calculate text color based on background brightness
-        $textColor = ($brightness > 128) ? "#000000" : "#FFFFFF";
-
-        // Calculate a slightly darker border color
-        [$r, $g, $b] = sscanf($backgroundColor, "#%02x%02x%02x");
-        $borderColorR = max(0, $r - 20);
-        $borderColorG = max(0, $g - 20);
-        $borderColorB = max(0, $b - 20);
-        $borderColor = sprintf("#%02x%02x%02x", $borderColorR, $borderColorG, $borderColorB);
-
-        return array(
-            "backgroundColor" => $backgroundColor,
-            "textColor" => $textColor,
-            "borderColor" => $borderColor
-        );
     }
 }
