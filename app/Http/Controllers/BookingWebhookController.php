@@ -18,6 +18,7 @@ use App\Models\Room;
 use App\Models\Tax;
 use App\Models\Tenant;
 use App\Models\TypeHasView;
+use App\Services\VerimorSmsService;
 use App\Settings\HotelSettings;
 use App\Settings\PricingPolicySettings;
 use Illuminate\Database\Eloquent\Collection;
@@ -532,7 +533,12 @@ class BookingWebhookController extends Controller
                         $booking->rooms->first()->room->roomType->name,
                         $booking->channel->name
                     ));
-                  
+
+
+                    if($booking->channel_id < 122) {
+                        (new VerimorSmsService())->sendSms($hotel->phone, sprintf('%s satış kanalından rezervasyon gelmiştir. otelyonet.com' , $booking->channel->name));
+                    }
+
                     return [
 //                        'message' => 'Booking ' . $webhookData['reason'] . ' successfully',
                         'status' => 'ok',
