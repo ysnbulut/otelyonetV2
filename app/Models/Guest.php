@@ -65,4 +65,9 @@ class Guest extends Model
     {
         return $this->belongsToMany(BookingRoom::class, 'booking_guests', 'guest_id', 'booking_room_id');
     }
+
+    public function citizen(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Citizen::class, 'id', 'citizen_id');
+    }
 }

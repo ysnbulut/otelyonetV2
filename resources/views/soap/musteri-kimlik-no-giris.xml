@@ -1,0 +1,21 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <MusteriKimlikNoGiris xmlns="http://tempuri.org/">
+            <KullaniciTC>{{ KULLANICI_TC }}</KullaniciTC>
+            <TssKod>{{ TSS_KOD }}</TssKod>
+            <Sifre>{{ SIFRE }}</Sifre>
+            <musteri xmlns:q1="http://schemas.datacontract.org/2004/07/KBS_Tesis_Servis">
+                <q1:GRSTRH>{{ GRSTRH }}</q1:GRSTRH>
+                <q1:ILERITARIHLI>false</q1:ILERITARIHLI>
+                <q1:KIMLIKNO>{{ KIMLIKNO }}</q1:KIMLIKNO>
+                <q1:KULLANIMSEKLI xmlns:q2="http://schemas.datacontract.org/2004/07/KBS_Model">{{ KULLANIMSEKLI }}</q1:KULLANIMSEKLI>
+                <q1:ODANO>{{ ODANO }}</q1:ODANO>
+                <q1:PLKNO>{{ PLKNO }}</q1:PLKNO>
+                <q1:ADI>{{ ADI }}</q1:ADI>
+                <q1:SOYADI>{{ SOYADI }}</q1:SOYADI>
+                <q1:TELNO>{{ TELNO }}</q1:TELNO>
+                <q1:ULKKOD xmlns:q2="http://schemas.datacontract.org/2004/07/KBS_Model">{{ ULKKOD }}</q1:ULKKOD>
+            </musteri>
+        </MusteriKimlikNoGiris>
+    </s:Body>
+</s:Envelope>
