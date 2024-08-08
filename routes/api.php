@@ -29,5 +29,9 @@ Route::middleware(['api'])->get('/', function () {
 
 Route::middleware(['api'])->post('/exchange/amount', [CurrencyController::class, 'amountConvert'])->name('amount.exchange');
 
-Route::middleware(['api'])->post('/{tenant}/webhook/booking', [BookingWebhookController::class, 'handleWebhook'])->name
-('booking.webhook');
+Route::middleware(['api'])->post('/{tenant}/webhook/booking', [BookingWebhookController::class, 'handleWebhook'])->name('booking.webhook');
+
+Route::middleware(['api'])->prefix('id-statement')->group(function () {
+    Route::get('{tenant}/{type}/{guest}', [\App\Http\Controllers\Hotel\IDStatementController::class, 'store'])->name('hotel.id.statement.store');
+    Route::get('{tenant}/{type}/{guest}/destroy', [\App\Http\Controllers\Hotel\IDStatementController::class, 'destroy'])->name('hotel.id.statement.destroy');
+});
