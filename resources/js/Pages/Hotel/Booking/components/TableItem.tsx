@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {FormCheck} from '@/Components/Form'
 import {twMerge} from 'tailwind-merge'
 import Lucide from '@/Components/Lucide'
+import Tippy from '@/Components/Tippy'
 
 interface TableItemProps {
 	index: number
@@ -96,15 +97,28 @@ function TableItem(props: TableItemProps) {
 				style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}
 				className="border-none text-xs">
 				{props.guest.check_in_kbs ? (
-					<Lucide
-						icon="Check"
-						className="float-right mr-1 h-4 w-4 text-success"
-					/>
+					props.guest.check_out_kbs ? (
+						<Tippy content="KBS Çıkış Bildirimi Yapıldı">
+							<Lucide
+								icon="CheckCheck"
+								className="float-right mr-1 h-4 w-4 text-success"
+							/>
+						</Tippy>
+					) : (
+						<Tippy content="KBS Giriş Bildirimi Yapıldı">
+							<Lucide
+								icon="Check"
+								className="float-right mr-1 h-4 w-4 text-success"
+							/>
+						</Tippy>
+					)
 				) : (
-					<Lucide
-						icon="X"
-						className="float-right mr-1 h-4 w-4 text-danger"
-					/>
+					<Tippy content="KBS Bildirimi Yapılmadı">
+						<Lucide
+							icon="X"
+							className="float-right mr-1 h-4 w-4 text-danger"
+						/>
+					</Tippy>
 				)}
 			</td>
 		</tr>

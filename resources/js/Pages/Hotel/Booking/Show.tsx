@@ -332,117 +332,117 @@ function Show(props: PageProps) {
 							<div className="mt-2 flex w-full justify-end gap-3">
 								{dayjs(props.booking.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 									<>
-										{((props.extendable_number_of_days !== null && props.extendable_number_of_days > 0) || props.extendable_number_of_days === null) && (
-											<>
-												<Button
-													variant="soft-success"
-													ref={buttonRef}
-													onClick={(e: any) => {
-														e.preventDefault()
-														handleShowLitepicker()
-													}}
-													className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-													<Lucide
-														icon="CalendarPlus"
-														className="mr-1 h-5 w-5"
-													/>
-													SÜREYİ UZAT
-													<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{expendableDays}</span>
-												</Button>
-												<Litepicker
-													ref={expendableDaysPicker}
-													className="hidden"
-													id="check_in"
-													value={`${props.booking.check_out} - ${props.booking.check_out}`}
-													options={{
-														lang: 'tr-TR',
-														singleMode: false,
-														// elementEnd: checkOutPicker.current,
-														autoApply: false,
-														selectBackward: false,
-														selectForward: true,
-														resetButton: true,
-														autoRefresh: true,
-														allowRepick: true,
-														numberOfColumns: 1,
-														numberOfMonths: 1,
-														startDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
-														endDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'), // Başlangıç için varsayılan bitiş tarihi
-														tooltipText: {
-															one: 'gece',
-															other: 'gece',
-														},
-														tooltipNumber: (totalDays) => {
-															return totalDays - 1
-														},
-														format: 'DD.MM.YYYY',
-														plugins: ['mobilefriendly'],
-														mobileFriendly: true,
-														lockDaysFormat: 'YYYY-MM-DD',
-														lockDaysFilter: (date1: DateTime | null) => {
-															if (date1) {
-																const date1Dayjs = dayjs(date1.toJSDate())
-																if (date1Dayjs.isBefore(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
-																	return true
-																}
-																if (props.extendable_number_of_days !== null) {
-																	if (date1Dayjs.isAfter(dayjs(props.booking.check_out, 'DD.MM.YYYY').add(props.extendable_number_of_days, 'day'))) {
-																		return true
-																	}
-																}
-															}
-															return false
-														},
-													}}
-													onChange={(date: string) => {
-														const dates = date.split(' - ')
-														let expendableStartDay = dates[0]
-														let expendableEndDay = dates[1]
-														if (!dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
-															Toast.fire({
-																icon: 'error',
-																title: 'Süre Uzatma başlangıç tarihi rezervasyon çıkış tarihinden farklı olamaz!',
-															})
-															//Burda Litepickerin tarihini sıfırlamak lazım
-															if (expendableDaysPicker.current?.litePickerInstance) {
-																expendableDaysPicker.current.litePickerInstance.setDateRange(
-																	dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
-																	dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'),
-																)
-															}
-														}
-														if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {
-															Toast.fire({
-																icon: 'info',
-																title: 'En az 1 gece uzatılabilir!',
-															})
-														}
-														console.log('date', date)
-													}}
-												/>
-												<ExpendBookingPeriod
-													open={expendBookingPeriodModalOpen}
-													onClose={setExpendBookingPeriodModalOpen}
-												/>
-											</>
-										)}
-										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') &&
-											bookingRooms.every((room) => room.guests.every((guest) => guest.is_check_in || room.guests.length === 0)) && (
-												<Button
-													variant="soft-pending"
-													onClick={(e: any) => {
-														e.preventDefault()
-														handleFinishBooking()
-													}}
-													className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
-													<Lucide
-														icon="CalendarMinus"
-														className="mr-1 h-5 w-5"
-													/>
-													ERKEN BİTİR
-												</Button>
-											)}
-										{['reception', 'agency'].includes(props.booking.channel_code) && dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
+										{/*{((props.extendable_number_of_days !== null && props.extendable_number_of_days > 0) || props.extendable_number_of_days === null) && (*/}
+										{/*	<>*/}
+										{/*		<Button*/}
+										{/*			variant="soft-success"*/}
+										{/*			ref={buttonRef}*/}
+										{/*			onClick={(e: any) => {*/}
+										{/*				e.preventDefault()*/}
+										{/*				handleShowLitepicker()*/}
+										{/*			}}*/}
+										{/*			className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">*/}
+										{/*			<Lucide*/}
+										{/*				icon="CalendarPlus"*/}
+										{/*				className="mr-1 h-5 w-5"*/}
+										{/*			/>*/}
+										{/*			SÜREYİ UZAT*/}
+										{/*			<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{expendableDays}</span>*/}
+										{/*		</Button>*/}
+										{/*		<Litepicker*/}
+										{/*			ref={expendableDaysPicker}*/}
+										{/*			className="hidden"*/}
+										{/*			id="check_in"*/}
+										{/*			value={`${props.booking.check_out} - ${props.booking.check_out}`}*/}
+										{/*			options={{*/}
+										{/*				lang: 'tr-TR',*/}
+										{/*				singleMode: false,*/}
+										{/*				// elementEnd: checkOutPicker.current,*/}
+										{/*				autoApply: false,*/}
+										{/*				selectBackward: false,*/}
+										{/*				selectForward: true,*/}
+										{/*				resetButton: true,*/}
+										{/*				autoRefresh: true,*/}
+										{/*				allowRepick: true,*/}
+										{/*				numberOfColumns: 1,*/}
+										{/*				numberOfMonths: 1,*/}
+										{/*				startDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),*/}
+										{/*				endDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'), // Başlangıç için varsayılan bitiş tarihi*/}
+										{/*				tooltipText: {*/}
+										{/*					one: 'gece',*/}
+										{/*					other: 'gece',*/}
+										{/*				},*/}
+										{/*				tooltipNumber: (totalDays) => {*/}
+										{/*					return totalDays - 1*/}
+										{/*				},*/}
+										{/*				format: 'DD.MM.YYYY',*/}
+										{/*				plugins: ['mobilefriendly'],*/}
+										{/*				mobileFriendly: true,*/}
+										{/*				lockDaysFormat: 'YYYY-MM-DD',*/}
+										{/*				lockDaysFilter: (date1: DateTime | null) => {*/}
+										{/*					if (date1) {*/}
+										{/*						const date1Dayjs = dayjs(date1.toJSDate())*/}
+										{/*						if (date1Dayjs.isBefore(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {*/}
+										{/*							return true*/}
+										{/*						}*/}
+										{/*						if (props.extendable_number_of_days !== null) {*/}
+										{/*							if (date1Dayjs.isAfter(dayjs(props.booking.check_out, 'DD.MM.YYYY').add(props.extendable_number_of_days, 'day'))) {*/}
+										{/*								return true*/}
+										{/*							}*/}
+										{/*						}*/}
+										{/*					}*/}
+										{/*					return false*/}
+										{/*				},*/}
+										{/*			}}*/}
+										{/*			onChange={(date: string) => {*/}
+										{/*				const dates = date.split(' - ')*/}
+										{/*				let expendableStartDay = dates[0]*/}
+										{/*				let expendableEndDay = dates[1]*/}
+										{/*				if (!dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {*/}
+										{/*					Toast.fire({*/}
+										{/*						icon: 'error',*/}
+										{/*						title: 'Süre Uzatma başlangıç tarihi rezervasyon çıkış tarihinden farklı olamaz!',*/}
+										{/*					})*/}
+										{/*					//Burda Litepickerin tarihini sıfırlamak lazım*/}
+										{/*					if (expendableDaysPicker.current?.litePickerInstance) {*/}
+										{/*						expendableDaysPicker.current.litePickerInstance.setDateRange(*/}
+										{/*							dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),*/}
+										{/*							dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'),*/}
+										{/*						)*/}
+										{/*					}*/}
+										{/*				}*/}
+										{/*				if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {*/}
+										{/*					Toast.fire({*/}
+										{/*						icon: 'info',*/}
+										{/*						title: 'En az 1 gece uzatılabilir!',*/}
+										{/*					})*/}
+										{/*				}*/}
+										{/*				console.log('date', date)*/}
+										{/*			}}*/}
+										{/*		/>*/}
+										{/*		<ExpendBookingPeriod*/}
+										{/*			open={expendBookingPeriodModalOpen}*/}
+										{/*			onClose={setExpendBookingPeriodModalOpen}*/}
+										{/*		/>*/}
+										{/*	</>*/}
+										{/*)}*/}
+										{/*{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') &&*/}
+										{/*	bookingRooms.every((room) => room.guests.every((guest) => guest.is_check_in || room.guests.length === 0)) && (*/}
+										{/*		<Button*/}
+										{/*			variant="soft-pending"*/}
+										{/*			onClick={(e: any) => {*/}
+										{/*				e.preventDefault()*/}
+										{/*				handleFinishBooking()*/}
+										{/*			}}*/}
+										{/*			className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">*/}
+										{/*			<Lucide*/}
+										{/*				icon="CalendarMinus"*/}
+										{/*				className="mr-1 h-5 w-5"*/}
+										{/*			/>*/}
+										{/*			ERKEN BİTİR*/}
+										{/*		</Button>*/}
+										{/*	)}*/}
+										{['reception', 'agency'].includes(props.booking.channel_code) && (
 											<Button
 												variant="soft-danger"
 												onClick={(e: any) => bookingCancel(e)}

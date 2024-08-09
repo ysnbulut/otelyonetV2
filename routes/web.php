@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{hotel}/edit', [HotelController::class, 'edit'])->name('admin.hotels.edit');
         Route::put('/{hotel}', [HotelController::class, 'update'])->name('admin.hotels.update');
         Route::delete('/{hotel}', [HotelController::class, 'destroy'])->name('admin.hotels.destroy');
-        Route::put('/{hotel}/channel_manager', [HotelController::class, 'channel_manager'])->name('admin.hotels.channe_manager');
+        Route::put('/{hotel}/settings', [HotelController::class, 'settings'])->name('admin.hotels.settings');
         Route::post('/{hotel}/cmroom', [HotelController::class, 'CmRoomsStore'])->name('admin.hotels.cmroomstore');
         Route::get('/{hotel}/active_channels', [HotelController::class, 'setActiveChannels'])->name('admin.hotels.active_channels');
         Route::get('/{hotel}/retrieve_reservations', [HotelController::class, 'retrieveReservations'])->name('admin.hotels.retrieve_reservations');
@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
 //    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 //    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-Route::get('/', [IndexController::class, 'index'])->name('site.index');
+//Route::get('/', [IndexController::class, 'index'])->name('site.index');
 
 Route::get('/syncwebhookerrors', [SyncController::class, 'index'])->name('test.index');
 

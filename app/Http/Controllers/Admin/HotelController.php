@@ -187,7 +187,7 @@ class HotelController extends Controller
 
     /**
      */
-    public function channel_manager(Hotel $hotel, HotelChannelManagerStoreRequest $request): RedirectResponse
+    public function settings(Hotel $hotel, HotelChannelManagerStoreRequest $request): RedirectResponse
     {
         $tenant = $hotel->tenant;
         $request->validated();
@@ -207,18 +207,26 @@ class HotelController extends Controller
                     $settingsData['api_settings']['hr_id'] = $request->api_hr_id;
                 }
             }
+            if ($request->kbs !== 'closed' && $request->kbs !== $settingsData['kbs']['value']) {
+                $settingsData['kbs']['value'] = $request->kbs;
+                $settingsData['kbs_settings']['TssKod'] = $request->TssKod;
+                $settingsData['kbs_settings']['KullaniciTC'] = $request->KullaniciTC;
+                $settingsData['kbs_settings']['Sifre'] = $request->Sifre;
+            } else {
+                if ($request->kbs === 'closed') {
+                    $settingsData['kbs']['value'] = $request->kbs;
+                    $settingsData['kbs_settings'] = [];
+                } else {
+                    $settingsData['kbs_settings']['TssKod'] = $request->TssKod;
+                    $settingsData['kbs_settings']['KullaniciTC'] = $request->KullaniciTC;
+                    $settingsData['kbs_settings']['Sifre'] = $request->Sifre;
+                }
+            }
             $settings->fill($settingsData);
             $settings->save();
         });
-        if ($request->channel_manager === 'closed') {
-            redirect()->back()->with('success', 'Kanal yönecisi kapatıldı.');
-        }
 
-        if ($request->api_token !== null && $request->api_hr_id !== null) {
-            return redirect()->back()->with('success', 'Kanal yöneticisi bilgileri güncellendi.');
-        }
-
-        return redirect()->back()->withErrors(['channel_manager' => 'Kanal yöneticisi güncellenemedi.']);
+        return redirect()->back()->with(['settings' => 'Ayarlar Güncellendi.']);
     }
 
     public function setActiveChannels(Hotel $hotel)

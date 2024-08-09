@@ -16,5 +16,27 @@
     ],
     "value": "closed"
   },
-  "api_settings" : {}
+  "api_settings": {},
+  "kbs": {
+    "label": "Kimlik Bildirim Sistemi",
+    "description": "Otelin kullanacağı kimlik bildirim sistemini belirler Örn: Polis, Jandarma gibi...",
+    "name": "kbs",
+    "type": "select",
+    "options": [
+      {
+        "label": "Jandarma",
+        "value": "jkbs"
+      },
+      {
+        "label": "Polis",
+        "value": "pkbs"
+      },
+      {
+        "label": "Kapalı",
+        "value": "closed"
+      }
+    ],
+    "value": "closed"
+  },
+  "kbs_settings": {}
 }

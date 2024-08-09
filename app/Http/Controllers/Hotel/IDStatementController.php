@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Hotel;
 
+use App\Exceptions\SoapException;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Interfaces\IDStatement;
+use App\Http\Requests\UpdateIDStatementUpdateRequest;
 use App\Models\BookingGuests;
 use App\Models\Customer;
 use App\Models\Tenant;
@@ -15,95 +17,122 @@ use Illuminate\Http\Request;
 class IDStatementController extends Controller implements IDStatement
 {
 
-    public $type;
+    public string $type;
 
-    public $hotelSettings;
+    public HotelSettings $hotelSettings;
 
-    public $services;
+    public KimlikBildirimService $services;
 
     public function set(string $type = 'jkb'): void
     {
         $this->type = $type;
     }
 
-    public function store(Tenant $tenant, $type, $guest)
+    public function store(UpdateIDStatementUpdateRequest $request): void
     {
 
-        $this->set($type);
+        $this->hotelSettings = new HotelSettings();
+        $this->set($this->hotelSettings->kbs['value']);
 
         $method = $this->type;
 
         if (method_exists($this, $method)) {
-            call_user_func_array([$this, $method], [$tenant, $guest]);
+            call_user_func_array([$this, $method], [$request->booking_guests]);
         } else {
             throw new \Exception("{$method} Bulunamadı.");
         }
     }
 
-    public function jkb($hotel, $guest): void
+    /**
+     * @throws SoapException
+     */
+    public function jkbs(array $guests): \Illuminate\Http\RedirectResponse
     {
-        $hotel->run(function ($hotel) use ($guest) {
-            $booking = BookingGuests::whereGuestId($guest)->firstOrFail();
+        $responses = [];
+        foreach ($guests as $guest) {
+            $bookingGuest = BookingGuests::findOrFail($guest);
             $this->hotelSettings = new HotelSettings();
-            $this->services = (new KimlikBildirimService($this->hotelSettings->kbs['TssKod'], $this->hotelSettings->kbs['KullaniciTC'], $this->hotelSettings->kbs['Sifre']));
-            if($booking->guest->citizen->name == 'TURKIYE') {
+            $this->services = (new KimlikBildirimService($this->hotelSettings->kbs_settings['TssKod'], $this->hotelSettings->kbs_settings['KullaniciTC'], $this->hotelSettings->kbs_settings['Sifre']));
+            if ($bookingGuest->guest->citizen->name === 'TURKIYE') {
                 $response = $this->services->musteriKimlikNoGiris([
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ?  $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
-                    'KIMLIKNO' => $booking->guest->identification_number,
+                    'GRSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_in_date)) ? $bookingGuest->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'KIMLIKNO' => $bookingGuest->guest->identification_number,
                     'KULLANIMSEKLI' => 'KONAKLAMA',
-                    'ODANO' => $booking->booking_room->room->name,
+                    'ODANO' => $bookingGuest->booking_room->room->name,
                     'PLKNO' => '',
-                    'ADI' => $booking->guest->name,
-                    'SOYADI' => $booking->guest->surname,
-                    'TELNO' => $booking->guest->phone,
+                    'ADI' => $bookingGuest->guest->name,
+                    'SOYADI' => $bookingGuest->guest->surname,
+                    'TELNO' => $bookingGuest->guest->phone,
                     'ULKKOD' => 'TURKIYE',
                 ]);
-
+                if ($response['aBasarili'] === 'true') {
+                    $bookingGuest->check_in_kbs = true;
+                    $bookingGuest->save();
+                }
+                $responses[] = $response;
             } else {
-
                 $response = $this->services->musteriYabanciGiris([
-                    'ADI' => $booking->guest->name,
-                    'SOYADI' => $booking->guest->surname,
+                    'ADI' => $bookingGuest->guest->name,
+                    'SOYADI' => $bookingGuest->guest->surname,
                     'ANAADI' => '',
                     'BABAADI' => '',
-                    'BELGENO' => $booking->guest->identification_number,
+                    'BELGENO' => $bookingGuest->guest->identification_number,
                     'CINSIYET' => '',
-                    'DOGUMTARIHI' => sprintf('%sT00:00:00', $booking->guest->birthday),
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ?  $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'DOGUMTARIHI' => sprintf('%sT00:00:00', $bookingGuest->guest->birthday),
+                    'GRSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_in_date)) ? $bookingGuest->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
                     'MEDENIHAL' => 'EVLI', // EVLI, BEKAR
-                    'ODANO' => $booking->booking_room->room->name,
+                    'ODANO' => $bookingGuest->booking_room->room->name,
                     'PLKNO' => '',
-                    'TELNO' => $booking->guest->phone,
-                    'ULKKOD' => $booking->guest->citizen->name
+                    'TELNO' => $bookingGuest->guest->phone,
+                    'ULKKOD' => $bookingGuest->guest->citizen->name
                 ]);
+                if ($response['aBasarili'] === 'true') {
+                    $bookingGuest->check_in_kbs = true;
+                    $bookingGuest->save();
+                }
+                $responses[] = $response;
             }
+        }
 
-            return response()->json($response);
-        });
+        return redirect()->back()->with('success', $responses);
     }
 
-    public function destroy(Tenant $tenant, $type, $guest)
+    /**
+     * @throws SoapException
+     */
+    public function destroy(UpdateIDStatementUpdateRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $tenant->run(function ($hotel) use ($guest) {
-            $booking = BookingGuests::whereGuestId($guest)->firstOrFail();
+        $responses = [];
+        foreach ($request->booking_guests as $guest) {
+            $bookingGuest = BookingGuests::findOrFail($guest);
             $this->hotelSettings = new HotelSettings();
-            $this->services = (new KimlikBildirimService($this->hotelSettings->kbs['TssKod'], $this->hotelSettings->kbs['KullaniciTC'], $this->hotelSettings->kbs['Sifre']));
-            if($booking->guest->citizen->name == 'TURKIYE') {
+            $this->services = (new KimlikBildirimService($this->hotelSettings->kbs_settings['TssKod'], $this->hotelSettings->kbs_settings['KullaniciTC'], $this->hotelSettings->kbs_settings['Sifre']));
+            if ($bookingGuest->guest->citizen->name === 'TURKIYE') {
                 $response = $this->services->musteriKimlikNoCikis(
-                [
-                    'CKSTIP' => 'TESISTENCIKIS',
-                    'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ?  $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
-                    'KIMLIKNO' => $booking->guest->identification_number,
-                ]);
-            }   else {
+                    [
+                        'CKSTIP' => 'TESISTENCIKIS',
+                        'CKSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_out_date)) ? $bookingGuest->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                        'KIMLIKNO' => $bookingGuest->guest->identification_number,
+                    ]);
+                if ($response['aBasarili'] === 'true') {
+                    $bookingGuest->check_out_kbs = true;
+                    $bookingGuest->save();
+                }
+                $responses[] = $response;
+            } else {
                 $response = $this->services->musteriYabanciCikis([
                     'CKSTIP' => 'TESISTENCIKIS',
-                    'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ?  $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
-                    'BELGENO' => $booking->guest->identification_number,
+                    'CKSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_out_date)) ? $bookingGuest->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'BELGENO' => $bookingGuest->guest->identification_number,
                 ]);
+                if ($response['aBasarili'] === 'true') {
+                    $bookingGuest->check_out_kbs = true;
+                    $bookingGuest->save();
+                }
+                $responses[] = $response;
             }
+        }
 
-            return response()->json($response);
-        });
+        return redirect()->back()->with('success', $responses);
     }
 }

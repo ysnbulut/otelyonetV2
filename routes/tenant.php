@@ -23,6 +23,7 @@ use App\Http\Controllers\Hotel\FloorController;
 use App\Http\Controllers\Hotel\GuestController;
 use App\Http\Controllers\Hotel\GuestVariationMultiplierController;
 use App\Http\Controllers\Hotel\HotelRunnerController;
+use App\Http\Controllers\Hotel\IDStatementController;
 use App\Http\Controllers\Hotel\ItemsController;
 use App\Http\Controllers\Hotel\PricingPolicySettingsController;
 use App\Http\Controllers\Hotel\RoleController;
@@ -407,5 +408,10 @@ Route::middleware([
         Route::get('/hotelrunner', [HotelRunnerController::class, 'api'])->name('hotel.channel_managers.hotelrunner');
 //        Route::get('/hotelrunner', [ChannelManagerController::class, 'index'])->name('hotel.channel_managers.hotelrunner.index');
 //        Route::get('/create', [ChannelManagerController::class, 'create'])->name('hotel.channel_managers.create');
+    });
+
+    Route::prefix('kbs')->middleware('auth')->group(function () {
+        Route::post('/check_in', [IDStatementController::class, 'store'])->name('hotel.kbs.check_in');
+        Route::post('/check_out', [IDStatementController::class, 'destroy'])->name('hotel.kbs.check_out');
     });
 });

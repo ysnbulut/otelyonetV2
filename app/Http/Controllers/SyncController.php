@@ -166,7 +166,7 @@ class SyncController extends Controller
                         }
                     }
                 }
-
             });
         }
+    }
 }

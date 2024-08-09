@@ -62,9 +62,24 @@ interface ChannelManagerProps {
 	description: string
 }
 
+interface KBSProps {
+	name: string
+	type: string
+	label: string
+	value: string
+	options: OptionProps[]
+	description: string
+}
+
 interface ApiSettingsProps {
 	token: string
 	hr_id: string
+}
+
+interface KBSSettingsProps {
+	TssKod: string
+	KullaniciTC: string
+	Sifre: string
 }
 
 interface TypeHasViewProps {
@@ -79,6 +94,8 @@ interface TypeHasViewProps {
 interface SettingProps {
 	channel_manager: ChannelManagerProps
 	api_settings: ApiSettingsProps | ''
+	kbs: KBSProps
+	kbs_settings: KBSSettingsProps | ''
 }
 
 interface PageProps {
@@ -132,8 +149,13 @@ function Show(props: PageProps) {
 		channel_manager: props.tenant.settings.channel_manager.value,
 		api_token: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.token : '' || '',
 		api_hr_id: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.hr_id : '' || '',
+		kbs: props.tenant.settings.kbs.value,
+		TssKod: props.tenant.settings.kbs_settings !== '' ? props.tenant.settings.kbs_settings.TssKod : '' || '',
+		KullaniciTC: props.tenant.settings.kbs_settings !== '' ? props.tenant.settings.kbs_settings.KullaniciTC : '' || '',
+		Sifre: props.tenant.settings.kbs_settings !== '' ? props.tenant.settings.kbs_settings.Sifre : '' || '',
 	})
-	const ref = useRef(null)
+	const refKBS = useRef(null)
+	const refCM = useRef(null)
 
 	const Toast = MySwal.mixin({
 		toast: true,
@@ -149,7 +171,7 @@ function Show(props: PageProps) {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		put(route('admin.hotels.channe_manager', props.hotel.id), {
+		put(route('admin.hotels.settings', props.hotel.id), {
 			preserveState: true,
 			preserveScroll: true,
 			onSuccess: () => {
@@ -328,6 +350,86 @@ function Show(props: PageProps) {
 				className="box mb-5 mt-4 flex flex-col p-5">
 				<div className="grid grid-cols-2 items-start gap-5 border-b py-5 last:border-b-0">
 					<FormLabel
+						htmlFor={props.tenant.settings.kbs.name}
+						className="col-span-2 flex flex-col gap-1 lg:col-span-1">
+						<h3 className="text-lg font-semibold">{props.tenant.settings.kbs.label}</h3>
+						<span className="text-xs text-slate-500">{props.tenant.settings.kbs.description}</span>
+					</FormLabel>
+					<div className="col-span-2 flex flex-col lg:col-span-1">
+						{props.tenant.settings.kbs.type === 'select' && (
+							<Select
+								ref={refKBS}
+								id={props.tenant.settings.kbs.name}
+								defaultValue={props.tenant.settings.kbs.options.find((option) => option.value === data.kbs)}
+								onChange={(e: any, action: any) => {
+									if (action.action === 'select-option') {
+										e && setData((data) => ({...data, kbs: e.value}))
+									} else if (action.action === 'clear') {
+										setData((data) => ({...data, kbs: 'closed'}))
+									} else {
+										setData((data) => ({...data, kbs: 'closed'}))
+									}
+								}}
+								options={props.tenant.settings.kbs.options}
+								className="remove-all my-select-container"
+								classNamePrefix="my-select"
+								styles={{
+									input: (base) => ({
+										...base,
+										'input:focus': {
+											boxShadow: 'none',
+										},
+									}),
+								}}
+								isClearable
+								hideSelectedOptions
+								placeholder={props.tenant.settings.kbs.label}
+							/>
+						)}
+						{errors.kbs && <div className="text-theme-6 mt-2 text-danger">{errors.kbs}</div>}
+					</div>
+				</div>
+				<div className="my-3 border-b-8 pb-5">
+					{data.kbs === 'jkbs' && (
+						<>
+							<h3 className="text-lg font-semibold">Jandarma KBS Ayarları</h3>
+							<div className="mt-2 flex gap-2">
+								<div className="w-full">
+									<FormLabel htmlFor="token">Tesis Kodu</FormLabel>
+									<FormInput
+										id="TssKod"
+										name="TssKod"
+										type="text"
+										value={data.TssKod}
+										onChange={(e) => setData((data) => ({...data, TssKod: e.target.value}))}
+									/>
+								</div>
+								<div className="w-full">
+									<FormLabel htmlFor="token">Kullanıcı Tc</FormLabel>
+									<FormInput
+										id="KullaniciTC"
+										name="KullaniciTC"
+										type="text"
+										value={data.KullaniciTC}
+										onChange={(e) => setData((data) => ({...data, KullaniciTC: e.target.value}))}
+									/>
+								</div>
+								<div className="w-full">
+									<FormLabel htmlFor="token">Şifre</FormLabel>
+									<FormInput
+										id="Sifre"
+										name="Sifre"
+										type="text"
+										value={data.Sifre}
+										onChange={(e) => setData((data) => ({...data, Sifre: e.target.value}))}
+									/>
+								</div>
+							</div>
+						</>
+					)}
+				</div>
+				<div className="grid grid-cols-2 items-start gap-5 border-b py-5 last:border-b-0">
+					<FormLabel
 						htmlFor={props.tenant.settings.channel_manager.name}
 						className="col-span-2 flex flex-col gap-1 lg:col-span-1">
 						<h3 className="text-lg font-semibold">{props.tenant.settings.channel_manager.label}</h3>
@@ -336,7 +438,7 @@ function Show(props: PageProps) {
 					<div className="col-span-2 flex flex-col lg:col-span-1">
 						{props.tenant.settings.channel_manager.type === 'select' && (
 							<Select
-								ref={ref}
+								ref={refCM}
 								id={props.tenant.settings.channel_manager.name}
 								defaultValue={props.tenant.settings.channel_manager.options.find((option) => option.value === data.channel_manager)}
 								onChange={(e: any, action: any) => {
@@ -362,24 +464,6 @@ function Show(props: PageProps) {
 								isClearable
 								hideSelectedOptions
 								placeholder={props.tenant.settings.channel_manager.label}
-							/>
-						)}
-						{props.tenant.settings.channel_manager.type === 'text' && (
-							<FormInput
-								id={props.tenant.settings.channel_manager.name}
-								name={props.tenant.settings.channel_manager.name}
-								type="text"
-								value={data.channel_manager}
-								onChange={(e) => setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))}
-							/>
-						)}
-						{props.tenant.settings.channel_manager.type === 'number' && (
-							<FormInput
-								id={props.tenant.settings.channel_manager.name}
-								name={props.tenant.settings.channel_manager.name}
-								type="number"
-								value={data.channel_manager}
-								onChange={(e) => setData((data) => ({...data, [props.tenant.settings.channel_manager.name]: e.target.value}))}
 							/>
 						)}
 						{errors.channel_manager && <div className="text-theme-6 mt-2 text-danger">{errors.channel_manager}</div>}
@@ -414,33 +498,33 @@ function Show(props: PageProps) {
 							</div>
 						</>
 					)}
-					<div className="mt-3 flex items-center justify-between">
-						{data.channel_manager !== 'closed' && data.api_hr_id && data.api_token && (
-							<Button
-								variant="soft-pending"
-								type="button"
-								onClick={(e: any) => {
-									setActiveChannels(e)
-								}}
-								className="flex gap-2">
-								Aktif Kanalları İşle
-								<Lucide
-									icon="ReplaceAll"
-									className="h-5 w-5 text-danger"
-								/>
-							</Button>
-						)}
+				</div>
+				<div className="mt-5 flex items-center justify-end border-t pt-5">
+					{data.channel_manager !== 'closed' && data.api_hr_id && data.api_token && (
 						<Button
-							variant="soft-secondary"
-							type="submit"
+							variant="soft-pending"
+							type="button"
+							onClick={(e: any) => {
+								setActiveChannels(e)
+							}}
 							className="flex gap-2">
-							{data.channel_manager === 'closed' ? 'Kaydet' : 'Odaları Getir'}
+							Aktif Kanalları İşle
 							<Lucide
-								icon="CheckCheck"
-								className="h-5 w-5 text-success"
+								icon="ReplaceAll"
+								className="h-5 w-5 text-danger"
 							/>
 						</Button>
-					</div>
+					)}
+					<Button
+						variant="soft-secondary"
+						type="submit"
+						className="float-right flex gap-2">
+						Kaydet
+						<Lucide
+							icon="CheckCheck"
+							className="h-5 w-5 text-success"
+						/>
+					</Button>
 				</div>
 			</form>
 

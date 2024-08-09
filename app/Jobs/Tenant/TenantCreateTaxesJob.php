@@ -40,8 +40,10 @@ class TenantCreateTaxesJob implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         $this->tenant->run(function () {
+            Tax::create(['name' => 'KDV %22', 'description' => 'Vergi', 'rate' => 22]);
             Tax::create(['name' => 'KDV %20', 'description' => 'Vergi', 'rate' => 20]);
             Tax::create(['name' => 'KDV %10', 'description' => 'Vergi', 'rate' => 10]);
+            Tax::create(['name' => 'KDV %12', 'description' => 'Vergi', 'rate' => 12]);
             Tax::create(['name' => 'KDV %8', 'description' => 'Vergi', 'rate' => 8]);
             Tax::create(['name' => 'KDV %1', 'description' => 'Vergi', 'rate' => 1]);
         });

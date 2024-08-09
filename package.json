@@ -78,6 +78,7 @@
     "@react-buddy/ide-toolbox": "^2.4.0",
     "@react-icons/all-files": "^4.1.0",
     "@reduxjs/toolkit": "^1.9.7",
+    "@sentry/react": "^8.25.0",
     "@types/react-datepicker": "^4.19.3",
     "chart.js": "^4.4.0",
     "cleave.js": "^1.6.0",

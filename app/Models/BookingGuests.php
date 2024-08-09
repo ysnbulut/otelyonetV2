@@ -44,6 +44,13 @@ class BookingGuests extends Model
         'check_out_kbs'
     ];
 
+    protected $casts = [
+        'check_in' => 'boolean',
+        'check_out' => 'boolean',
+        'check_in_kbs' => 'boolean',
+        'check_out_kbs' => 'boolean'
+    ];
+
     public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(BookingRoom::class);

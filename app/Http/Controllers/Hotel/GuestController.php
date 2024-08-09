@@ -18,12 +18,6 @@ class GuestController extends Controller
      * Display a listing of the resource.
      */
 
-    public function test()
-    {
-        $bguest = BookingRoom::find(5);
-        return $bguest->guests;
-    }
-
     public function index()
     {
         return Inertia::render('Hotel/Guest/Index', [
