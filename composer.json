@@ -10,9 +10,9 @@
   "require": {
     "php": "^8.2",
     "ext-intl": "*",
-    "ext-soap": "*",
-    "ext-simplexml": "*",
     "ext-libxml": "*",
+    "ext-simplexml": "*",
+    "ext-soap": "*",
     "aloha/twilio": "^5.0",
     "artisaninweb/laravel-soap": "0.3.0.10",
     "cknow/laravel-money": "^8.0",
@@ -29,6 +29,7 @@
     "pusher/pusher-php-server": "^7.2",
     "s-ichikawa/laravel-sendgrid-driver": "^4.0",
     "seld/jsonlint": "^1.10",
+    "sentry/sentry-laravel": "^4.7",
     "shiftonelabs/laravel-cascade-deletes": "^2.0",
     "spatie/laravel-activitylog": "^4.7",
     "spatie/laravel-permission": "^6.2",
@@ -36,8 +37,7 @@
     "sqids/sqids": "^0.4.1",
     "stancl/tenancy": "^3.7",
     "teknomavi/tcmb": "^1.0",
-    "tightenco/ziggy": "^1.0",
-    "ext-simplexml": "*"
+    "tightenco/ziggy": "^1.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

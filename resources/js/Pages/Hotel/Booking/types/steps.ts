@@ -79,8 +79,10 @@ export interface StepFourProps {
 	guests: GuestProps[]
 	checkedRooms: CheckedRoomsProps | undefined
 	citizens: CitizenProps[]
+	pricingPolicy: string
 	setStep: React.Dispatch<React.SetStateAction<number>>
 	data: StepOneDataProps[]
+	totalGuests: number
 	roomsGuests: RoomTypeRoomGuestsProps
 	setRoomsGuests: React.Dispatch<React.SetStateAction<RoomTypeRoomGuestsProps>>
 }

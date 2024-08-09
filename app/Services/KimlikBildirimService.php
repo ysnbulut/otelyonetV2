@@ -28,8 +28,9 @@ class KimlikBildirimService
         ]);
 
         $this->TSS_KOD = $TSS_KOD;
-        $this->KLN_TC = $KLN_TC;
+        $this->KLN_TC = (int)$KLN_TC;
         $this->KLN_SIFRE = $KLN_SIFRE;
+
     }
 
     /**
@@ -45,6 +46,7 @@ class KimlikBildirimService
     {
         try {
             $response = $this->client->__doRequest($this->fillSoapTemplate($templateContent, $parameters), $this->wsdl, $action, SOAP_1_1);
+
 
             if ($response === false) {
                 throw new SoapException('SOAP request failed. Last request: ' . $this->client->__getLastRequest());

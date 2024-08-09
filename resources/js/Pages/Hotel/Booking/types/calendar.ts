@@ -13,11 +13,15 @@ interface BookingsProps {
 	id: number
 	resourceId: number
 	typeHasViewId: number
+	booking_room_id: number
 	title: string
 	start: string
 	end: string
 	nights: number
 	earlyCheckOut: boolean
+	channel: string
+	channel_color: string
+	channel_bg_color: string
 	backgroundColor: string
 	textColor: string
 	borderColor: string

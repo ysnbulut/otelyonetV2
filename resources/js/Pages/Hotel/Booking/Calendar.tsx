@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import FullCalendar from '@fullcalendar/react'
 import interactionPlugin from '@fullcalendar/interaction'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -23,6 +23,8 @@ import {ResourceInput} from '@fullcalendar/resource'
 import Tippy from '@/Components/Tippy'
 import {EventDropArg, EventSourceInput} from '@fullcalendar/core'
 import axios from 'axios'
+import {twMerge} from 'tailwind-merge'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 
 moment.locale('tr')
 dayjs.extend(utc)
@@ -30,6 +32,7 @@ dayjs.extend(tz)
 dayjs.extend(customFormat)
 dayjs.tz.setDefault('Europe/Istanbul')
 dayjs.extend(isBetween)
+dayjs.extend(isSameOrBefore)
 
 function Calendar(props: PageProps) {
 	const calendarRef = React.useRef(null)
@@ -52,17 +55,21 @@ function Calendar(props: PageProps) {
 			id: booking.id,
 			url: route('hotel.bookings.show', booking.id),
 			resourceId: booking.resourceId,
+			bookingRoomId: booking.booking_room_id,
 			start: booking.start,
 			title: booking.title,
 			end: booking.end,
 			nights: booking.nights,
 			earlyCheckOut: booking.earlyCheckOut,
+			channel: booking.channel,
+			channel_color: booking.channel_color,
+			channel_bg_color: booking.channel_bg_color,
 			backgroundColor: booking.backgroundColor,
 			borderColor: booking.borderColor,
 			textColor: booking.textColor,
 			startEditable: false,
 			durationEditable: false,
-			resourceEditable: true,
+			resourceEditable: !dayjs(booking.start).isSameOrBefore(dayjs()),
 			allDay: false,
 			typeHasViewId: booking.typeHasViewId,
 		}
@@ -79,8 +86,6 @@ function Calendar(props: PageProps) {
 			type_id: room.type_and_view_id,
 		}
 	})
-
-	console.log(events)
 
 	return (
 		<>
@@ -204,10 +209,34 @@ function Calendar(props: PageProps) {
 							})
 							info.revert()
 						} else {
-							console.log(info)
-							// axios.put(route('hotel.bookings.update', info.event.id), {
-							// 	resourceId: info.newResource.id,
-							// })
+							console.log(info.event.extendedProps.bookingRoomId, parseInt(info.newResource?.id ?? '0'), parseInt('0'))
+							const room_id = parseInt(info.newResource?.id ?? '0')
+							if (room_id === 0) {
+								Toast.fire({
+									icon: 'error',
+									title: 'Oda Bulunamadı',
+								})
+								info.revert()
+							} else {
+								axios
+									.put(route('hotel.booking_rooms.update', info.event.extendedProps.bookingRoomId), {
+										room_id: room_id,
+									})
+									.then((response) => {
+										if (response.data.status === 'success') {
+											Toast.fire({
+												icon: 'success',
+												title: 'Oda numarası değiştirildi',
+											})
+										} else {
+											Toast.fire({
+												icon: 'error',
+												title: 'Oda numarası değiştirilemedi!',
+											})
+											info.revert()
+										}
+									})
+							}
 						}
 					}}
 					eventContent={(e) => {
@@ -217,6 +246,9 @@ function Calendar(props: PageProps) {
 									<div className="relative px-0.5">
 										<p className="overflow-clip whitespace-nowrap text-sm">{e.event.title}</p>
 										<p className="overflow-clip whitespace-nowrap text-sm">{e.event.extendedProps.nights}</p>
+										<span className={twMerge(e.event.extendedProps.channel_color, e.event.extendedProps.channel_bg_color, 'bottom-0 right-0 rounded px-1 py-0.5 text-[9px]')}>
+											{e.event.extendedProps.channel}
+										</span>
 										{e.event.extendedProps.earlyCheckOut && (
 											<Tippy
 												className="absolute right-0 top-0 h-4 w-4 rounded-full border-2 border-white bg-warning text-xs text-red-500 shadow-inner"

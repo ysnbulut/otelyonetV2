@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios'
 import ChannelManagerRooms from '@/Pages/Admin/Hotel/components/ChannelManagerRooms'
+import {twMerge} from 'tailwind-merge'
 
 dayjs.extend(customParseFormat)
 
@@ -90,6 +91,7 @@ interface PageProps {
 		settings: SettingProps
 	}
 	type_has_views: TypeHasViewProps[]
+	cmError: boolean
 	cm_rooms: CMRoomsProps[] | [] | undefined
 	channel_rooms: ChannelRoomProps[] | [] | undefined
 }
@@ -164,6 +166,36 @@ function Show(props: PageProps) {
 						title: errors.channel_manager,
 					})
 			},
+		})
+	}
+
+	const handleDelete = (e: any) => {
+		e.preventDefault()
+		MySwal.fire({
+			title: 'Otel Silme',
+			text: 'Otel silinecek, emin misiniz?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet, Sil',
+			cancelButtonText: 'İptal',
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				axios
+					.delete(route('admin.hotels.destroy', props.hotel.id))
+					.then((response) => {
+						console.log(response)
+						Toast.fire({
+							icon: 'success',
+							title: 'Otel başarıyla silindi',
+						})
+						router.visit(route('admin.hotels.index'))
+					})
+					.catch((error) => {
+						console.log(error)
+					})
+			}
 		})
 	}
 
@@ -268,6 +300,19 @@ function Show(props: PageProps) {
 						<span>{props.hotel.phone}</span>
 					</div>
 				</div>
+				<div className="flex flex-1 items-end justify-end gap-2">
+					<Button
+						variant="danger"
+						onClick={handleDelete}>
+						Sil
+					</Button>
+					<Button
+						variant="soft-primary"
+						as="a"
+						href={route('admin.hotels.edit', props.hotel.id)}>
+						Düzenle
+					</Button>
+				</div>
 			</div>
 			<div className="box mt-5 flex flex-col gap-1 p-5 lg:flex-row lg:gap-10">
 				<FormInput
@@ -352,6 +397,7 @@ function Show(props: PageProps) {
 										name="token"
 										type="text"
 										value={data.api_token}
+										className={twMerge('w-full', props.cmError ? 'border border-danger bg-danger/80 font-bold text-white' : 'border border-success bg-success/20 font-bold')}
 										onChange={(e) => setData((data) => ({...data, api_token: e.target.value}))}
 									/>
 								</div>

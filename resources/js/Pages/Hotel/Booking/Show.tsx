@@ -23,8 +23,6 @@ import {motion} from 'framer-motion'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import {DateTime} from 'litepicker/dist/types/datetime'
-import {Simulate} from 'react-dom/test-utils'
-import reset = Simulate.reset
 import ExpendBookingPeriod from '@/Pages/Hotel/Booking/components/ExpendBookingPeriod'
 
 dayjs.extend(isSameOrAfter)
@@ -76,17 +74,15 @@ function Show(props: PageProps) {
 		timer: 3000,
 		timerProgressBar: true,
 		didOpen: (toast) => {
-			// toast.addEventListener('mouseenter', MySwal.stopTimer)
-			// toast.addEventListener('mouseleave', MySwal.resumeTimer)
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
 		},
 	})
 
 	useEffect(() => {
 		setData((data) => ({...data, currency: 'TRY', bank_id: '', payment_method: '', description: ''}))
 		paymentTypeSelectRef.current?.selectOption(paymentTypeOptions[paymentDocumentIndex])
-		//TODO gereksiz oldu
-		const documents = props.booking.rooms.flatMap((room) => room.documents)
-		const document = documents.find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value)
+		const document = props.booking.rooms.flatMap((room) => room.documents).find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value)
 		if (document) {
 			if (paymentDocumentIndex > 0 && document.balance) {
 				setData((data) => ({
@@ -186,7 +182,7 @@ function Show(props: PageProps) {
 					description: '',
 				}))
 			},
-			preserveState: true,
+			preserveState: false,
 			preserveScroll: true,
 		})
 	}
@@ -200,6 +196,32 @@ function Show(props: PageProps) {
 					title: 'Rezervasyon iptal edildi',
 				})
 			},
+		})
+	}
+
+	const handleFinishBooking = () => {
+		MySwal.fire({
+			title: 'Rezervasyonu Erken Bitir',
+			text: 'Rezervasyonu erken bitirmek istediğinizden emin misiniz?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet',
+			cancelButtonText: 'Hayır',
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				props.booking.rooms.forEach((room) => {
+					room.daily_prices.forEach((dailyPrice) => {
+						console.log(dailyPrice)
+					})
+					room.documents.forEach((document) => {
+						document.payments.forEach((payment) => {
+							console.log(payment)
+						})
+					})
+				})
+			}
 		})
 	}
 
@@ -238,7 +260,6 @@ function Show(props: PageProps) {
 
 	const handleShowLitepicker = () => {
 		const litepicker = expendableDaysPicker.current // Litepicker'ın referansı
-
 		if (litepicker && litepicker.litePickerInstance) {
 			if (isLitepickerVisible) {
 				// Litepicker şu anda gösteriliyorsa, gizle
@@ -281,9 +302,7 @@ function Show(props: PageProps) {
 						<div className="-intro-y col-span-12 rounded-t-md border-b border-teal-700 bg-teal-600 px-4 py-5 dark:bg-teal-700/40">
 							<h3 className="rounded-md text-xl font-bold text-light">Rezervasyon Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-light lg:flex-row">
-								<Link
-									href={route('hotel.customers.show', props.customer.id)}
-									className="flex w-full flex-col text-sm font-semibold">
+								<div className="flex w-full flex-col text-sm font-semibold">
 									<span className="font-semibold">
 										Giriş Tarihi :<span className="ml-1 font-normal">{props.booking.check_in}</span>
 									</span>
@@ -293,7 +312,7 @@ function Show(props: PageProps) {
 									<span className="font-semibold">
 										Seçilen Oda Türleri :<span className="ml-1 font-normal">{bookingRooms.map((room) => room.room_type_full_name).join(', ')}</span>
 									</span>
-								</Link>
+								</div>
 								<div className="flex w-full flex-col text-sm font-semibold lg:ml-5">
 									<span className="font-semibold">
 										Konaklama Süresi :<span className="ml-1 font-normal">{props.booking.stay_duration_nights}</span>
@@ -393,7 +412,10 @@ function Show(props: PageProps) {
 															}
 														}
 														if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {
-															console.log(date)
+															Toast.fire({
+																icon: 'info',
+																title: 'En az 1 gece uzatılabilir!',
+															})
 														}
 														console.log('date', date)
 													}}
@@ -404,18 +426,23 @@ function Show(props: PageProps) {
 												/>
 											</>
 										)}
-										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') && (
-											<Button
-												variant="soft-pending"
-												className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
-												<Lucide
-													icon="CalendarMinus"
-													className="mr-1 h-5 w-5"
-												/>
-												ERKEN BİTİR
-											</Button>
-										)}
-										{['reception', 'agency'].includes(props.booking.channel_code) && (
+										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') &&
+											bookingRooms.every((room) => room.guests.every((guest) => guest.is_check_in || room.guests.length === 0)) && (
+												<Button
+													variant="soft-pending"
+													onClick={(e: any) => {
+														e.preventDefault()
+														handleFinishBooking()
+													}}
+													className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+													<Lucide
+														icon="CalendarMinus"
+														className="mr-1 h-5 w-5"
+													/>
+													ERKEN BİTİR
+												</Button>
+											)}
+										{['reception', 'agency'].includes(props.booking.channel_code) && dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 											<Button
 												variant="soft-danger"
 												onClick={(e: any) => bookingCancel(e)}
@@ -431,12 +458,10 @@ function Show(props: PageProps) {
 								)}
 							</div>
 						</div>
-						<div className="intro-y col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
+						<div className="intro-y relative col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Müşteri Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-dark lg:flex-row dark:text-light">
-								<Link
-									href={route('hotel.customers.show', props.customer.id)}
-									className="flex w-full flex-col text-sm font-semibold">
+								<div className="flex w-full flex-col text-sm font-semibold">
 									<span className="font-semibold">
 										Müşteri Türü :<span className="ml-1 font-normal">{props.customer.type}</span>
 									</span>
@@ -449,7 +474,7 @@ function Show(props: PageProps) {
 									<span className="font-semibold">
 										T.C. Kimlik No / Vergi No :<span className="ml-1 font-normal">{props.customer.tax_number}</span>
 									</span>
-								</Link>
+								</div>
 								<div className="flex w-full flex-col text-sm font-semibold lg:ml-5">
 									<span className="font-semibold">
 										Ülke :<span className="ml-1 font-normal">{props.customer.country}</span>
@@ -467,6 +492,14 @@ function Show(props: PageProps) {
 									</span>
 								</div>
 							</div>
+							<div className="absolute right-5 top-5">
+								<Link href={route('hotel.customers.show', props.customer.id)}>
+									<Lucide
+										icon="MousePointerSquareDashed"
+										className="text-black hover:h-7 hover:w-7 hover:-translate-y-0.5 hover:translate-x-0.5 dark:text-white"
+									/>
+								</Link>
+							</div>
 						</div>
 						<div className="col-span-12 border-b border-slate-200 bg-white px-4 py-5 dark:bg-darkmode-200/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Oda Bilgileri</h3>
@@ -478,6 +511,7 @@ function Show(props: PageProps) {
 										currency={props.currency}
 										taxes={props.taxes}
 										citizens={props.citizens}
+										pricingPolicy={props.pricing_policy}
 										items={props.items}
 										bookingRooms={bookingRooms}
 										setBookingRooms={setBookingRooms}

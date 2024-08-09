@@ -69,7 +69,7 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'calendar_colors' => 'json',
+        'calendar_colors' => 'array',
     ];
 
     protected $cascadeDeletes = ['rooms', 'cMBooking', 'notes', 'tasks', 'cancelReason'];

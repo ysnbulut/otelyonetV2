@@ -24,6 +24,7 @@ class BookingRoomsController extends Controller
     {
         $this->settings = new PricingPolicySettings();
     }
+
     public function addGuests(BookingRoomsAddGuestsRequest $request)
     {
 
@@ -107,9 +108,10 @@ class BookingRoomsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBookingRoomsRequest $request, BookingRoom $bookingRooms)
+    public function update(UpdateBookingRoomsRequest $request, BookingRoom $bookingRoom)
     {
-        //
+        return $bookingRoom->update($request->validated()) ?
+            response()->json(['status' => 'success', 'message' => 'Booking room updated successfully']) : response()->json(['status' => 'error', 'message' => 'Booking room could not be updated']);
     }
 
     /**
@@ -118,6 +120,7 @@ class BookingRoomsController extends Controller
     public function destroy($booking_room_id)
     {
         //TODO: Burası komple revize
+        //TODO: Fiyat iade vs varsa kontrol edilecek
         $bookingRoom = BookingRoom::find($booking_room_id);
         $bookingRoom->booking_guests()->delete();
         $deletedPrice = 0;
@@ -129,8 +132,8 @@ class BookingRoomsController extends Controller
         $booking = $bookingRoom->booking;
         $newTotalPrice = $booking->total_price->total_price - $deletedPrice;
         $newTax = round($newTotalPrice - ($newTotalPrice / (1 +
-                        ($this->settings->tax_rate['value'] /
-                            100))), 2);
+                    ($this->settings->tax_rate['value'] /
+                        100))), 2);
         $booking->total_price()->update([
             'discount' => $booking->total_price->discount - $deletedDiscount,
             'total_price' => $newTotalPrice,

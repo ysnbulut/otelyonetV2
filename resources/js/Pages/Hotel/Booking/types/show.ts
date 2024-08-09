@@ -85,6 +85,16 @@ export interface DocumentProps {
 	balance_formatted: string
 }
 
+interface DailyPricesProps {
+	date: string
+	original_price: number
+	original_price_formatted: string
+	discount: number
+	discount_formatted: string
+	price: number
+	price_formatted: string
+}
+
 export interface RoomsProps {
 	booking_room_id: number
 	id: number
@@ -97,6 +107,7 @@ export interface RoomsProps {
 	number_of_adults: number
 	number_of_children: number
 	children_ages: number[]
+	daily_prices: DailyPricesProps[]
 	documents: DocumentProps[]
 	guests: GuestsProps[]
 	extendable_number_of_days: number | null
@@ -206,6 +217,7 @@ export interface ItemsProps {
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
 	currency: string
 	accommodation_type: string
+	pricing_policy: string
 	citizens: CitizenProps[]
 	taxes: TaxesProps[]
 	items: ItemsProps[]

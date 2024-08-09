@@ -33,6 +33,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use Spatie\LaravelSettings\Migrations\SettingsMigrator;
 use JsonException;
@@ -166,11 +167,17 @@ class HotelController extends Controller
                     'cm_connected' => CMRoom::where('type_has_view_id', $typeHasView->id)->exists(),
                 ];
             })->toArray() : [];
+            $returnData['cmError'] = false;
             if ($settings->channel_manager['value'] !== 'closed') {
                 $channelManagers = new ChannelManagers($settings->channel_manager['value'], ['token' => $settings->api_settings['token'], 'hr_id' => $settings->api_settings['hr_id']]);
-                $channelManagerRooms = $channelManagers->getRooms()['rooms'] ?? [];
+                try {
+                    $channelManagerRooms = $channelManagers->getRooms()['rooms'] ?? [];
+                } catch (GuzzleException $e) {
+                    $channelManagerRooms = [];
+                    $returnData['cmError'] = true;
+                }
                 $collection = collect($channelManagerRooms);
-                $uniqueCollection = $collection->unique('inv_code')->values()->all();
+                $uniqueCollection = $collection->count() > 0 ? $collection->unique('inv_code')->values()->all() : [];
                 $returnData['cm_rooms'] = CMRoom::all();
                 $returnData['channel_rooms'] = $uniqueCollection;
             }
@@ -356,7 +363,7 @@ class HotelController extends Controller
                                                 . $settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'),
                                             'number_of_adults' => $room['total_adult'],
                                             'number_of_children' => count($room['child_ages']),
-                                            'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
+                                            'children_ages' => $room['child_ages'],
                                             'created_at' => Carbon::now(),
                                             'updated_at' => Carbon::now(),
                                         ]);
@@ -506,24 +513,55 @@ class HotelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateHotelsRequest $request, Hotel $hotels)
+    public function update(UpdateHotelsRequest $request, Hotel $hotel): RedirectResponse
     {
-        //
+        $request->validated();
+        $hotel->fill([
+            'status' => $request->status,
+            'name' => $request->name,
+            'register_date' => Carbon::parse($request->register_date)->format('Y-m-d'),
+            'renew_date' => Carbon::parse($request->renew_date)->format('Y-m-d'),
+            'price' => $request->price,
+            'renew_price' => $request->renew_price,
+            'title' => $request->title,
+            'address' => $request->address,
+            'province_id' => $request->province_id,
+            'district_id' => $request->district_id,
+            'tax_office_id' => $request->tax_office_id,
+            'tax_number' => $request->tax_number,
+            'phone' => $request->phone,
+            'email' => $request->email,
+        ]);
+        if ($hotel->isDirty()) {
+            $hotel->update($hotel->getDirty());
+            return redirect()->back()->with('success', 'Otel güncellendi.');
+        }
+
+        return redirect()->back()->with('success', 'Değişiklik yapılmadı.');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Hotel $hotels)
+    public function edit(Hotel $hotel): \Inertia\Response
     {
-        //
+        return Inertia::render('Admin/Hotel/Edit', [
+            'hotel' => [
+                ...$hotel->toArray(),
+                'subdomain' => explode('.', $hotel->tenant->domains->first()->domain)[0],
+            ],
+            'provinces' => Province::all(['id', 'name']),
+            'districts' => District::all(['id', 'province_id', 'name']),
+            'tax_offices' => TaxOffice::all(['id', 'province_id', 'tax_office']),
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Hotel $hotels)
+    public function destroy(Hotel $hotel): void
     {
-        //
+        $hotel->tenant->delete();
+        $hotel->forceDelete();
     }
 }

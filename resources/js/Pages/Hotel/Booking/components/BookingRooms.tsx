@@ -1,4 +1,4 @@
-import React, {createRef, useRef, useState} from 'react'
+import React, {createRef, useEffect, useRef, useState} from 'react'
 import dayjs from 'dayjs'
 import Tippy from '@/Components/Tippy'
 import Button from '@/Components/Button'
@@ -16,11 +16,13 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {DateTime} from 'litepicker/dist/types/datetime'
 import Litepicker, {LitepickerElement} from '@/Components/Litepicker'
+import {includes} from 'lodash'
 
 interface BookingRoomsProps {
 	room: RoomsProps
 	currency: string
 	citizens: CitizenProps[]
+	pricingPolicy: string
 	taxes: TaxesProps[]
 	items: ItemsProps[]
 	bookingRooms: RoomsProps[]
@@ -95,6 +97,12 @@ function BookingRooms(props: BookingRoomsProps) {
 			},
 		)
 	}
+
+	useEffect(() => {
+		const zaa = !roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_in)
+		console.log(zaa, roomGuests)
+		console.log('asdasd', !!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_out && !guest.can_be_check_in))
+	}, [selectedBookingGuests])
 
 	const handleSelectedGuestCheckIn = (e: any) => {
 		e.preventDefault()
@@ -269,47 +277,55 @@ function BookingRooms(props: BookingRoomsProps) {
 								if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {
 									expendableEndDay = dayjs().add(1, 'day').format('DD.MM.YYYY')
 								}
-								// setFirstStepData((data) => ({...data, check_in: checkIn, check_out: checkOut}))
-								// props.setStepOneResults(undefined)
 							}}
 						/>
 					</Tippy>
 				)}
-				{dayjs(props.room.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') && dayjs(props.room.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
+				{dayjs(props.room.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') &&
+					dayjs(props.room.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') &&
+					props.room.guests.every((guest) => guest.is_check_in || props.room.guests.length === 0) && (
+						<Tippy
+							content="Odayı Rezervasyonunu Erken Bitir"
+							className="text-xs">
+							<Button
+								className="px-1.5 py-1 dark:bg-opacity-80"
+								variant="pending"
+								onClick={() => handleDeleteBookingRoom(props.room.booking_room_id)}>
+								<Lucide
+									icon="CalendarMinus"
+									className="mr-1 h-4 w-4"
+								/>
+								Erken Bitir
+							</Button>
+						</Tippy>
+					)}
+				{/*TODO: Buranın Channel Manage rolayına backendden bak*/}
+				{props.bookingRooms.length > 1 && dayjs(props.check_in, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 					<Tippy
-						content="Odayı Rezervasyonunu Erken Bitir"
-						className="text-xs">
+						content="Odayı Rezervasyondan Çıkart"
+						className="">
 						<Button
-							className="px-1.5 py-1 dark:bg-opacity-80"
-							variant="pending"
+							className="px-1 py-0.5"
+							variant="danger"
 							onClick={() => handleDeleteBookingRoom(props.room.booking_room_id)}>
 							<Lucide
-								icon="CalendarMinus"
-								className="mr-1 h-4 w-4"
+								icon="X"
+								className="h-5 w-5"
 							/>
-							Erken Bitir
 						</Button>
 					</Tippy>
 				)}
-				{/*TODO: Backendi revize olan kısım*/}
-				{/*{props.bookingRooms.length > 1 && dayjs(props.check_in, 'DD.MM.YYYY').isAfter(dayjs(), 'day') && (*/}
-				{/*	<Tippy*/}
-				{/*		content="Odayı Rezervasyondan Çıkart"*/}
-				{/*		className="">*/}
-				{/*		<Button*/}
-				{/*			className="px-1 py-0.5"*/}
-				{/*			variant="danger"*/}
-				{/*			onClick={() => handleDeleteBookingRoom(props.room.booking_room_id)}>*/}
-				{/*			<Lucide*/}
-				{/*				icon="X"*/}
-				{/*				className="h-5 w-5"*/}
-				{/*			/>*/}
-				{/*		</Button>*/}
-				{/*	</Tippy>*/}
-				{/*)}*/}
 			</div>
 			<div className="intro-y flex flex-col items-start justify-between justify-items-start text-dark dark:text-light">
-				<h3 className="w-full rounded-t-lg border-b bg-white px-5 py-1 text-center text-sm font-semibold lg:flex-row lg:gap-2 dark:bg-darkmode-600">{props.room.name}'nolu oda misafirleri</h3>
+				<h3 className="w-full rounded-t-lg border-b bg-white px-5 py-1 text-right text-sm font-bold text-slate-400 lg:flex-row lg:gap-2 dark:bg-darkmode-600">
+					Check-in - Check-out :
+					<span
+						className="ml-2 font-bold text-primary"
+						style={{textShadow: '0.5px 0.5px 2px rgba(177, 200, 222, 0.9), -0.5px -0.5px rgba(177, 200, 222, 0.9)'}}>
+						{props.room.check_in} - {props.room.check_out}
+					</span>
+				</h3>
+				<h3 className="w-full border-b bg-white px-5 py-1 text-center text-sm font-semibold lg:flex-row lg:gap-2 dark:bg-darkmode-600">{props.room.name}'nolu oda misafirleri</h3>
 				<div className="flex w-full flex-col items-center justify-center gap-1 bg-white px-5 py-1 text-center text-sm font-semibold lg:flex-row lg:gap-2 dark:bg-darkmode-600">
 					<span className="font-semibold">
 						Yetişkin Sayısı :<span className="ml-1 font-normal">{props.room.number_of_adults}</span>
@@ -327,44 +343,77 @@ function BookingRooms(props: BookingRoomsProps) {
 				</div>
 				{roomGuests.length > 0 && <GuestStatusColors />}
 				<div className="flex w-full flex-col text-sm font-semibold">
-					{roomGuests.length > 0 ? (
-						<BookingRoomGuestsTable
-							guests={roomGuests}
-							setSelectedBookingGuests={setSelectedBookingGuests}
-						/>
-					) : (
-						<ShowRoomGuestAdd
-							citizens={props.citizens}
-							setRoomGuests={setRoomGuests}
-							totalGuests={props.room.number_of_adults + props.room.number_of_children}
-							bookingRoomId={props.room.booking_room_id}
-							roomId={props.room.id}
-						/>
-					)}
+					{/*{roomGuests.length > 0 ? (*/}
+					<BookingRoomGuestsTable
+						guests={roomGuests}
+						setSelectedBookingGuests={setSelectedBookingGuests}
+					/>
+					{/*) : (*/}
+					<ShowRoomGuestAdd
+						citizens={props.citizens}
+						pricingPolicy={props.pricingPolicy}
+						roomGuests={roomGuests}
+						setRoomGuests={setRoomGuests}
+						totalGuests={props.room.number_of_adults + props.room.number_of_children}
+						bookingRoomId={props.room.booking_room_id}
+						roomId={props.room.id}
+					/>
+					{/*)}*/}
 					{roomGuests.length > 0 && (
 						<div className="flex items-center justify-between gap-1 rounded-b-lg bg-white px-2 py-2 dark:bg-darkmode-600">
 							<h3 className="text-xs font-semibold">Toplu İşlemler</h3>
 							<div className="flex gap-2">
-								{roomGuests.find((guest) => guest.can_be_check_in) && roomGuests.length > 0 && (
-									<Tippy content="Seçilenleri Check-in Yap">
-										<Button
-											variant="soft-success"
-											className="border border-success/70 px-2 py-1 shadow"
-											onClick={(e: any) => handleSelectedGuestCheckIn(e)}>
-											Check-in
-										</Button>
-									</Tippy>
-								)}
-								{roomGuests.find((guest) => guest.can_be_check_out) && roomGuests.length > 0 && (
-									<Tippy content="Seçilenleri Check-out Yap">
-										<Button
-											variant="soft-dark"
-											className="border border-dark/40 px-2 py-1 text-slate-800 shadow dark:bg-darkmode-300"
-											onClick={(e: any) => handleSelectedGuestCheckOut(e)}>
-											Check-out
-										</Button>
-									</Tippy>
-								)}
+								{roomGuests.find((guest) => guest.can_be_check_in) &&
+									roomGuests.length > 0 &&
+									!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_in) && (
+										<Tippy content="Seçilenleri Check-in Yap">
+											<Button
+												variant="soft-success"
+												className="border border-success/70 px-2 py-1 shadow"
+												onClick={(e: any) => handleSelectedGuestCheckIn(e)}>
+												Check-in
+											</Button>
+										</Tippy>
+									)}
+								{roomGuests.find((guest) => guest.can_be_check_out) &&
+									roomGuests.length > 0 &&
+									!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_out) && (
+										<Tippy content="Seçilenleri Check-out Yap">
+											<Button
+												variant="soft-dark"
+												className="border border-dark/40 px-2 py-1 text-slate-800 shadow dark:bg-darkmode-300"
+												onClick={(e: any) => handleSelectedGuestCheckOut(e)}>
+												Check-out
+											</Button>
+										</Tippy>
+									)}
+								{roomGuests.find((guest) => guest.can_be_check_out) &&
+									roomGuests.length > 0 &&
+									!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_out) && (
+										<Tippy content="Seçilenlerin KBS Bildirimini Yap">
+											<Button
+												variant="soft-primary"
+												className="border border-primary/40 px-2 py-1 text-primary shadow dark:bg-darkmode-300"
+												onClick={(e: any) => handleSelectedGuestCheckOut(e)}>
+												KBS Check-in
+											</Button>
+										</Tippy>
+									)}
+								{roomGuests.find((guest) => !guest.can_be_check_out && !guest.can_be_check_in) &&
+									roomGuests.length > 0 &&
+									(selectedBookingGuests.length > 0
+										? roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).filter((guest) => !guest.can_be_check_out && !guest.can_be_check_in).length ===
+											selectedBookingGuests.length
+										: true) && (
+										<Tippy content="Seçilenlerin KBS Bildirimini Yap">
+											<Button
+												variant="soft-primary"
+												className="border border-danger/40 px-2 py-1 text-danger shadow dark:bg-darkmode-300"
+												onClick={(e: any) => handleSelectedGuestCheckOut(e)}>
+												KBS Check-out
+											</Button>
+										</Tippy>
+									)}
 							</div>
 						</div>
 					)}

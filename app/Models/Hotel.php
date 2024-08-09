@@ -113,6 +113,7 @@ class Hotel extends Model
                 $query->where(function ($query) use ($search) {
                     $query
                         ->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('tenant_id', 'like', '%' . $search . '%')
                         ->orWhere('name', 'like', '%' . $search . '%')
                         ->orWhere('tax_number', 'like', '%' . $search . '%')
                         ->orWhere('phone', 'like', '%' . $search . '%')

@@ -19,21 +19,12 @@ class CurrencyController extends Controller
         $this->settings = new PricingPolicySettings();
     }
 
-    public function exchange(Request $request)
-    {
-//        if ($this->settings->pricing_currency['value'] !== 'TRY') {
-//            return $this->convert($request);
-//        } else {
-//            return $request->amount;
-//        }
-    }
-
     /**
      * @throws JsonException
      */
-    public function convert(Request $request): ?array
+    public function convert(Request $request)
     {
-        $currencies = (new Currencies())->convert($request->currency, 'TRY', $request->amount);
+        $currencies = (new Currencies())->convert('TRY', $request->currency, $request->amount);
         if ($currencies['status'] === false) {
             return [
                 'currency' => $request->currency,
@@ -44,8 +35,8 @@ class CurrencyController extends Controller
         }
         return [
             'currency' => $request->currency,
-            'amount' => $request->amount,
-            'exchange_rate' => 1,
+            'amount' => $currencies['amount'],
+            'exchange_rate' => $currencies['exchange_rate'],
             'total' => round($currencies['total'], 2),
         ];
     }

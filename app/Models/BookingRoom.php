@@ -58,12 +58,12 @@ class BookingRoom extends Model
     ];
 
     protected $casts = [
-        'children_ages' => 'json',
+        'children_ages' => 'array',
     ];
 
     protected $cascadeDeletes = ['documents', 'tasks', 'booking_guests', 'prices', 'cancelReason'];
 
-    public function booking() : HasOne
+    public function booking(): HasOne
     {
         return $this->hasOne(Booking::class, 'id', 'booking_id');
     }

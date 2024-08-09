@@ -94,13 +94,6 @@ class BookingGuestsController extends Controller
             ]);
         }
         return redirect()->back()->with('success', 'Guests checked out successfully');
-//        $bookingRoom = BookingRoom::find($request->booking_room_id);
-//        $check = $bookingRoom->booking_guests->filter(fn($guest) => $guest->check_out === 0)->pluck('id')->toArray();
-////        dd($check, $request->booking_guests, array_intersect($check, $request->booking_guests));
-//        Log::info('ZAAAAAAA ' . json_encode($check));
-//        if (count($check) < 1) {
-//            dd($bookingRoom->booking->delete());
-//        }
     }
 
     /**

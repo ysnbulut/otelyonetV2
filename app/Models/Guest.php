@@ -48,10 +48,10 @@ class Guest extends Model
     public function scopeFilter($query, array $filters): void
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', '%' . $search . '%')->orWhere('surname', 'like', '%' . $search . '%')->orWhere('identification_number', 'like', '%' . $search . '%')->orWhere('phone', 'like', '%' . $search . '%')->orWhere('email', 'like', '%' . $search . '%');
-                });
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')->orWhere('surname', 'like', '%' . $search . '%')->orWhere('identification_number', 'like', '%' . $search . '%')->orWhere('phone', 'like', '%' . $search . '%')->orWhere('email', 'like', '%' . $search . '%');
             });
+        });
 //            ->when($filters['trashed'] ?? null, function ($query, $trashed) {
 //                if ($trashed === 'with') {
 //                    $query->withTrashed();
@@ -64,5 +64,10 @@ class Guest extends Model
     public function booking_room(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(BookingRoom::class, 'booking_guests', 'guest_id', 'booking_room_id');
+    }
+
+    public function citizen(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Citizen::class, 'id', 'citizen_id');
     }
 }

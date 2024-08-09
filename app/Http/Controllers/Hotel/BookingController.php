@@ -24,6 +24,7 @@ use App\Models\Transaction;
 use App\Models\TypeHasView;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -56,12 +57,25 @@ class BookingController extends Controller
                 ->through(function ($booking) {
                     $grandTotal = $booking->documents->map(fn($document) => $document->total->filter(fn($total) => $total->type === 'total')->map(fn($total) => $total->amount))->flatten(1)->sum();
                     $remainingBalance = floor($grandTotal - $booking->documents->map(fn($document) => $document->payments->map(fn($payment) => $payment->amount))->flatten(1)->sum());
+                    if ($booking->channel->id < 122) {
+                        $channel_bg_color = 'bg-primary';
+                        $channel_color = 'text-white';
+                    } elseif ($booking->channel->id === 122) {
+                        $channel_bg_color = 'bg-dark';
+                        $channel_color = 'text-white';
+                    } else {
+                        $channel_bg_color = 'bg-pending';
+                        $channel_color = 'text-white';
+                    }
                     return [
                         'id' => $booking->id,
                         'check_in' => Carbon::parse($booking->rooms->pluck('check_in')->min())->format('d.m.Y'),
                         'check_out' => Carbon::parse($booking->rooms->pluck('check_out')->max())->format('d.m.Y'),
                         'customer_id' => $booking->customer->id,
                         'customer' => $booking->customer->title,
+                        'channel' => $booking->channel->name,
+                        'channel_bg_color' => $channel_bg_color,
+                        'channel_color' => $channel_color,
                         'rooms' => $booking->rooms->map(fn($booking_room) => $booking_room->room->name)->implode(', '),
                         'rooms_count' => $booking->rooms->count(),
                         'number_of_adults' => $booking->rooms->sum('pivot.number_of_adults'),
@@ -118,22 +132,35 @@ class BookingController extends Controller
                     ]
                 ),
             'bookings' => $bookings->flatMap(callback: function ($booking) {
-                return $booking->rooms->map(function ($room) use ($booking) {
-                    $calendarColors = json_decode($booking->calendar_colors, true, 512, JSON_THROW_ON_ERROR);
+                if ($booking->channel->id < 122) {
+                    $channel_bg_color = 'bg-primary';
+                    $channel_color = 'text-white';
+                } elseif ($booking->channel->id === 122) {
+                    $channel_bg_color = 'bg-dark';
+                    $channel_color = 'text-white';
+                } else {
+                    $channel_bg_color = 'bg-pending';
+                    $channel_color = 'text-white';
+                }
+                return $booking->rooms->map(function ($room) use ($booking, $channel_bg_color, $channel_color) {
                     return [
                         'id' => $booking->id,
                         'typeHasViewId' => $room->room->typeHasView->id,
                         'resourceId' => $room->room_id,
                         'title' => $booking->customer->title,
-                        'start' => Carbon::parse($room->check_in),
-                        'end' => Carbon::parse($room->check_out),
+                        'start' => Carbon::parse($room->check_in)->format('Y-m-d H:i:s'),
+                        'end' => Carbon::parse($room->check_out)->format('Y-m-d H:i:s'),
                         'nights' => $booking->stayDurationNight(),
+                        'booking_room_id' => $room->id,
                         'earlyCheckOut' => $room->booking_guests->count() > 0 && $room->booking_guests->filter(
                                 fn($bookingGuest) => $bookingGuest->check_out && $bookingGuest->status === 'check_out'
                             )->count() === $room->booking_guests->count(),
-                        'backgroundColor' => $calendarColors['backgroundColor'],
-                        'textColor' => $calendarColors['textColor'],
-                        'borderColor' => $calendarColors['borderColor'],
+                        'channel' => $booking->channel->name,
+                        'channel_color' => $channel_color,
+                        'channel_bg_color' => $channel_bg_color,
+                        'backgroundColor' => $booking->calendar_colors['backgroundColor'],
+                        'textColor' => $booking->calendar_colors['textColor'],
+                        'borderColor' => $booking->calendar_colors['borderColor'],
                     ];
                 });
             }),
@@ -141,10 +168,9 @@ class BookingController extends Controller
     }
 
     /**
-     * @throws JsonException
      * @throws RandomException
      */
-    public function store(StoreBookingRequest $request): \Illuminate\Http\RedirectResponse
+    public function store(StoreBookingRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $getSettingBookingTax = Tax::find($this->settings->tax_rate['value']);
@@ -157,7 +183,7 @@ class BookingController extends Controller
             'number_of_rooms' => collect($data['booking_result']['typed_rooms'])->sum('count'),
             'number_of_adults' => $data['booking_result']['number_of_adults_total'],
             'number_of_children' => $data['booking_result']['number_of_children_total'],
-            'calendar_colors' => json_encode($this->getRandomColors(), JSON_THROW_ON_ERROR),
+            'calendar_colors' => $this->getRandomColors(),
         ];
         $booking = Booking::create($booking_data);
         $number_of_adults = $data['booking_result']['number_of_adults_total'] / $selected_room_count || $data['number_of_adults'];
@@ -176,7 +202,7 @@ class BookingController extends Controller
                         . $this->settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'),
                     'number_of_adults' => $number_of_adults,
                     'number_of_children' => $number_of_children,
-                    'children_ages' => json_encode($children_ages, JSON_THROW_ON_ERROR),
+                    'children_ages' => $children_ages,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ]);
@@ -333,16 +359,14 @@ class BookingController extends Controller
             'child_age_limit' => $this->settings->child_age_limit['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
             'citizens' => Citizen::select(['id', 'name'])->get(),
+            'pricing_policy' => $this->settings->pricing_policy['value'],
         ]);
     }
 
     public function getAvailableRoomsAndPrices(BookingStepOneRequest $request): array
     {
         $priceCalculator = new PriceCalculator();
-        $request->check_in = Carbon::createFromFormat('d.m.Y H:i:s', $request->check_in . ' ' . $this->settings->check_in_time_policy['value'] . ':00')->format('Y-m-d H:i:s');
-        $request->check_out = Carbon::createFromFormat('d.m.Y H:i:s', $request->check_out . ' ' . $this->settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s');
-        $nightCount = Carbon::parse($request->check_in)->diffInDays($request->check_out);
-        $unavailableRoomsIds = Booking::getUnavailableRoomsIds($request->check_in, $request->check_out);
+        $unavailableRoomsIds = Booking::getUnavailableRoomsIds(Carbon::createFromFormat('d.m.Y H:i:s', $request->check_in . ' ' . $this->settings->check_in_time_policy['value'] . ':00')->format('Y-m-d H:i:s'), Carbon::createFromFormat('d.m.Y H:i:s', $request->check_out . ' ' . $this->settings->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'));
         $roomResults = TypeHasView::with([
             'view',
             'rooms' => function ($query) use ($unavailableRoomsIds) {
@@ -389,7 +413,8 @@ class BookingController extends Controller
         return [
             'currency' => $this->settings->currency['value'],
             'request' => $request->all(),
-            'night_count' => $nightCount,
+            'night_count' => Carbon::parse($request->check_in)->diffInDays
+                (Carbon::parse($request->check_out)) + 1,
             'data' => $roomResults,
             'customers' => Customer::select(['id', 'title', 'type', 'tax_office', 'tax_number', 'country', 'city', 'address', 'phone', 'email'])->get(),
         ];
@@ -407,6 +432,7 @@ class BookingController extends Controller
         return Inertia::render('Hotel/Booking/Show', [
             'currency' => $this->settings->currency['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
+            'pricing_policy' => $this->settings->pricing_policy['value'],
             'citizens' => Citizen::select(['id', 'name'])->get(),
             'taxes' => Tax::select(['id', 'name', 'rate'])->get(),
             'items' => SalesUnit::find(1)->items->map(function ($item) {
@@ -469,8 +495,18 @@ class BookingController extends Controller
                         'check_out' => Carbon::parse($booking_room->check_out)->format('d.m.Y'),
                         'number_of_adults' => $booking_room->number_of_adults,
                         'number_of_children' => $booking_room->number_of_children,
-                        'children_ages' => $booking_room->children_ages !== null ? json_decode($booking_room->children_ages, false, 512, JSON_THROW_ON_ERROR) :
-                            null,
+                        'children_ages' => $booking_room->children_ages,
+                        'daily_prices' => $booking_room->prices->map(function ($dailyPrice) {
+                            return [
+                                'date' => Carbon::parse($dailyPrice->date)->format('d.m.Y'),
+                                'original_price' => $dailyPrice->original_price,
+                                'original_price_formatted' => number_format($dailyPrice->original_price, 2, ',', '.') . ' ' . $dailyPrice->currency,
+                                'discount' => $dailyPrice->discount,
+                                'discount_formatted' => number_format($dailyPrice->discount, 2, ',', '.') . ' ' . $dailyPrice->currency,
+                                'price' => $dailyPrice->price,
+                                'price_formatted' => number_format($dailyPrice->price, 2, ',', '.') . ' ' . $dailyPrice->currency,
+                            ];
+                        }),
                         'documents' => $booking_room->documents->map(fn($document) => [
                             'id' => $document->id,
                             'type' => $document->type,
@@ -550,8 +586,8 @@ class BookingController extends Controller
                                 Carbon::now()->isBetween(Carbon::parse
                                 ($booking_room->check_in)->sub(14, 'hours'),
                                     Carbon::parse($booking_room->check_out)->add(13, 'hours')),
-                            'is_check_in' => $booking_guest->check_in,
-                            'is_check_out' => $booking_guest->check_out,
+                            'is_check_in' => (bool)$booking_guest->check_in,
+                            'is_check_out' => (bool)$booking_guest->check_out,
                             'status' => $booking_guest->status,
                             'check_in_date' => $booking_guest->check_in_date !== null ? Carbon::parse
                             ($booking_guest->check_in_date)->format('d.m.Y') : null,
@@ -601,7 +637,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function transactionAdd(StoreTransactionRequest $request, Booking $booking): \Illuminate\Http\RedirectResponse
+    public function transactionAdd(StoreTransactionRequest $request, Booking $booking): RedirectResponse
     {
         $request->validated();
         $now = Carbon::now();
@@ -711,7 +747,7 @@ class BookingController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Booking $booking): \Illuminate\Http\RedirectResponse
+    public function destroy(Booking $booking): RedirectResponse
     {
         $booking->delete();
         return redirect()->route('hotel.bookings.index')->with('success', 'Rezervasyon başarıyla silindi.');
