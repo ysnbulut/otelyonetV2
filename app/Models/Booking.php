@@ -68,13 +68,16 @@ class Booking extends Model
         'calendar_colors',
     ];
 
+    protected $casts = [
+        'calendar_colors' => 'array',
+    ];
+
     protected $cascadeDeletes = ['rooms', 'cMBooking', 'notes', 'tasks', 'cancelReason'];
 
     protected static function boot(): void
     {
         parent::boot();
-
-        Booking::observe(BookingObserver::class);
+        self::observe(BookingObserver::class);
     }
 
     /**
@@ -86,17 +89,26 @@ class Booking extends Model
     {
         return self::select('id')
             ->whereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->whereDate('check_in', '>=', $check_in)
-                    ->whereDate('check_in', '<', $check_out);
+                $query->where(function ($query) use ($check_in, $check_out) {
+                    $query->where(function ($query) use ($check_in, $check_out) {
+                        $query->where('check_in', '<', $check_out)
+                            ->where('check_out', '>', $check_in);
+                    });
+                });
             })
-            ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->whereDate('check_out', '>', $check_in)
-                    ->whereDate('check_out', '<=', $check_out);
-            })
-            ->orWhereHas('rooms', function ($query) use ($check_in, $check_out) {
-                $query->whereDate('check_in', '<=', $check_in)
-                    ->whereDate('check_out', '>=', $check_out);
-            })->with('rooms')->get()->pluck('rooms')->flatten()->pluck('room_id')->unique()->toArray();
+            ->with(['rooms' => function ($query) use ($check_in) {
+                $query->whereHas('booking_guests', function ($query) use ($check_in) {
+                    $query->where('status', '!=', 'check_out')->orWhere(function ($query) use ($check_in) {
+                        $query->where('status', 'check_out')->where('check_out_date', '>', $check_in);
+                    });
+                })->orWhereDoesntHave('booking_guests');
+            }])
+            ->get()
+            ->pluck('rooms')
+            ->flatten()
+            ->pluck('room_id')
+            ->unique()
+            ->toArray();
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -164,7 +176,7 @@ class Booking extends Model
         $checkOut = $this->rooms->max('check_out');
         $checkIn = Carbon::createFromFormat('Y-m-d H:i:s', $checkIn);
         $checkOut = Carbon::createFromFormat('Y-m-d H:i:s', $checkOut);
-        return $checkIn->diffInDays($checkOut) . ' Gece';
+        return $checkIn->diffInDays($checkOut, false) + 1 . ' Gece';
     }
 
     public function scopeStayDurationDay(): ?string
@@ -173,7 +185,7 @@ class Booking extends Model
         $checkOut = $this->rooms->max('check_out');
         $checkIn = Carbon::createFromFormat('Y-m-d H:i:s', $checkIn);
         $checkOut = Carbon::createFromFormat('Y-m-d H:i:s', $checkOut);
-        return $checkIn->diffInDays($checkOut) . ' Gün';
+        return $checkIn->diffInDays($checkOut, false) . ' Gün';
     }
 
     public function scopeFilter($query, array $filters): void

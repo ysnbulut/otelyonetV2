@@ -1,0 +1,10 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <ParametreListele xmlns="http://tempuri.org/">
+            <KullaniciTC>{{ KULLANICI_TC }}</KullaniciTC>
+            <TssKod>{{ TSS_KOD }}</TssKod>
+            <Sifre>{{ SIFRE }}</Sifre>
+            <parametreTuru>{{ PARAMETRE }}</parametreTuru>
+        </ParametreListele>
+    </s:Body>
+</s:Envelope>

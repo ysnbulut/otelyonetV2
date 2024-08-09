@@ -46,4 +46,13 @@ return [
         'api_key' => env('SENDGRID_API_KEY', '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'),
     ],
 
+    'verimor' => [
+        'username' => env('VERIMOR_USERNAME', '908502426153'),
+        'password' => env('VERIMOR_API_KEY', 'Nesal5522**'),
+        'custom_id' => uniqid(),
+        'datacoding' => '0',
+        'valid_for' => '48:00',
+    ],
+
+
 ];

@@ -6,6 +6,9 @@ interface BookingDataProps {
 	check_out: string | null
 	customer_id: number
 	customer: string
+	channel: string
+	channel_bg_color: string
+	channel_color: string
 	rooms: string
 	rooms_count: number
 	number_of_adults: number

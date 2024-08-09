@@ -413,6 +413,15 @@ function BookingSummary(props: BookingSummaryProps) {
 								disabled={props.step < 5}
 								onValueChange={(value, name, values) => {
 									values && setGrandTotal(values?.float || 0)
+									if (values && values?.float) {
+										if (values?.float > props.grandTotal) {
+											Toast.fire({
+												icon: 'error',
+												title: 'Genel toplam fiyat, toplam fiyattan fazla olamaz.',
+											}).then((r) => console.log(r))
+											setGrandTotal(parseFloat(props.grandTotal.toFixed(2)))
+										}
+									}
 								}}
 								name="unit_price"
 								className="w-48 border-none px-0.5 py-0.5 text-right text-lg font-bold text-danger focus:border-none focus:ring-0 dark:bg-darkmode-600"

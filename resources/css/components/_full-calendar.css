@@ -60,7 +60,7 @@
         th,
         td,
         .fc-list {
-            border-color: theme("colors.slate.200" / 60%);
+            @apply border border-slate-300 rounded-lg !important;
         }
     }
 
@@ -70,6 +70,10 @@
         tr th .fc-scrollgrid-sync-inner {
             padding-top: theme("spacing.3");
             padding-bottom: theme("spacing.3");
+        }
+
+        .fc-resource-timeline-divider {
+            @apply bg-slate-100 border-none !important;
         }
     }
 
@@ -218,88 +222,191 @@
         padding-left: theme("spacing.2");
     }
 
-}
+    .fc-daygrid-day-top {
+        @apply border-b border-slate-200 p-0 !important;
+    }
 
-.dark {
-    .full-calendar {
-        .fc-button-primary {
-            background-color: theme("colors.darkmode.400") !important;
-            border-color: theme("colors.darkmode.400") !important;
+    .fc-daygrid-day-number {
+        @apply flex w-full p-0 !important;
+    }
+
+    .fc-daygrid-month-start {
+        @apply bg-yellow-300 shadow-sm text-xs font-extrabold rounded-bl-md m-0 !important;
+    }
+
+    .fc-list-day-cushion {
+        @apply bg-slate-100 !important;
+    }
+
+    .fc-event {
+        @apply h-auto !important;
+    }
+
+    .fc-scrollgrid {
+        @apply border-none !important;
+    }
+
+    .fc-datagrid-body {
+        @apply -mb-3 !important;
+    }
+
+    .fc-listYear-view {
+        @apply border-slate-100 !important;
+    }
+
+    .fc-highlight {
+        @apply bg-primary/40 !important;
+    }
+
+    .fc-daygrid-day-frame {
+        @apply border border-slate-400 !important;
+    }
+
+    .fc-scroller-harness {
+        @apply bg-white rounded-lg !important;
+    }
+
+
+    thead {
+        @apply bg-transparent !important;
+
+        tr {
+            th.fc-datagrid-cell {
+                @apply border-b-0 !important;
+
+                .fc-datagrid-cell-frame {
+                    @apply flex justify-center items-center !important;
+                }
+            }
+
         }
 
-        .fc-list-day-cushion {
-            background-color: theme("colors.darkmode.400") !important;
+    }
+
+    tbody {
+        @apply border border-slate-400 bg-transparent !important;
+
+        .fc-resource-timeline-divider {
+            @apply bg-slate-100 border-none !important;
         }
 
-        .fc-event:hover td {
-            border-color: theme("colors.darkmode.400") !important;
-            background-color: theme("colors.darkmode.400") !important;
-        }
-
-        .fc-theme-standard {
-            .fc-scrollgrid,
-            th,
-            td,
-            .fc-list {
-                border-color: theme("colors.darkmode.400");
+        td:nth-child(1) {
+            .fc-scroller {
+                @apply overflow-visible !important;
             }
         }
 
-        .fc-day-other {
-            background-color: theme("colors.darkmode.700");
+        .fc-scroller {
+            @apply overflow-x-hidden rounded-lg !important;
         }
 
-        .fc-button-primary:focus {
-            --tw-ring-color: theme("colors.slate.700");
-            --tw-ring-opacity: 0.5;
-            transition-property: none;
+        .fc-scroller-harness {
+            @apply rounded-lg overflow-visible !important;
         }
+    }
+
+    tfoot {
+        .fc-resource-timeline-divider {
+            @apply bg-slate-100 border-none !important;
+        }
+
+        th {
+            @apply border-none !important;
+
+            .fc-scroller {
+                @apply border-none !important;
+            }
+
+            .fc-scroller-harness {
+                @apply border-none !important;
+            }
+        }
+    }
+
+    table.fc-scrollgrid-sync-table {
+        @apply bg-transparent rounded-lg overflow-hidden !important;
+
+        colgroup {
+            @apply rounded-lg overflow-hidden !important;
+        }
+
+        tbody {
+            @apply border-b-0 !important;
+
+            .fc-timeline-header-row {
+                @apply rounded-lg overflow-hidden !important;
+            }
+        }
+
+        tr.fc-timeline-header-row-chrono {
+            @apply border-b-0 !important;
+
+            th {
+                @apply border-b-0 !important;
+
+                .fc-timeline-slot-frame {
+                    @apply border-b-0 rounded-lg !important;
+                }
+            }
+        }
+    }
+
+    .fc-scroller::-webkit-scrollbar-track {
+        @apply bg-slate-100 rounded-full !important
+    }
+
+    .fc-scroller::-webkit-scrollbar-thumb {
+        @apply bg-slate-400 rounded-full !important
+    }
+
+    .fc-timeline-now-indicator-container > .fc-timeline-now-indicator-line.now-indicator {
+        @apply border-spacing-3 border-l-4 border-dotted border-teal-700 opacity-90 !important;
+    }
+
+    .fc-datagrid-cell-cushion .fc-sticky {
+        @apply text-xl font-semibold whitespace-nowrap !important;
+    }
+
+    .fc-datagrid-cell-cushion .fc-scrollgrid-sync-inner {
+        @apply w-full !important;
+    }
+
+    .fc-datagrid-cell-main {
+        @apply flex justify-center items-center text-center w-full !important;
+    }
+
+
+    .fc-datagrid-cell-frame {
+        @apply mx-auto text-center rounded-lg !important;
+    }
+
+    .fc-timeline {
+        @apply bg-transparent rounded-lg !important;
+    }
+
+    .fc-view {
+        @apply bg-transparent !important;
+    }
+
+    /*Haftanın günleri sayı ve yazı ile*/
+
+    .fc-scrollgrid-section-header {
+        @apply text-lg !important;
+
+        th {
+            @apply rounded-lg !important;
+        }
+    }
+
+    .fc-datagrid-cell {
+        @apply bg-transparent !important;
+    }
+
+    .fc-datagrid-header {
+        @apply rounded-lg !important;
     }
 }
 
-.resource-label > .fc-datagrid-cell-frame {
-    @apply h-[4rem] flex items-center justify-center !important;
-}
-
-.fc-timeline-lane-frame {
-    @apply h-[4rem] !important;
-}
-
-.fc-list-day-cushion {
-    @apply bg-slate-100 dark:bg-darkmode-700 !important;
-}
-
-.fc-event {
-    @apply h-auto !important;
-}
-
-.fc-scrollgrid {
-    @apply border-slate-200 dark:border-darkmode-500 !important;
-}
-
-.fc-datagrid-body {
-    @apply -mb-3 !important;
-}
-
-.fc-listYear-view {
-    @apply border-slate-100 dark:border-darkmode-300 !important;
-}
-
-.fc-highlight {
-    @apply bg-primary/40 dark:bg-primary/20 !important;
-}
-
-.fc-daygrid-day-frame {
-    @apply border border-slate-400 dark:border-darkmode-500 !important;
-}
-
-.fc-scroller::-webkit-scrollbar-track {
-    @apply bg-slate-300 dark:bg-darkmode-800 !important
-}
-
-.fc-scroller::-webkit-scrollbar-thumb {
-    @apply bg-slate-100 rounded-full dark:bg-darkmode-400 !important
-}
 
 .holidays {
     @apply bg-red-500/20 dark:bg-red-500/30 dark:opacity-20 opacity-30 h-full !important;
@@ -313,37 +420,128 @@
     @apply text-red-700 text-xs !important;
 }
 
-.fc-timeline-now-indicator-container > .fc-timeline-now-indicator-line.now-indicator {
-    @apply border-spacing-3 border-l-4 border-dotted border-teal-700 dark:border-teal-300 opacity-90 !important;
-}
-
-.fc-daygrid-day-top {
-    @apply border-b border-slate-200 dark:border-darkmode-500 p-0 !important;
-}
-
-.fc-daygrid-day-number {
-    @apply flex w-full p-0 !important;
-}
-
-.fc-daygrid-month-start {
-    @apply bg-yellow-300 dark:bg-yellow-700 shadow-sm text-xs font-extrabold rounded-bl-md m-0 !important;
-}
-
-.fc-datagrid-cell-frame.fc-datagrid-cell-frame-liquid {
-    @apply flex max-w-fit h-full justify-center items-center !important;
-}
-
-
-.fc-datagrid-cell-cushion.fc-sticky {
-    @apply text-xl font-semibold min-w-max whitespace-nowrap !important;
-}
-
-.fc-datagrid-cell-cushion.fc-scrollgrid-sync-inner {
-    @apply text-center !important;
-}
-
-
 .context-menu {
     @apply absolute z-50 bg-white dark:bg-gray-800 shadow rounded-md p-2 text-sm font-semibold overflow-hidden !important;
 }
+
+.dark {
+    .full-calendar {
+
+        table {
+
+            .fc-resource-timeline-divider {
+                @apply bg-darkmode-700 border-none !important;
+            }
+        }
+
+        .fc-button-primary {
+            @apply bg-darkmode-400 border-darkmode-400 !important
+        }
+
+        .fc-list-day-cushion {
+            @apply bg-darkmode-400 !important;
+        }
+
+        .fc-event:hover td {
+            @apply bg-darkmode-400 border-darkmode-400 !important
+
+        }
+
+        .fc-theme-standard {
+            .fc-scrollgrid,
+            th,
+            td,
+            .fc-list {
+                @apply border-darkmode-800 !important
+            }
+        }
+
+        .fc-day-other {
+            @apply bg-darkmode-700 !important;
+        }
+
+        .fc-button-primary:focus {
+            --tw-ring-color: theme("colors.slate.700");
+            --tw-ring-opacity: 0.5;
+            transition-property: none;
+        }
+
+        .fc-scroller::-webkit-scrollbar-track {
+            @apply bg-darkmode-700 border-none !important
+        }
+
+        .fc-scroller::-webkit-scrollbar-thumb {
+            @apply bg-darkmode-100 rounded-full !important
+        }
+
+        .fc-scroller-harness {
+            @apply bg-darkmode-300 rounded-lg !important;
+        }
+
+        thead {
+            @apply bg-darkmode-300 !important;
+
+            th {
+                @apply bg-darkmode-300 !important;
+            }
+        }
+
+
+        tbody {
+            @apply border border-danger !important;
+
+            .fc-resource-timeline-divider {
+                @apply bg-darkmode-700 border-none !important;
+            }
+
+
+            .fc-scroller-harness {
+                @apply rounded-lg overflow-visible !important;
+            }
+        }
+
+        tfoot {
+            .fc-resource-timeline-divider {
+                @apply bg-darkmode-700 border-none !important;
+            }
+
+            th {
+                @apply bg-darkmode-700 border-none !important;
+            }
+        }
+
+
+        .fc-daygrid-day-top {
+            @apply border-b border-danger p-0 !important;
+        }
+
+        .fc-daygrid-month-start {
+            @apply bg-yellow-300 shadow-sm text-xs font-extrabold rounded-bl-md m-0 !important;
+        }
+
+        .fc-list-day-cushion {
+            @apply bg-warning !important;
+        }
+
+        .fc-listYear-view {
+            @apply border-danger !important;
+        }
+
+        .fc-highlight {
+            @apply bg-warning/20 !important;
+        }
+
+        .fc-daygrid-day-frame {
+            @apply border-danger !important;
+        }
+
+
+        .fc-timeline-now-indicator-container > .fc-timeline-now-indicator-line.now-indicator {
+            @apply border-spacing-3 border-l-4 border-dotted border-teal-700 opacity-90 !important;
+        }
+
+    }
+}
+
+
 

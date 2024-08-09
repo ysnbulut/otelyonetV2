@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Customer search($searchTerm)
  * @method static Builder|Customer withTrashed()
  * @method static Builder|Customer withoutTrashed()
- * @property-read Collection<int, \App\Models\Document> $documents
+ * @property-read Collection<int, Document> $documents
  * @property-read int|null $documents_count
  * @mixin Eloquent
  */

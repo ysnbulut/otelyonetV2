@@ -36,13 +36,14 @@ class TenantCreateBanksJob implements ShouldQueue, ShouldBeUnique
     {
         return $this->tenant->id;
     }
+
     public function handle(): void
     {
         $this->tenant->run(function () {
             Bank::create(['name' => 'Nakit Kasa', 'currency' => 'TRY', 'type' => 'case']);
             Bank::create(['name' => 'POS Kasa', 'currency' => 'TRY', 'type' => 'bank']);
             Bank::create(['name' => 'Havale Kasa', 'currency' => 'TRY', 'type' => 'bank']);
-            Bank::create(['name' => 'Online Kasa', 'currency' => 'TRY', 'type' => 'case']);
+            Bank::create(['name' => 'Kanal Kasası', 'currency' => 'TRY', 'type' => 'case']);
         });
     }
 }

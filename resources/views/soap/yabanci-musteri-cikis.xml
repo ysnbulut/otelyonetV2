@@ -1,0 +1,14 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <MusteriYabanciCikis xmlns="http://tempuri.org/">
+            <KullaniciTC>{{ KULLANICI_TC }}</KullaniciTC>
+            <TssKod>{{ TSS_KOD }}</TssKod>
+            <Sifre>{{ SIFRE }}</Sifre>
+            <musteri xmlns:q16="http://schemas.datacontract.org/2004/07/KBS_Tesis_Servis">
+                <q16:BELGENO>{{ BELGENO }}</q16:BELGENO>
+                <q16:CKSTIP xmlns:q17="http://schemas.datacontract.org/2004/07/KBS_Model">TESISTENCIKIS</q16:CKSTIP>
+                <q16:CKSTRH>{{ CKSTRH }}</q16:CKSTRH>
+            </musteri>
+        </MusteriYabanciCikis>
+    </s:Body>
+</s:Envelope>

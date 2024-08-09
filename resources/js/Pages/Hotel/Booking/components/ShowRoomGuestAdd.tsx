@@ -8,11 +8,14 @@ import {router} from '@inertiajs/react'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import {FormDataConvertible} from '@inertiajs/inertia'
+import {twMerge} from 'tailwind-merge'
 
 interface ShowRoomGuestProps {
 	totalGuests: number
 	bookingRoomId: number
 	citizens: CitizenProps[]
+	pricingPolicy: string
+	roomGuests: GuestsProps[]
 	setRoomGuests: React.Dispatch<React.SetStateAction<GuestsProps[]>>
 	roomId: number
 }
@@ -43,7 +46,6 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 			toast.addEventListener('mouseleave', MySwal.resumeTimer)
 		},
 	})
-
 	const updateRoomGuests = (index: number, newGuest: AddGuestsProps): void => {
 		setRoomGuests((roomGuests) => {
 			const newRoomGuests = [...roomGuests]
@@ -64,7 +66,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 
 	useEffect(() => {
 		if (addGuest) {
-			if (roomGuests.length === props.totalGuests) return
+			if (props.pricingPolicy === 'person_based' && roomGuests.length === props.totalGuests) return
 			if (roomGuests.length > 0) {
 				setRoomGuests(
 					(roomGuests) =>
@@ -105,13 +107,12 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 				preserveState: true,
 				// @ts-ignore
 				onSuccess: (response: {props: PageProps}) => {
-					props.setRoomGuests(
-						(prevState) => response.props.booking.rooms.find((room) => room.id === props.roomId)?.guests ?? prevState,
-					)
+					props.setRoomGuests((prevState) => response.props.booking.rooms.find((room) => room.id === props.roomId)?.guests ?? prevState)
 					Toast.fire({
 						icon: 'success',
 						title: 'Misafirler başarıyla eklendi.',
 					})
+					setRoomGuests([])
 				},
 				onError: (error: any) => {
 					setErrors(error.response.data.errors)
@@ -125,8 +126,8 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 	}
 
 	return (
-		<div className="flex flex-col items-center justify-between rounded-b-lg border border-x-0 bg-white py-2 dark:bg-darkmode-600">
-			{roomGuests.length > 0 ? (
+		<div className={twMerge('flex flex-col items-center justify-between border-x-0  border-b bg-white py-2 dark:bg-darkmode-600', roomGuests.length <= 0 && 'border-t-0')}>
+			{props.roomGuests.length > 0 || roomGuests.length > 0 ? (
 				<div className="flex flex-col gap-2 px-4">
 					{roomGuests.map((guest, index) => (
 						<ShowRoomGuest
@@ -142,9 +143,9 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 					))}
 				</div>
 			) : (
-				<h3 className="text-center text-xs text-danger">Henüz Misafir Bilgileri Girilmemiş.</h3>
+				<h3 className={twMerge('w-full text-center text-xs text-danger', roomGuests.length <= 0 && 'mb-2 border-b pb-2')}>Henüz Misafir Bilgileri Girilmemiş.</h3>
 			)}
-			<div className="mt-3 flex w-full items-center justify-end gap-2 border-t px-4 pt-2">
+			<div className={twMerge('flex w-full items-center justify-end gap-2 px-4', roomGuests.length > 0 && 'mt-2 border-t pt-2')}>
 				{roomGuests.length > 0 && (
 					<Tippy content="Kaydet">
 						<Button
@@ -165,7 +166,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 				<Tippy content="Misafir Ekle">
 					<Button
 						variant="soft-secondary"
-						disabled={roomGuests.length === props.totalGuests || false}
+						disabled={(props.pricingPolicy === 'person_based' && roomGuests.length === props.totalGuests) || false}
 						onClick={(e: any) => {
 							e.preventDefault()
 							setAddGuest(true)

@@ -17,6 +17,9 @@ class HotelRunnerApi
         $this->token = $token;
         $this->hr_id = $hr_id;
         $this->client = new Client([
+                'timeout' => 60.0,
+                'connect_timeout' => 60.0,
+                'read_timeout' => 60.0,
                 'base_uri' => 'https://app.hotelrunner.com/api/v2/apps/',
                 'headers' => [
                     'content-type' => 'application/json',
@@ -103,19 +106,18 @@ class HotelRunnerApi
     /**
      * @throws GuzzleException|JsonException
      */
-    public function getReservations(): mixed
+    public function getReservations(int $page): mixed
     {
         $response = $this->client->get('reservations', [
             'query' => [
                 'token' => $this->token,
                 'hr_id' => $this->hr_id,
-                // TODO: Bu kısım yazılmalı sonra
 //                'from_date' => 'YYYY-MM-DD',
 //                'from_last_update_date' => 'YYYY-MM-DD',
-//                'per_page' => 100,
-//                'page' => 1,
+                'per_page' => 15, //max 15
+                'page' => $page,
 //                'reservation_number' => '',
-                'undelivered' => true,
+                'undelivered' => false,
 //                'modified' => false,
 //                'booked' => false,
             ]

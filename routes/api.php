@@ -23,11 +23,26 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::middleware(['api'])->get('/', function () {
-    return response()->json(['message' => 'Welcome to Multi-Tenancy API']);
-})->name('mb.currency.exchange');
+Route::middleware([
+    'api',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+    Route::get('/', function () {
+        return 'asdasdasd';
+    })->name('test');
+});
+
+
+//Route::middleware(['api'])->get('/', function () {
+//    return response()->json(['message' => 'Welcome to Multi-Tenancy API']);
+//})->name('mb.currency.exchange');
 
 Route::middleware(['api'])->post('/exchange/amount', [CurrencyController::class, 'amountConvert'])->name('amount.exchange');
 
-Route::middleware(['api'])->post('/{tenant}/webhook/booking', [BookingWebhookController::class, 'handleWebhook'])->name
-('booking.webhook');
+Route::middleware(['api'])->post('/{tenant}/webhook/booking', [BookingWebhookController::class, 'handleWebhook'])->name('booking.webhook');
+
+Route::middleware(['api'])->prefix('id-statement')->group(function () {
+    Route::get('{tenant}/{type}/{guest}', [\App\Http\Controllers\Hotel\IDStatementController::class, 'store'])->name('hotel.id.statement.store');
+    Route::get('{tenant}/{type}/{guest}/destroy', [\App\Http\Controllers\Hotel\IDStatementController::class, 'destroy'])->name('hotel.id.statement.destroy');
+});

@@ -14,6 +14,8 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 	useEffect(() => {
 		if (guestAllChecked) {
 			props.setSelectedBookingGuests(props.guests.map((guest) => guest.booking_guests_id))
+		} else {
+			props.setSelectedBookingGuests([])
 		}
 	}, [guestAllChecked])
 
@@ -64,6 +66,11 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 						className="text-left text-xs"
 						style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}>
 						Kimlik / Pasaport No
+					</th>
+					<th
+						className="text-left text-xs"
+						style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}>
+						KBS
 					</th>
 				</tr>
 			</thead>

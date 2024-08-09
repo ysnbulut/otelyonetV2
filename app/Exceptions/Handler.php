@@ -25,7 +25,9 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->reportable(function (Throwable $e) {
-            if (request()->ip() != '127.0.0.1' || request()->ip() != ':::1') {
+
+
+            if (request()->ip() !== '127.0.0.1') {
                 Integration::captureUnhandledException($e);
             }
         });

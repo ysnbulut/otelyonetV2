@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState, useRef, createRef} from 'react'
 import AuthenticatedLayout from '@/Layouts/HotelAuthenticatedLayout'
 import {Head, Link, router, useForm} from '@inertiajs/react'
 import Button from '@/Components/Button'
@@ -6,7 +6,7 @@ import route from 'ziggy-js'
 import Lucide from '@/Components/Lucide'
 import {twMerge} from 'tailwind-merge'
 import {FormInput, FormLabel} from '@/Components/Form'
-import Litepicker from '@/Components/Litepicker'
+import Litepicker, {LitepickerElement} from '@/Components/Litepicker'
 import TomSelect from '@/Components/TomSelect'
 import CurrencyInput from 'react-currency-input-field'
 import {PageProps, RoomsProps} from '@/Pages/Hotel/Booking/types/show'
@@ -22,16 +22,22 @@ import {Page} from '@inertiajs/inertia'
 import {motion} from 'framer-motion'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+import {DateTime} from 'litepicker/dist/types/datetime'
+import ExpendBookingPeriod from '@/Pages/Hotel/Booking/components/ExpendBookingPeriod'
 
 dayjs.extend(isSameOrAfter)
 dayjs.extend(isSameOrBefore)
 dayjs.extend(customParseFormat)
 
 function Show(props: PageProps) {
+	const expendableDaysPicker = createRef<LitepickerElement>()
 	const paymentTypeSelectRef = useRef<SelectInstance>(null)
+	const buttonRef = useRef<HTMLButtonElement>(null)
 	const MySwal = withReactContent(Swal)
+	const [isLitepickerVisible, setIsLitepickerVisible] = useState(false)
 	const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false)
 	const [bookingRooms, setBookingRooms] = useState<RoomsProps[]>(props.booking.rooms)
+	const [expendBookingPeriodModalOpen, setExpendBookingPeriodModalOpen] = useState<boolean>(false)
 	const [balance, setBalance] = useState<{number: number; formatted: string}>({
 		number: props.remaining_balance,
 		formatted: props.remaining_balance_formatted,
@@ -68,17 +74,15 @@ function Show(props: PageProps) {
 		timer: 3000,
 		timerProgressBar: true,
 		didOpen: (toast) => {
-			// toast.addEventListener('mouseenter', MySwal.stopTimer)
-			// toast.addEventListener('mouseleave', MySwal.resumeTimer)
+			toast.addEventListener('mouseenter', MySwal.stopTimer)
+			toast.addEventListener('mouseleave', MySwal.resumeTimer)
 		},
 	})
 
 	useEffect(() => {
 		setData((data) => ({...data, currency: 'TRY', bank_id: '', payment_method: '', description: ''}))
 		paymentTypeSelectRef.current?.selectOption(paymentTypeOptions[paymentDocumentIndex])
-		//TODO gereksiz oldu
-		const documents = props.booking.rooms.flatMap((room) => room.documents)
-		const document = documents.find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value)
+		const document = props.booking.rooms.flatMap((room) => room.documents).find((document) => document.id === paymentTypeOptions[paymentDocumentIndex].value)
 		if (document) {
 			if (paymentDocumentIndex > 0 && document.balance) {
 				setData((data) => ({
@@ -178,7 +182,7 @@ function Show(props: PageProps) {
 					description: '',
 				}))
 			},
-			preserveState: true,
+			preserveState: false,
 			preserveScroll: true,
 		})
 	}
@@ -193,6 +197,79 @@ function Show(props: PageProps) {
 				})
 			},
 		})
+	}
+
+	const handleFinishBooking = () => {
+		MySwal.fire({
+			title: 'Rezervasyonu Erken Bitir',
+			text: 'Rezervasyonu erken bitirmek istediğinizden emin misiniz?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet',
+			cancelButtonText: 'Hayır',
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				props.booking.rooms.forEach((room) => {
+					room.daily_prices.forEach((dailyPrice) => {
+						console.log(dailyPrice)
+					})
+					room.documents.forEach((document) => {
+						document.payments.forEach((payment) => {
+							console.log(payment)
+						})
+					})
+				})
+			}
+		})
+	}
+
+	const expendableDays =
+		props.extendable_number_of_days !== null ? (
+			props.extendable_number_of_days
+		) : (
+			<Lucide
+				icon="Infinity"
+				className="h-4 w-4"
+			/>
+		)
+
+	const showLitepicker = () => {
+		const button = buttonRef.current // Butonun referansı
+		const litepicker = expendableDaysPicker.current // Litepicker'ın referansı
+		if (button && litepicker && litepicker.litePickerInstance) {
+			const rect = button.getBoundingClientRect()
+			const top = rect.bottom + window.scrollY
+			const left = rect.left + window.scrollX
+			litepicker.litePickerInstance.setOptions({
+				parentEl: document.body,
+				buttonText: {
+					apply: 'Uzat',
+					cancel: 'İptal',
+				},
+			})
+			litepicker.litePickerInstance.show()
+			// @ts-ignore
+			const style = litepicker.litePickerInstance.ui.style
+			style.position = 'absolute'
+			style.top = `${top}px`
+			style.left = `${left}px`
+		}
+	}
+
+	const handleShowLitepicker = () => {
+		const litepicker = expendableDaysPicker.current // Litepicker'ın referansı
+		if (litepicker && litepicker.litePickerInstance) {
+			if (isLitepickerVisible) {
+				// Litepicker şu anda gösteriliyorsa, gizle
+				litepicker.litePickerInstance.hide()
+			} else {
+				// Litepicker şu anda gizliyse, göster
+				showLitepicker()
+			}
+		}
+		setIsLitepickerVisible(!isLitepickerVisible)
 	}
 
 	return (
@@ -225,9 +302,7 @@ function Show(props: PageProps) {
 						<div className="-intro-y col-span-12 rounded-t-md border-b border-teal-700 bg-teal-600 px-4 py-5 dark:bg-teal-700/40">
 							<h3 className="rounded-md text-xl font-bold text-light">Rezervasyon Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-light lg:flex-row">
-								<Link
-									href={route('hotel.customers.show', props.customer.id)}
-									className="flex w-full flex-col text-sm font-semibold">
+								<div className="flex w-full flex-col text-sm font-semibold">
 									<span className="font-semibold">
 										Giriş Tarihi :<span className="ml-1 font-normal">{props.booking.check_in}</span>
 									</span>
@@ -237,7 +312,7 @@ function Show(props: PageProps) {
 									<span className="font-semibold">
 										Seçilen Oda Türleri :<span className="ml-1 font-normal">{bookingRooms.map((room) => room.room_type_full_name).join(', ')}</span>
 									</span>
-								</Link>
+								</div>
 								<div className="flex w-full flex-col text-sm font-semibold lg:ml-5">
 									<span className="font-semibold">
 										Konaklama Süresi :<span className="ml-1 font-normal">{props.booking.stay_duration_nights}</span>
@@ -257,49 +332,136 @@ function Show(props: PageProps) {
 							<div className="mt-2 flex w-full justify-end gap-3">
 								{dayjs(props.booking.check_out, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 									<>
-										<Button
-											variant="soft-success"
-											className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
-											<Lucide
-												icon="CalendarPlus"
-												className="mr-1 h-5 w-5"
-											/>
-											SÜREYİ UZAT
-											<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">
-												{props.extendable_number_of_days}
-											</span>
-										</Button>
-										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') && (
+										{((props.extendable_number_of_days !== null && props.extendable_number_of_days > 0) || props.extendable_number_of_days === null) && (
+											<>
+												<Button
+													variant="soft-success"
+													ref={buttonRef}
+													onClick={(e: any) => {
+														e.preventDefault()
+														handleShowLitepicker()
+													}}
+													className="intro-x relative flex items-center justify-center border-2 border-success/60 py-1 text-white/70">
+													<Lucide
+														icon="CalendarPlus"
+														className="mr-1 h-5 w-5"
+													/>
+													SÜREYİ UZAT
+													<span className="absolute -right-3 -top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-success/60 bg-danger text-xs">{expendableDays}</span>
+												</Button>
+												<Litepicker
+													ref={expendableDaysPicker}
+													className="hidden"
+													id="check_in"
+													value={`${props.booking.check_out} - ${props.booking.check_out}`}
+													options={{
+														lang: 'tr-TR',
+														singleMode: false,
+														// elementEnd: checkOutPicker.current,
+														autoApply: false,
+														selectBackward: false,
+														selectForward: true,
+														resetButton: true,
+														autoRefresh: true,
+														allowRepick: true,
+														numberOfColumns: 1,
+														numberOfMonths: 1,
+														startDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
+														endDate: dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'), // Başlangıç için varsayılan bitiş tarihi
+														tooltipText: {
+															one: 'gece',
+															other: 'gece',
+														},
+														tooltipNumber: (totalDays) => {
+															return totalDays - 1
+														},
+														format: 'DD.MM.YYYY',
+														plugins: ['mobilefriendly'],
+														mobileFriendly: true,
+														lockDaysFormat: 'YYYY-MM-DD',
+														lockDaysFilter: (date1: DateTime | null) => {
+															if (date1) {
+																const date1Dayjs = dayjs(date1.toJSDate())
+																if (date1Dayjs.isBefore(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
+																	return true
+																}
+																if (props.extendable_number_of_days !== null) {
+																	if (date1Dayjs.isAfter(dayjs(props.booking.check_out, 'DD.MM.YYYY').add(props.extendable_number_of_days, 'day'))) {
+																		return true
+																	}
+																}
+															}
+															return false
+														},
+													}}
+													onChange={(date: string) => {
+														const dates = date.split(' - ')
+														let expendableStartDay = dates[0]
+														let expendableEndDay = dates[1]
+														if (!dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(props.booking.check_out, 'DD.MM.YYYY'))) {
+															Toast.fire({
+																icon: 'error',
+																title: 'Süre Uzatma başlangıç tarihi rezervasyon çıkış tarihinden farklı olamaz!',
+															})
+															//Burda Litepickerin tarihini sıfırlamak lazım
+															if (expendableDaysPicker.current?.litePickerInstance) {
+																expendableDaysPicker.current.litePickerInstance.setDateRange(
+																	dayjs(props.booking.check_out, 'DD.MM.YYYY').format('YYYY-MM-DD'),
+																	dayjs(props.booking.check_out, 'DD.MM.YYYY').add(1, 'day').format('YYYY-MM-DD'),
+																)
+															}
+														}
+														if (dayjs(expendableStartDay, 'DD.MM.YYYY').isSame(dayjs(expendableEndDay, 'DD.MM.YYYY'))) {
+															Toast.fire({
+																icon: 'info',
+																title: 'En az 1 gece uzatılabilir!',
+															})
+														}
+														console.log('date', date)
+													}}
+												/>
+												<ExpendBookingPeriod
+													open={expendBookingPeriodModalOpen}
+													onClose={setExpendBookingPeriodModalOpen}
+												/>
+											</>
+										)}
+										{dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrBefore(dayjs(), 'day') &&
+											bookingRooms.every((room) => room.guests.every((guest) => guest.is_check_in || room.guests.length === 0)) && (
+												<Button
+													variant="soft-pending"
+													onClick={(e: any) => {
+														e.preventDefault()
+														handleFinishBooking()
+													}}
+													className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+													<Lucide
+														icon="CalendarMinus"
+														className="mr-1 h-5 w-5"
+													/>
+													ERKEN BİTİR
+												</Button>
+											)}
+										{['reception', 'agency'].includes(props.booking.channel_code) && dayjs(props.booking.check_in, 'DD.MM.YYYY').isSameOrAfter(dayjs(), 'day') && (
 											<Button
-												variant="soft-pending"
-												className="intro-x flex items-center justify-center border-2 border-pending/60 py-1 text-white/70">
+												variant="soft-danger"
+												onClick={(e: any) => bookingCancel(e)}
+												className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
 												<Lucide
-													icon="CalendarMinus"
+													icon="CalendarX2"
 													className="mr-1 h-5 w-5"
 												/>
-												ERKEN BİTİR
+												İPTAL ET
 											</Button>
 										)}
-										<Button
-											variant="soft-danger"
-											onClick={(e: any) => bookingCancel(e)}
-											className="intro-x flex items-center justify-center border-2 border-danger/60 py-1 text-white/70">
-											<Lucide
-												icon="CalendarX2"
-												className="mr-1 h-5 w-5"
-											/>
-											İPTAL ET
-										</Button>
 									</>
 								)}
 							</div>
 						</div>
-						<div className="intro-y col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
+						<div className="intro-y relative col-span-12 border-b border-slate-300 bg-slate-200 px-4 py-5 dark:bg-darkmode-300/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Müşteri Bilgileri</h3>
 							<div className="flex flex-col items-start justify-between justify-items-start py-3 text-dark lg:flex-row dark:text-light">
-								<Link
-									href={route('hotel.customers.show', props.customer.id)}
-									className="flex w-full flex-col text-sm font-semibold">
+								<div className="flex w-full flex-col text-sm font-semibold">
 									<span className="font-semibold">
 										Müşteri Türü :<span className="ml-1 font-normal">{props.customer.type}</span>
 									</span>
@@ -312,7 +474,7 @@ function Show(props: PageProps) {
 									<span className="font-semibold">
 										T.C. Kimlik No / Vergi No :<span className="ml-1 font-normal">{props.customer.tax_number}</span>
 									</span>
-								</Link>
+								</div>
 								<div className="flex w-full flex-col text-sm font-semibold lg:ml-5">
 									<span className="font-semibold">
 										Ülke :<span className="ml-1 font-normal">{props.customer.country}</span>
@@ -330,6 +492,14 @@ function Show(props: PageProps) {
 									</span>
 								</div>
 							</div>
+							<div className="absolute right-5 top-5">
+								<Link href={route('hotel.customers.show', props.customer.id)}>
+									<Lucide
+										icon="MousePointerSquareDashed"
+										className="text-black hover:h-7 hover:w-7 hover:-translate-y-0.5 hover:translate-x-0.5 dark:text-white"
+									/>
+								</Link>
+							</div>
 						</div>
 						<div className="col-span-12 border-b border-slate-200 bg-white px-4 py-5 dark:bg-darkmode-200/70">
 							<h3 className="rounded-md text-xl font-bold text-dark dark:text-light">Oda Bilgileri</h3>
@@ -341,6 +511,7 @@ function Show(props: PageProps) {
 										currency={props.currency}
 										taxes={props.taxes}
 										citizens={props.citizens}
+										pricingPolicy={props.pricing_policy}
 										items={props.items}
 										bookingRooms={bookingRooms}
 										setBookingRooms={setBookingRooms}
@@ -355,7 +526,6 @@ function Show(props: PageProps) {
 							</div>
 						</div>
 					</div>
-					{/*<TransactionsSection customer={props.customer} />*/}
 				</div>
 				<div className="w-full xl:w-1/3">
 					<div className="xl:h-full xl:border-l xl:p-5">
@@ -417,6 +587,23 @@ function Show(props: PageProps) {
 										value={data.payment_date}
 										onChange={(e) => setData((data) => ({...data, payment_date: e}))}
 										className="w-full text-center"
+										options={{
+											lang: 'tr-TR',
+											format: 'DD.MM.YYYY',
+											numberOfColumns: 1,
+											numberOfMonths: 1,
+											plugins: ['mobilefriendly'],
+											mobileFriendly: true,
+											lockDaysFormat: 'YYYY-MM-DD',
+											lockDays: [dayjs().subtract(1, 'day').format('YYYY-MM-DD')],
+											lockDaysFilter: (date1: DateTime | null) => {
+												if (date1) {
+													const date1Dayjs = dayjs(date1.toJSDate())
+													return date1Dayjs.isBefore(dayjs().subtract(1, 'day'))
+												}
+												return false
+											},
+										}}
 									/>
 									{errors.payment_date && <div className="text-theme-6 mt-2 text-danger">{errors.payment_date}</div>}
 								</div>

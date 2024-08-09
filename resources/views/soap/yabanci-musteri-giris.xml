@@ -1,0 +1,26 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <MusteriYabanciGiris xmlns="http://tempuri.org/">
+            <KullaniciTC>{{ KULLANICI_TC }}</KullaniciTC>
+            <TssKod>{{ TSS_KOD }}</TssKod>
+            <Sifre>{{ SIFRE }}</Sifre>
+            <musteri xmlns:q8="http://schemas.datacontract.org/2004/07/KBS_Tesis_Servis">
+                <q8:ADI>{{ ADI }}</q8:ADI>
+                <q8:ANAADI>{{ ANAADI }}</q8:ANAADI>
+                <q8:BABADI>{{ BABAADI }}</q8:BABADI>
+                <q8:BELGENO>{{ BELGENO }}</q8:BELGENO>
+                <q8:CINSIYET xmlns:q8="http://schemas.datacontract.org/2004/07/KBS_Model">{{ CINSIYET }}</q8:CINSIYET>
+                <q8:DOGUMTARIHI>{{ DOGUMTARIHI }}</q8:DOGUMTARIHI>
+                <q8:GRSTRH>{{ GRSTRH }}</q8:GRSTRH>
+                <q8:ILERITARIHLI>false</q8:ILERITARIHLI>
+                <q8:KULLANIMSEKLI xmlns:q9="http://schemas.datacontract.org/2004/07/KBS_Model">KONAKLAMA</q8:KULLANIMSEKLI>
+                <q8:MEDENIHAL xmlns:q10="http://schemas.datacontract.org/2004/07/KBS_Model">{{ MEDENIHAL }}</q8:MEDENIHAL>
+                <q8:ODANO>{{ ODANO }}</q8:ODANO>
+                <q8:PLKNO>{{ PLKNO }}</q8:PLKNO>
+                <q8:SOYADI>{{ SOYADI }}</q8:SOYADI>
+                <q8:TELNO>{{ TELNO }}</q8:TELNO>
+                <q8:ULKKOD xmlns:q11="http://schemas.datacontract.org/2004/07/KBS_Model">{{ ULKKOD }}</q8:ULKKOD>
+            </musteri>
+        </MusteriYabanciGiris>
+    </s:Body>
+</s:Envelope>

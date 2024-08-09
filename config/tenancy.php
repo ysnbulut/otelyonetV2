@@ -18,11 +18,8 @@ return [
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
     'central_domains' => [
+        'test1.localhost',
         'otelyonet.test',
-         '127.0.0.1',
-         ':::1',
-         'localhost',
-         'otelyonet.com'
     ],
 
     /**
