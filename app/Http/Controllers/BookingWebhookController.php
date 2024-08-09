@@ -534,8 +534,8 @@ class BookingWebhookController extends Controller
                         $booking->channel->name
                     ));
 
-                    if($booking->channel_id < 122) {
-                        (new VerimorSmsService())->sendSms($hotel->phone, sprintf('Değerli müşterimiz %s satış kanalından rezervasyon gelmiştir. OTELYONET' , $booking->channel->name));
+                    if ($booking->channel_id < 122) {
+                        (new VerimorSmsService())->sendSms($hotel->phone, sprintf('Değerli müşterimiz %s satış kanalından rezervasyon gelmiştir. OTELYONET', $booking->channel->name));
                     }
 
                     return [
