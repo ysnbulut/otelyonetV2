@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
 import axios from 'axios'
 import ChannelManagerRooms from '@/Pages/Admin/Hotel/components/ChannelManagerRooms'
+import {twMerge} from 'tailwind-merge'
 
 dayjs.extend(customParseFormat)
 
@@ -45,6 +46,13 @@ interface OptionProps {
 	value: string
 }
 
+interface CMRoomsProps {
+	id: number
+	type_has_view_id: number
+	room_code: string
+	stock: number
+}
+
 interface ChannelManagerProps {
 	name: string
 	type: string
@@ -60,9 +68,12 @@ interface ApiSettingsProps {
 }
 
 interface TypeHasViewProps {
-	value: number
-	label: string
-	count: number
+	id: number
+	name: string
+	stock: number
+	adult_capacity: number
+	child_capacity: number
+	cm_connected: boolean
 }
 
 interface SettingProps {
@@ -78,8 +89,11 @@ interface PageProps {
 		tenancy_db_name: string
 		domains: string[]
 		settings: SettingProps
-		type_has_views: TypeHasViewProps[]
 	}
+	type_has_views: TypeHasViewProps[]
+	cmError: boolean
+	cm_rooms: CMRoomsProps[] | [] | undefined
+	channel_rooms: ChannelRoomProps[] | [] | undefined
 }
 
 interface ChannelRoomProps {
@@ -112,8 +126,9 @@ interface ChannelRoomProps {
 
 function Show(props: PageProps) {
 	const MySwal = withReactContent(Swal)
-	const [rooms, setRooms] = useState<ChannelRoomProps[]>([])
-	const {data, setData, errors, setError, clearErrors} = useForm({
+	const [rooms, setRooms] = useState<ChannelRoomProps[]>(props.channel_rooms || [])
+	const [typeHasViewRooms, setTypeHasViewRooms] = useState<TypeHasViewProps[]>(props.type_has_views || [])
+	const {data, setData, errors, setError, clearErrors, put} = useForm({
 		channel_manager: props.tenant.settings.channel_manager.value,
 		api_token: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.token : '' || '',
 		api_hr_id: props.tenant.settings.api_settings !== '' ? props.tenant.settings.api_settings.hr_id : '' || '',
@@ -134,20 +149,54 @@ function Show(props: PageProps) {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
-		axios
-			.put(route('admin.hotels.channe_manager', props.hotel.id), data)
-			.then((response) => {
+		put(route('admin.hotels.channe_manager', props.hotel.id), {
+			preserveState: true,
+			preserveScroll: true,
+			onSuccess: () => {
 				Toast.fire({
-					icon: response.data.status === 'success' ? 'success' : 'error',
-					title: response.data.message,
+					icon: 'success',
+					title: 'Kanal yöneticisi başarıyla güncellendi',
 				})
-				setRooms(response.data.rooms)
-			})
-			.catch((error) => {
-				if (error.response.status === 422) {
-					setError('channel_manager', error.response.data.errors.channel_manager[0])
-				}
-			})
+			},
+			//TODO: Burası olmadı sonra bakarız.
+			onError: (error) => {
+				errors.channel_manager &&
+					Toast.fire({
+						icon: 'error',
+						title: errors.channel_manager,
+					})
+			},
+		})
+	}
+
+	const handleDelete = (e: any) => {
+		e.preventDefault()
+		MySwal.fire({
+			title: 'Otel Silme',
+			text: 'Otel silinecek, emin misiniz?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Evet, Sil',
+			cancelButtonText: 'İptal',
+			confirmButtonColor: '#d33',
+			cancelButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				axios
+					.delete(route('admin.hotels.destroy', props.hotel.id))
+					.then((response) => {
+						console.log(response)
+						Toast.fire({
+							icon: 'success',
+							title: 'Otel başarıyla silindi',
+						})
+						router.visit(route('admin.hotels.index'))
+					})
+					.catch((error) => {
+						console.log(error)
+					})
+			}
+		})
 	}
 
 	const setActiveChannels = (e: any) => {
@@ -251,6 +300,19 @@ function Show(props: PageProps) {
 						<span>{props.hotel.phone}</span>
 					</div>
 				</div>
+				<div className="flex flex-1 items-end justify-end gap-2">
+					<Button
+						variant="danger"
+						onClick={handleDelete}>
+						Sil
+					</Button>
+					<Button
+						variant="soft-primary"
+						as="a"
+						href={route('admin.hotels.edit', props.hotel.id)}>
+						Düzenle
+					</Button>
+				</div>
 			</div>
 			<div className="box mt-5 flex flex-col gap-1 p-5 lg:flex-row lg:gap-10">
 				<FormInput
@@ -335,6 +397,7 @@ function Show(props: PageProps) {
 										name="token"
 										type="text"
 										value={data.api_token}
+										className={twMerge('w-full', props.cmError ? 'border border-danger bg-danger/80 font-bold text-white' : 'border border-success bg-success/20 font-bold')}
 										onChange={(e) => setData((data) => ({...data, api_token: e.target.value}))}
 									/>
 								</div>
@@ -381,17 +444,18 @@ function Show(props: PageProps) {
 				</div>
 			</form>
 
-			{rooms.length > 0 && (
-				<div>
-					{rooms.map((room, index) => (
+			{typeHasViewRooms.length > 0 && (
+				<>
+					{typeHasViewRooms.map((type_has_view_room, index) => (
 						<ChannelManagerRooms
 							hotel_id={props.hotel.id}
-							room={room}
+							type_room={type_has_view_room}
 							key={index}
-							type_has_views={props.tenant.type_has_views}
+							cm_rooms={props.cm_rooms}
+							channel_rooms={props.channel_rooms}
 						/>
 					))}
-				</div>
+				</>
 			)}
 		</>
 	)

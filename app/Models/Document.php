@@ -47,7 +47,9 @@ class Document extends Model
         'due_date',
     ];
 
-    protected $cascadeDeletes = ['items', 'total', 'payments'];
+    protected $cascadeDeletes = ['items', 'total'];
+
+    //TODO: Burda payments düşünülmeli...
 
     protected static function boot(): void
     {

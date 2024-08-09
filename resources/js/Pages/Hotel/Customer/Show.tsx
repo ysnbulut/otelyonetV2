@@ -140,8 +140,10 @@ function Show({...props}: PageProps) {
 									<Litepicker
 										id="payment-date"
 										name="payment_date"
-										data-single-mode="true"
 										value={data.payment_date}
+										options={{
+											singleMode: true,
+										}}
 										onChange={(e) => setData((data) => ({...data, payment_date: e}))}
 										className="w-full text-center"
 									/>

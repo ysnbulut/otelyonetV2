@@ -58,7 +58,9 @@ class IDStatementController extends Controller implements IDStatement
                     'TELNO' => $booking->guest->phone,
                     'ULKKOD' => 'TURKIYE',
                 ]);
-            }   else {
+
+            } else {
+
                 $response = $this->services->musteriYabanciGiris([
                     'ADI' => $booking->guest->name,
                     'SOYADI' => $booking->guest->surname,

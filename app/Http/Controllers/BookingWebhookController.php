@@ -197,7 +197,7 @@ class BookingWebhookController extends Controller
                                         'check_out' => $room['checkout_date'],
                                         'number_of_adults' => $room['total_adult'],
                                         'number_of_children' => count($room['child_ages']),
-                                        'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
+                                        'children_ages' => $room['child_ages'],
                                     ]);
                                     if ($bookingRoom->isDirty()) {
                                         BookingRoom::withoutEvents(static function () use ($bookingRoom) {
@@ -288,7 +288,7 @@ class BookingWebhookController extends Controller
                                             'check_out' => $room['checkout_date'],
                                             'number_of_adults' => $room['total_adult'],
                                             'number_of_children' => count($room['child_ages']),
-                                            'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
+                                            'children_ages' => $room['child_ages'],
                                             'created_at' => Carbon::now(),
                                             'updated_at' => Carbon::now(),
                                         ]);
@@ -396,7 +396,7 @@ class BookingWebhookController extends Controller
                         'number_of_rooms' => $webhookData['total_rooms'],
                         'number_of_adults' => $webhookData['total_guests'],
                         'number_of_children' => 0,
-                        'calendar_colors' => json_encode($this->getRandomColors(), JSON_THROW_ON_ERROR),
+                        'calendar_colors' => $this->getRandomColors(),
                     ];
                     $booking = Booking::create($booking_data);
                     $booking->cMBooking()->create([
@@ -438,7 +438,7 @@ class BookingWebhookController extends Controller
                                             . $this->setting->check_out_time_policy['value'] . ':00')->format('Y-m-d H:i:s'),
                                         'number_of_adults' => $room['total_adult'],
                                         'number_of_children' => count($room['child_ages']),
-                                        'children_ages' => json_encode($room['child_ages'], JSON_THROW_ON_ERROR),
+                                        'children_ages' => $room['child_ages'],
                                         'created_at' => Carbon::now(),
                                         'updated_at' => Carbon::now(),
                                     ]);
@@ -511,7 +511,7 @@ class BookingWebhookController extends Controller
                         }
                     }
 
-                    if(\request()->ip() != '127.0.0.1') {
+                    if (\request()->ip() != '127.0.0.1') {
                         $this->channelManager->confirmReservation($webhookData['message_uid'], $booking->booking_code);
                     }
 
@@ -533,7 +533,6 @@ class BookingWebhookController extends Controller
                         $booking->rooms->first()->room->roomType->name,
                         $booking->channel->name
                     ));
-
 
                     if($booking->channel_id < 122) {
                         (new VerimorSmsService())->sendSms($hotel->phone, sprintf('Değerli müşterimiz %s satış kanalından rezervasyon gelmiştir. OTELYONET' , $booking->channel->name));

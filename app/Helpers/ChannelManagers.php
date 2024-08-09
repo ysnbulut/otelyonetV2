@@ -7,7 +7,7 @@ use JsonException;
 
 class ChannelManagers
 {
-    protected HotelRunnerApi $channelManagerApi;
+    public HotelRunnerApi $channelManagerApi;
 
     public function __construct(string $channel_manager, array $options = [])
     {
@@ -18,6 +18,7 @@ class ChannelManagers
 
     /**
      * @throws GuzzleException
+     * @throws JsonException
      */
     public function getRooms(): array
     {
@@ -26,6 +27,7 @@ class ChannelManagers
 
     /**
      * @throws GuzzleException
+     * @throws JsonException
      */
     public function updateDailyRoomStock(string|int $room_code, array $dates): array
     {
@@ -44,14 +46,16 @@ class ChannelManagers
 
     /**
      * @throws GuzzleException
+     * @throws JsonException
      */
-    public function getReservations(): array
+    public function getReservations(int $page): array
     {
-        return $this->channelManagerApi->getReservations();
+        return $this->channelManagerApi->getReservations($page);
     }
 
     /**
      * @throws GuzzleException
+     * @throws JsonException
      */
     public function getChannelList(): array
     {
@@ -60,12 +64,17 @@ class ChannelManagers
 
     /**
      * @throws GuzzleException
+     * @throws JsonException
      */
     public function getTransactionDetails(string|int $transaction_id): array
     {
         return $this->channelManagerApi->getTransactionDetails($transaction_id);
     }
 
+    /**
+     * @throws GuzzleException
+     * @throws JsonException
+     */
     public function confirmReservation(string $message_uid, string $booking_code): array
     {
         return $this->channelManagerApi->confirmReservation($message_uid, $booking_code);

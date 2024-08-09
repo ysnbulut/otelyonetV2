@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    * {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media only screen and (max-width: 1700px) {
+        html {
+            font-size: 15px;
+        }
+    }
+
+    @media only screen and (max-width: 1300px) {
+        html {
+            font-size: 14px;
+        }
+    }
+
+    @media only screen and (max-width: 1180px) {
+        html {
+            font-size: 13px;
+        }
+    }
+
+    html {
+        scroll-behavior: smooth;
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+        background-color: #ffffff;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    html::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        border-radius: 0px;
+        background-color: #fff;
+    }
+
+    html::-webkit-scrollbar {
+        width: 12px;
+        background-color: #fff;
+    }
+
+    html::-webkit-scrollbar-thumb {
+        border-radius: 0px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+        background-color: #312e81;
+    }
+}
+
+@layer components {
+    .custom-container-1 {
+        width: 100%;
+        max-width: 1440px;
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+
+    .custom-container-2 {
+        width: 100%;
+        padding-left: 30px;
+        padding-right: 30px;
+        max-width: 1600px;
+    }
+
+    @media only screen and (max-width: 400px) {
+        .custom-container-1,
+        .custom-container-2 {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    }
+
+    .number-style {
+        font-family: 'PT Serif', serif;
+    }
+
+    .text-soft {
+        @apply text-gray-400 leading-[24px] text-[16px];
+    }
+
+    .ticket-wave {
+        position: relative;
+    }
+
+    .ticket-wave {
+        color: #fff;
+        text-align: center;
+        font-weight: bold;
+        font-size: 24px;
+        padding-top: 25px;
+        padding-bottom: 25px;
+    }
+
+    @media only screen and (max-width: 800px) {
+    }
+    .ticket-wave {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .ticket-wave::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-repeat: repeat;
+        height: 10px;
+        background-size: 20px 20px;
+        background-image: radial-gradient(
+                circle at 10px -5px,
+                transparent 12px,
+                #fff 13px
+        );
+    }
+
+    .ticket-wave::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-repeat: repeat;
+        height: 14px;
+        background-size: 40px 20px;
+        background-image: radial-gradient(
+                circle at 10px 15px,
+                #fff 12px,
+                transparent 13px
+        );
+    }
+
+    .wave {
+        transform: rotate(180deg);
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -9999;
+        height: 75vh;
+        max-height: 700px;
+        min-height: 500px;
+    }
+
+    @media only screen and (max-width: 640px) {
+        .ticket-wave::before,
+        .ticket-wave::after {
+            display: none;
+        }
+    }
+
+    .btn {
+        outline: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 0;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        padding: 13px 20px;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .btn .animation {
+        border-radius: 100%;
+        animation: ripple 0.6s linear infinite;
+    }
+
+    @keyframes ripple {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.07),
+            0 0 0 20px rgba(255, 255, 255, 0.07),
+            0 0 0 40px rgba(255, 255, 255, 0.07),
+            0 0 0 60px rgba(255, 255, 255, 0.07);
+        }
+
+        100% {
+            box-shadow: 0 0 0 20px rgba(255, 255, 255, 0.07),
+            0 0 0 40px rgba(255, 255, 255, 0.07),
+            0 0 0 60px rgba(255, 255, 255, 0.07), 0 0 0 80px rgba(255, 255, 255, 0);
+        }
+    }
+}
+
+@layer utilities {
+    .slick-outline {
+        user-select: none;
+    }
+
+    .slick-outline:focus-visible {
+        outline: -webkit-focus-ring-color auto 0px !important;
+    }
+
+    #hakkimizda:target {
+        scroll-margin-top: -80px;
+    }
+
+    #ozellikler:target,
+    #paketler:target,
+    #hizmetler:target,
+    #referanslar:target,
+    #iletisim:target {
+        scroll-margin-top: 80px;
+    }
+
+    .bg-line {
+        background: linear-gradient(
+                19deg,
+                rgba(45, 116, 213, 0.1) 0%,
+                rgba(49, 46, 129, 0.2) 25%,
+                rgba(69, 113, 244, 0.3) 50%,
+                rgba(49, 46, 129, 0.2) 75%,
+                rgba(45, 116, 213, 0.1) 100%
+        );
+    }
+
+    .nav-link > a {
+        position: relative;
+    }
+
+    .nav-link > a:before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: 0;
+        margin: -5px 0;
+        background-color: white;
+        visibility: hidden;
+        transform: scaleX(0);
+        transition: all 0.4s ease-in-out 0s;
+    }
+
+    @media only screen and (max-width: 1280px) {
+        .nav-link > a:before {
+            @apply bg-blue-100;
+        }
+    }
+
+    .nav-link > a:hover:before {
+        visibility: visible;
+        transform: scaleX(1);
+    }
+
+    .active-nav-link > a:before {
+        visibility: visible;
+        transform: scaleX(1);
+    }
+}

@@ -15,6 +15,7 @@ interface CreateProps {
 	child_age_limit: number
 	accommodation_type: string
 	citizens: CitizenProps[]
+	pricing_policy: string
 }
 
 function Create(props: CreateProps) {
@@ -164,6 +165,8 @@ function Create(props: CreateProps) {
 									setStep={setStep}
 									checkedRooms={checkedRooms}
 									data={stepOneResults.data}
+									pricingPolicy={props.pricing_policy}
+									totalGuests={stepOneResults.request.number_of_adults + stepOneResults.request.number_of_children}
 									setRoomsGuests={setRoomsGuests}
 									roomsGuests={roomsGuests}
 								/>

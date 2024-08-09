@@ -41,6 +41,7 @@ function Four(props: StepFourProps) {
 											<Tippy content="Misafir Ekle">
 												<Button
 													type="button"
+													disabled={props.pricingPolicy === 'person_based' && props.totalGuests <= Object.values(props.roomsGuests[room_type.id]).length}
 													variant="soft-primary"
 													onClick={(e: any) => {
 														e.preventDefault()

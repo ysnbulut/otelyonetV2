@@ -34,30 +34,63 @@ interface RoomPorps {
 	show_refundable_rate: boolean
 }
 
+interface CMRoomProps {
+	id: number
+	type_has_view_id: number
+	room_code: string
+	stock: number
+}
+
 interface TypeHasView {
-	value: number
-	label: string
-	count: number
+	id: number
+	name: string
+	stock: number
+	adult_capacity: number
+	child_capacity: number
+	cm_connected: boolean
 }
 
 interface Props {
 	hotel_id: number
-	room: RoomPorps
-	type_has_views: TypeHasView[]
+	type_room: TypeHasView
+	cm_rooms: CMRoomProps[] | [] | undefined
+	channel_rooms: RoomPorps[] | [] | undefined
 }
 
 function ChannelManagerRooms(props: Props) {
-	const [typeHasView, setTypeHasView] = useState<TypeHasView | null>(null)
+	const [cmRoom, setCmRoom] = useState<{
+		value: string
+		label: string
+		stock: number
+	} | null>(null)
 	const {data, setData, post, processing, errors, reset} = useForm({
-		cm_room_code: props.room.code.toString(),
-		type_has_view_id: '',
-		stock: '0',
+		cm_room_code: props.cm_rooms && props.cm_rooms.length > 0 ? props.cm_rooms.find((room) => room.type_has_view_id === props.type_room.id)?.room_code : null,
+		type_has_view_id: props.type_room.id,
+		stock: cmRoom !== null ? cmRoom.stock : props.cm_rooms ? props.cm_rooms.find((room) => room.type_has_view_id === props.type_room.id)?.stock : props.type_room.stock,
 	})
 
 	useEffect(() => {
-		typeHasView !== null && setData((data) => ({...data, type_has_view_id: typeHasView.value.toString()}))
-		typeHasView !== null && setData((data) => ({...data, stock: typeHasView.count.toString()}))
-	}, [typeHasView])
+		if (props.cm_rooms && props.cm_rooms.length > 0) {
+			props.cm_rooms.map((room) => {
+				if (room.type_has_view_id === props.type_room.id) {
+					const channelRoom = props.channel_rooms && props.channel_rooms.find((r) => r.inv_code.split(':').at(-1) === room.room_code)
+					if (channelRoom) {
+						setCmRoom({
+							value: room.room_code,
+							label: channelRoom.name + ' - ' + channelRoom.inv_code,
+							stock: room.stock,
+						})
+						setData((data) => ({...data, cm_room_code: room.room_code}))
+					}
+				}
+			})
+		}
+	}, [props.cm_rooms, props.channel_rooms])
+
+	useEffect(() => {
+		cmRoom !== null && setData((data) => ({...data, cm_room_code: cmRoom.value}))
+		cmRoom !== null && setData((data) => ({...data, stock: cmRoom.stock}))
+	}, [cmRoom])
 
 	const handleSubmit = (e: any) => {
 		e.preventDefault()
@@ -76,68 +109,77 @@ function ChannelManagerRooms(props: Props) {
 			<div className="flex w-full flex-col justify-between border-b pb-2 lg:flex-row lg:items-center">
 				<div>
 					<div className="flex gap-2">
-						<span className="font-semibold">Oda Adı :</span>
-						<span>{props.room.name}</span>
+						<span className="font-semibold">Otel Yönet Oda Adı :</span>
+						<span>{props.type_room.name}</span>
 					</div>
 					<div className="flex gap-2">
-						<span className="font-semibold">Oda Kodu :</span>
-						<span>{props.room.rate_code}</span>
+						<span className="font-semibold">Otel Yönet Oda Kapasitesi :</span>
+						<span>{props.type_room.stock}</span>
 					</div>
 					<div className="flex gap-2">
-						<span className="font-semibold">Oda Kapasitesi :</span>
-						<span>{props.room.room_capacity}</span>
+						<span className="font-semibold">Yetişkin Kapasitesi :</span>
+						<span>{props.type_room.adult_capacity}</span>
 					</div>
 					<div className="flex gap-2">
-						<span className="font-semibold">Oda Yetişkin Kapasitesi :</span>
-						<span>{props.room.adult_capacity}</span>
+						<span className="font-semibold">Çocuk Kapasitesi :</span>
+						<span>{props.type_room.child_capacity}</span>
 					</div>
 				</div>
-				<div>
-					<FormLabel htmlFor="room">Otel Yonet Oda Türü</FormLabel>
-					<Select
-						id="province"
-						name="province"
-						defaultValue={typeHasView}
-						onChange={(e: any, action: any) => {
-							if (action.action === 'select-option') {
-								e && setTypeHasView(e)
-							} else if (action.action === 'clear') {
-								setTypeHasView(null)
-							} else {
-								setTypeHasView(null)
+				<div className="flex flex-col items-center justify-end gap-3">
+					<div>
+						<FormLabel htmlFor="room">HotelRunner Oda Türü</FormLabel>
+						<Select
+							id="type_has_view"
+							name="type_has_view"
+							value={cmRoom}
+							onChange={(e: any, action: any) => {
+								if (action.action === 'select-option') {
+									e && setCmRoom(e)
+								} else if (action.action === 'clear') {
+									setCmRoom(null)
+								} else {
+									setCmRoom(null)
+								}
+							}}
+							className="remove-all my-select-container max-w-96"
+							classNamePrefix="my-select"
+							styles={{
+								input: (base) => ({
+									...base,
+									'input:focus': {
+										boxShadow: 'none',
+									},
+								}),
+							}}
+							isClearable
+							hideSelectedOptions
+							options={
+								props.channel_rooms &&
+								props.channel_rooms.map((room) => ({
+									value: room.inv_code,
+									label: room.name + ' - ' + room.inv_code,
+									stock: room.room_capacity,
+								}))
 							}
-						}}
-						className="remove-all my-select-container max-w-96"
-						classNamePrefix="my-select"
-						styles={{
-							input: (base) => ({
-								...base,
-								'input:focus': {
-									boxShadow: 'none',
-								},
-							}),
-						}}
-						isClearable
-						hideSelectedOptions
-						options={props.type_has_views}
-						placeholder="Otel Yonet Oda Türü"
-					/>
+							placeholder="Otel Yonet Oda Türü"
+						/>
+					</div>
+					<div className="flex flex-col">
+						<FormLabel htmlFor="room">Gönderilecek Stok</FormLabel>
+						<FormInput
+							id="stock"
+							name="room"
+							className="w-32 text-right"
+							type="stock"
+							value={data.stock}
+							onChange={(e: any) => {
+								setData((data) => ({...data, stock: e.target.value}))
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 			<div className="mt-2 flex items-center justify-end gap-2">
-				<div className="flex flex-col">
-					<FormLabel htmlFor="room">Gönderilecek Stok</FormLabel>
-					<FormInput
-						id="room"
-						name="room"
-						className="w-32 text-right"
-						type="number"
-						value={data.stock}
-						onChange={(e: any) => {
-							setData((data) => ({...data, stock: e.target.value}))
-						}}
-					/>
-				</div>
 				<Button
 					variant="soft-secondary"
 					type="button"

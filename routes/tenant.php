@@ -72,11 +72,7 @@ Route::middleware([
 
     Route::get('/test', static function () {
         $booking = Booking::find(14);
-        $bookig_customer = $booking->customer;
-        $booking_total_price = $booking->documents->map((static function ($document) {
-            return $document->total->where('type', 'total')->sum('amount');
-        }))->sum();
-        return $booking_total_price;
+        return \App\Http\Resources\BookingResource::collection(Booking::all());
     })->name('test');
 
     Route::middleware('guest')->group(function () {
@@ -306,7 +302,7 @@ Route::middleware([
 //        Route::post('/', [BookingController::class, 'store'])->name('hotel.booking_rooms.store');
 //        Route::get('/{booking_room}', [BookingController::class, 'show'])->name('hotel.booking_rooms.show');
 //        Route::get('/{booking_room}/edit', [BookingController::class, 'edit'])->name('hotel.booking_rooms.edit');
-//        Route::put('/{booking_room}', [BookingController::class, 'update'])->name('hotel.booking_rooms.update');
+        Route::put('/{booking_room}', [BookingRoomsController::class, 'update'])->name('hotel.booking_rooms.update');
         Route::delete('/{booking_room}', [BookingRoomsController::class, 'destroy'])->name('hotel.booking_rooms.destroy');
     });
 

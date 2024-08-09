@@ -10,7 +10,9 @@ import CurrencyInput from 'react-currency-input-field'
 import Select from 'react-select'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+
 dayjs.extend(customParseFormat)
+
 interface Province {
 	id: number
 	name: string
@@ -52,24 +54,16 @@ function Create(props: PageProps) {
 		email: '',
 	})
 	const [province, setProvince] = useState<{label: string; value: number} | null>(null)
-	const [districts, setDistricts] = useState<District[] | []>(
-		props.districts.filter((district) => district.province_id === province?.value) || [],
-	)
+	const [districts, setDistricts] = useState<District[] | []>(props.districts.filter((district) => district.province_id === province?.value) || [])
 	const [district, setDistrict] = useState<{label: string; value: number} | null>(null)
 
-	const [taxOffices, setTaxOffices] = useState<TaxOffice[] | []>(
-		props.tax_offices.filter((tax_offices) => tax_offices.province_id === province?.value) || [],
-	)
+	const [taxOffices, setTaxOffices] = useState<TaxOffice[] | []>(props.tax_offices.filter((tax_offices) => tax_offices.province_id === province?.value) || [])
 	const [taxOffice, setTaxOffice] = useState<{label: string; value: number} | null>(null)
 
 	useEffect(() => {
 		province !== null && province && setData((data) => ({...data, province_id: province.value.toString()}))
-		province !== null &&
-			province &&
-			setDistricts(props.districts.filter((district) => district.province_id === province.value) || [])
-		province !== null &&
-			province &&
-			setTaxOffices(props.tax_offices.filter((tax_office) => tax_office.province_id === province.value) || [])
+		province !== null && province && setDistricts(props.districts.filter((district) => district.province_id === province.value) || [])
+		province !== null && province && setTaxOffices(props.tax_offices.filter((tax_office) => tax_office.province_id === province.value) || [])
 	}, [province])
 
 	useEffect(() => {
@@ -145,6 +139,14 @@ function Create(props: PageProps) {
 							id="register_date"
 							name="register_date"
 							value={data.register_date}
+							options={{
+								singleMode: true,
+								lang: 'tr-TR',
+								format: 'DD.MM.YYYY',
+								mobileFriendly: true,
+								showWeekNumbers: false,
+								plugins: ['mobilefriendly'],
+							}}
 							onChange={(e) => {
 								setData((data) => ({...data, register_date: e}))
 								setData((data) => ({...data, renew_date: dayjs(e, 'DD.MM.YYYY').add(1, 'year').format('DD.MM.YYYY')}))
@@ -157,6 +159,14 @@ function Create(props: PageProps) {
 							id="renew_date"
 							name="renew_date"
 							value={data.renew_date}
+							options={{
+								singleMode: true,
+								lang: 'tr-TR',
+								format: 'DD.MM.YYYY',
+								mobileFriendly: true,
+								showWeekNumbers: false,
+								plugins: ['mobilefriendly'],
+							}}
 							onChange={(e) => setData((data) => ({...data, renew_date: e}))}
 						/>
 					</div>
@@ -177,9 +187,7 @@ function Create(props: PageProps) {
 							decimalsLimit={2}
 							required={true}
 							// disabled={!editable}
-							onValueChange={(value, name, values) =>
-								values && setData((data) => ({...data, price: values.float !== null ? values.float.toFixed(2) : '0'}))
-							}
+							onValueChange={(value, name, values) => values && setData((data) => ({...data, price: values.float !== null ? values.float.toFixed(2) : '0'}))}
 							className="w-full rounded-md border-slate-200 text-right shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 						/>
 					</div>
@@ -198,10 +206,7 @@ function Create(props: PageProps) {
 							decimalsLimit={2}
 							required={true}
 							// disabled={!editable}
-							onValueChange={(value, name, values) =>
-								values &&
-								setData((data) => ({...data, renew_price: values.float !== null ? values.float.toFixed(2) : '0'}))
-							}
+							onValueChange={(value, name, values) => values && setData((data) => ({...data, renew_price: values.float !== null ? values.float.toFixed(2) : '0'}))}
 							className="w-full rounded-md border-slate-200 text-right shadow-sm transition duration-200 ease-in-out placeholder:text-slate-400/90 focus:border-primary focus:border-opacity-40 focus:ring-4 focus:ring-primary focus:ring-opacity-20 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-transparent dark:bg-darkmode-800 dark:placeholder:text-slate-500/80 dark:focus:ring-slate-700 dark:focus:ring-opacity-50 dark:disabled:border-transparent dark:disabled:bg-darkmode-800/50 [&[readonly]]:cursor-not-allowed [&[readonly]]:bg-slate-100 [&[readonly]]:dark:border-transparent [&[readonly]]:dark:bg-darkmode-800/50"
 						/>
 					</div>

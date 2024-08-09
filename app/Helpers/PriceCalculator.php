@@ -8,6 +8,7 @@ use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Log;
+use JsonException;
 use Teknomavi\Tcmb\Doviz;
 use Teknomavi\Tcmb\Exception\UnknownCurrencyCode;
 use Teknomavi\Tcmb\Exception\UnknownPriceType;
@@ -15,20 +16,20 @@ use Teknomavi\Tcmb\Exception\UnknownPriceType;
 class PriceCalculator
 {
     protected PricingPolicySettings $settings;
-    protected Doviz $doviz;
+    protected Currencies $currencies;
 
     public function __construct()
     {
         $settings = new PricingPolicySettings();
-        $doviz = new Doviz();
+        $currencies = new Currencies();
         $this->settings = $settings;
-        $this->doviz = $doviz;
+        $this->currencies = $currencies;
     }
 
     /**
      * @throws UnknownCurrencyCode
      * @throws UnknownPriceType
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function prices($id, $checkIn, $checkOut, $numberOfAdults, $numberOfChildren, $chilrenAges = null)
     {
@@ -38,18 +39,16 @@ class PriceCalculator
                 if ($age >= $this->settings->free_child_or_baby_max_age['value']) {
                     $numberOfAdults++;
                     $numberOfChildren--;
-                } else {
-                    if ($i <= $this->settings->free_child_or_baby_max_number['value']) {
-                        $numberOfChildren--;
-                        $i++;
-                    }
+                } else if ($i <= $this->settings->free_child_or_baby_max_number['value']) {
+                    $numberOfChildren--;
+                    $i++;
                 }
             }
         }
         $helper = new Helper();
         $dates = $helper->datesBetween($checkIn, $checkOut, true);
         if ($this->settings->pricing_currency['value'] !== 'TRY') {
-            $kur = $this->doviz->kurAlis($this->settings->pricing_currency['value'], Doviz::TYPE_EFEKTIFALIS);
+            $kur = $this->currencies->convert($this->settings->pricing_currency['value'], 'TRY', 1);
         } else {
             $kur = 1;
         }
@@ -152,12 +151,10 @@ class PriceCalculator
 
                         foreach ($dates as $dkey => $date) {
                             $returnData[$channelName]['daily_prices'][$dkey]['date'] = $date->format('Y-m-d');
-                            if ($unitPrice->typeHasView->type !== null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0) {
-                                if ($this->settings->pricing_policy['value'] === 'person_based') {
-                                    $variationGuestsFirst = $unitPrice->typeHasView->type->variationsOfGuests->first();
-                                    if ($variationGuestsFirst !== null && $variationGuestsFirst->multiplier !== null) {
-                                        $multiplier = $variationGuestsFirst->multiplier->multiplier;
-                                    }
+                            if ($unitPrice->typeHasView->type !== null && count($unitPrice->typeHasView->type->variationsOfGuests) > 0 && $this->settings->pricing_policy['value'] === 'person_based') {
+                                $variationGuestsFirst = $unitPrice->typeHasView->type->variationsOfGuests->first();
+                                if ($variationGuestsFirst !== null && $variationGuestsFirst->multiplier !== null) {
+                                    $multiplier = $variationGuestsFirst->multiplier->multiplier;
                                 }
                             }
                             if ($unitPrice->season !== null) {
@@ -171,15 +168,13 @@ class PriceCalculator
                                     $returnData[$channelName]['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
                                         $this->settings->currency['value'];
                                 }
-                            } else {
-                                if (!array_key_exists('price', $returnData[$channelName]['daily_prices'][$dkey]) && $unitPrice->booking_channel_id === $receiptChannelId) {
-                                    $price = round($unitPrice->unit_price * $kur * $multiplier);
-                                    $fprice = number_format($price, 2, '.', ',');
-                                    $returnData[$channelName]['daily_prices'][$dkey]['price'] = $price;
-                                    $returnData[$channelName]['daily_prices'][$dkey]['fprice'] = $fprice;
-                                    $returnData[$channelName]['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
-                                        $this->settings->currency['value'];
-                                }
+                            } else if (!array_key_exists('price', $returnData[$channelName]['daily_prices'][$dkey]) && $unitPrice->booking_channel_id === $receiptChannelId) {
+                                $price = round($unitPrice->unit_price * $kur * $multiplier);
+                                $fprice = number_format($price, 2, '.', ',');
+                                $returnData[$channelName]['daily_prices'][$dkey]['price'] = $price;
+                                $returnData[$channelName]['daily_prices'][$dkey]['fprice'] = $fprice;
+                                $returnData[$channelName]['daily_prices'][$dkey]['fprice_with_currency'] = $fprice . ' ' .
+                                    $this->settings->currency['value'];
                             }
 
                         }

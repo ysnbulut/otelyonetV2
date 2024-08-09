@@ -1,12 +1,13 @@
-import {createRef, useEffect, useRef} from 'react'
+import React, {forwardRef, useEffect, useRef, useImperativeHandle} from 'react'
 import {setValue, init, reInit} from './litepicker'
 import LitepickerJs from 'litepicker'
 import {FormInput} from '@/Components/Form'
 import {ILPConfiguration} from 'litepicker/dist/types/interfaces'
 import 'litepicker/dist/plugins/mobilefriendly'
 
-export interface LitepickerElement extends HTMLInputElement {
-	litePickerInstance: LitepickerJs
+export interface LitepickerElement {
+	litePickerInstance?: LitepickerJs // Make litePickerInstance optional
+	show: () => void
 }
 
 type LitepickerConfig = Partial<ILPConfiguration>
@@ -17,19 +18,19 @@ interface MainProps {
 	} & LitepickerConfig
 	value: string
 	onChange: (date: string) => void
-	getRef: (el: LitepickerElement) => void
+	getRef?: (el: LitepickerElement) => void // Optional if using forwardRef
 }
 
 export type LitepickerProps = MainProps & Omit<React.ComponentPropsWithoutRef<'input'>, keyof MainProps>
 
-function Litepicker(props: LitepickerProps) {
+const Litepicker = forwardRef<LitepickerElement, LitepickerProps>((props, ref) => {
 	const initialRender = useRef(true)
-	const litepickerRef = createRef<LitepickerElement>()
+	const litepickerRef = useRef<LitepickerElement>(null)
 	const tempValue = useRef(props.value)
 
 	useEffect(() => {
 		if (litepickerRef.current) {
-			props.getRef(litepickerRef.current)
+			props.getRef?.(litepickerRef.current)
 		}
 
 		if (initialRender.current) {
@@ -47,10 +48,21 @@ function Litepicker(props: LitepickerProps) {
 		tempValue.current = props.value
 	}, [props.value])
 
-	const {options, value, onChange, getRef, ...computedProps} = props
+	useImperativeHandle(ref, () => ({
+		show: () => {
+			if (litepickerRef.current?.litePickerInstance) {
+				litepickerRef.current.litePickerInstance.show()
+			}
+		},
+		get litePickerInstance() {
+			return litepickerRef.current?.litePickerInstance
+		},
+	}))
+
+	const {options, value, getRef, onChange, ...computedProps} = props
 	return (
 		<FormInput
-			ref={litepickerRef}
+			ref={litepickerRef as any} // Cast to `any` to bypass the type mismatch error temporarily
 			type="text"
 			value={props.value}
 			onChange={(e) => {
@@ -59,7 +71,7 @@ function Litepicker(props: LitepickerProps) {
 			{...computedProps}
 		/>
 	)
-}
+})
 
 Litepicker.defaultProps = {
 	options: {
@@ -76,7 +88,6 @@ Litepicker.defaultProps = {
 	},
 	value: '',
 	onChange: () => {},
-	getRef: () => {},
 }
 
 export default Litepicker

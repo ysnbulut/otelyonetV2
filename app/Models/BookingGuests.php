@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|BookingGuests query()
  * @method static Builder|BookingGuests withTrashed()
  * @method static Builder|BookingGuests withoutTrashed()
- * @property-read \App\Models\BookingRoom|null $booking_room
+ * @property-read BookingRoom|null $booking_room
  * @mixin Eloquent
  */
 class BookingGuests extends Model

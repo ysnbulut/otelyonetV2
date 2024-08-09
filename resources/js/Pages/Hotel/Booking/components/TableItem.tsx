@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {FormCheck} from '@/Components/Form'
 import {twMerge} from 'tailwind-merge'
+import Lucide from '@/Components/Lucide'
 
 interface TableItemProps {
 	index: number
@@ -17,6 +18,8 @@ interface TableItemProps {
 		status: string
 		check_in_date: string
 		check_out_date: string
+		check_in_kbs: boolean
+		check_out_kbs: boolean
 	}
 	setSelectedBookingGuests: React.Dispatch<React.SetStateAction<number[]>>
 }
@@ -62,13 +65,7 @@ function TableItem(props: TableItemProps) {
 				data-label="Durum"
 				style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'center'}}
 				className="border-none text-xs font-bold lg:w-2">
-				<span
-					className={twMerge(
-						'rounded-full px-[7px] py-[2px] text-center text-white/60',
-						statusColor[props.guest.status] || 'bg-primary',
-					)}>
-					{props.index + 1}
-				</span>
+				<span className={twMerge('rounded-full px-[7px] py-[2px] text-center text-white/60', statusColor[props.guest.status] || 'bg-primary')}>{props.index + 1}</span>
 			</td>
 			<td
 				data-label="Ad"
@@ -93,6 +90,22 @@ function TableItem(props: TableItemProps) {
 				style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}
 				className="border-none text-xs">
 				{props.guest.identification_number}
+			</td>
+			<td
+				data-label="Kimlik No"
+				style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}
+				className="border-none text-xs">
+				{props.guest.check_in_kbs ? (
+					<Lucide
+						icon="Check"
+						className="float-right mr-1 h-4 w-4 text-success"
+					/>
+				) : (
+					<Lucide
+						icon="X"
+						className="float-right mr-1 h-4 w-4 text-danger"
+					/>
+				)}
 			</td>
 		</tr>
 	)

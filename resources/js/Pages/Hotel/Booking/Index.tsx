@@ -88,6 +88,7 @@ function Index(props: PageProps) {
 							<Table.Thead>
 								<Table.Tr>
 									<Table.Th className="whitespace-nowrap border-b-0">GİRİŞ/ÇIKIŞ TARİHİ</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0">KANALLAR</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">ODALAR</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">MÜŞTERİ</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">TOPLAM TUTAR</Table.Th>
@@ -121,11 +122,15 @@ function Index(props: PageProps) {
 											</div>
 										</Table.Td>
 										<Table.Td
+											dataLabel="Kanal"
+											className="bg-white font-semibold text-primary first:rounded-l-md last:rounded-r-md lg:shadow-[20px_3px_20px_#0000000b] dark:bg-darkmode-600">
+											<span className={twMerge(booking.channel_color, booking.channel_bg_color, 'rounded px-2 py-1')}>{booking.channel}</span>
+										</Table.Td>
+										<Table.Td
 											dataLabel="Odalar"
 											className={twMerge(
 												booking.rooms_count > 2 ? 'text-lg' : 'text-2xl',
-												'bg-white font-semibold text-primary first:rounded-l-md lg:shadow-[20px_3px_20px_#0000000b]' +
-													' last:rounded-r-md dark:bg-darkmode-600',
+												'bg-white font-semibold text-primary first:rounded-l-md lg:shadow-[20px_3px_20px_#0000000b]' + ' last:rounded-r-md dark:bg-darkmode-600',
 											)}>
 											{booking.rooms}
 										</Table.Td>
@@ -149,9 +154,7 @@ function Index(props: PageProps) {
 											{booking.remaining_balance === 0 ? (
 												<span className="text-xl font-semibold text-green-600">Ödendi</span>
 											) : (
-												<span className="text-xl font-semibold text-red-400">
-													{booking.remaining_balance_formatted}
-												</span>
+												<span className="text-xl font-semibold text-red-400">{booking.remaining_balance_formatted}</span>
 											)}
 										</Table.Td>
 										<Table.Td
