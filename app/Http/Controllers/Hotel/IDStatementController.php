@@ -46,9 +46,9 @@ class IDStatementController extends Controller implements IDStatement
             $booking = BookingGuests::whereGuestId($guest)->firstOrFail();
             $this->hotelSettings = new HotelSettings();
             $this->services = (new KimlikBildirimService($this->hotelSettings->kbs['TssKod'], $this->hotelSettings->kbs['KullaniciTC'], $this->hotelSettings->kbs['Sifre']));
-            if ($booking->guest->citizen->name == 'TURKIYE') {
+            if($booking->guest->citizen->name == 'TURKIYE') {
                 $response = $this->services->musteriKimlikNoGiris([
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ? $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ?  $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
                     'KIMLIKNO' => $booking->guest->identification_number,
                     'KULLANIMSEKLI' => 'KONAKLAMA',
                     'ODANO' => $booking->booking_room->room->name,
@@ -58,7 +58,9 @@ class IDStatementController extends Controller implements IDStatement
                     'TELNO' => $booking->guest->phone,
                     'ULKKOD' => 'TURKIYE',
                 ]);
+
             } else {
+
                 $response = $this->services->musteriYabanciGiris([
                     'ADI' => $booking->guest->name,
                     'SOYADI' => $booking->guest->surname,
@@ -67,7 +69,7 @@ class IDStatementController extends Controller implements IDStatement
                     'BELGENO' => $booking->guest->identification_number,
                     'CINSIYET' => '',
                     'DOGUMTARIHI' => sprintf('%sT00:00:00', $booking->guest->birthday),
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ? $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'GRSTRH' => sprintf('%sT%s', (!is_null($booking->check_in_date)) ?  $booking->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
                     'MEDENIHAL' => 'EVLI', // EVLI, BEKAR
                     'ODANO' => $booking->booking_room->room->name,
                     'PLKNO' => '',
@@ -86,17 +88,17 @@ class IDStatementController extends Controller implements IDStatement
             $booking = BookingGuests::whereGuestId($guest)->firstOrFail();
             $this->hotelSettings = new HotelSettings();
             $this->services = (new KimlikBildirimService($this->hotelSettings->kbs['TssKod'], $this->hotelSettings->kbs['KullaniciTC'], $this->hotelSettings->kbs['Sifre']));
-            if ($booking->guest->citizen->name == 'TURKIYE') {
+            if($booking->guest->citizen->name == 'TURKIYE') {
                 $response = $this->services->musteriKimlikNoCikis(
-                    [
-                        'CKSTIP' => 'TESISTENCIKIS',
-                        'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ? $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
-                        'KIMLIKNO' => $booking->guest->identification_number,
-                    ]);
-            } else {
+                [
+                    'CKSTIP' => 'TESISTENCIKIS',
+                    'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ?  $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'KIMLIKNO' => $booking->guest->identification_number,
+                ]);
+            }   else {
                 $response = $this->services->musteriYabanciCikis([
                     'CKSTIP' => 'TESISTENCIKIS',
-                    'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ? $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'CKSTRH' => sprintf('%sT%s', (!is_null($booking->check_out_date)) ?  $booking->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
                     'BELGENO' => $booking->guest->identification_number,
                 ]);
             }
