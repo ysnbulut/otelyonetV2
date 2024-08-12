@@ -7,12 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Hotel\Interfaces\IDStatement;
 use App\Http\Requests\UpdateIDStatementUpdateRequest;
 use App\Models\BookingGuests;
-use App\Models\Customer;
-use App\Models\Tenant;
 use App\Services\KimlikBildirimService;
 use App\Settings\HotelSettings;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class IDStatementController extends Controller implements IDStatement
 {

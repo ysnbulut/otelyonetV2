@@ -139,7 +139,7 @@ function BookingRooms(props: BookingRoomsProps) {
 			},
 			{
 				preseveScroll: true,
-				preseveState: true,
+				preseveState: false,
 				// @ts-ignore
 				onSuccess: (response: {props: PageProps}) => {},
 			},
@@ -156,7 +156,7 @@ function BookingRooms(props: BookingRoomsProps) {
 			},
 			{
 				preseveScroll: true,
-				preseveState: true,
+				preseveState: false,
 				// @ts-ignore
 				onSuccess: (response: {props: PageProps}) => {},
 			},
