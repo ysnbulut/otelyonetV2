@@ -512,6 +512,7 @@ function Show(props: PageProps) {
 										taxes={props.taxes}
 										citizens={props.citizens}
 										pricingPolicy={props.pricing_policy}
+										kbs={props.kbs}
 										items={props.items}
 										bookingRooms={bookingRooms}
 										setBookingRooms={setBookingRooms}

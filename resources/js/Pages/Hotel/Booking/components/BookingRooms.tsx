@@ -23,6 +23,7 @@ interface BookingRoomsProps {
 	currency: string
 	citizens: CitizenProps[]
 	pricingPolicy: string
+	kbs: boolean
 	taxes: TaxesProps[]
 	items: ItemsProps[]
 	bookingRooms: RoomsProps[]
@@ -175,6 +176,7 @@ function BookingRooms(props: BookingRoomsProps) {
 
 	const KBSCheckInButtonCheck = () => {
 		return (
+			props.kbs &&
 			roomGuests.some((guest) => guest.can_be_check_out) &&
 			roomGuests.length > 0 &&
 			selectedBookingGuests.every((id) => roomGuests.find((guest) => guest.booking_guests_id === id)?.can_be_check_out) &&
@@ -190,6 +192,7 @@ function BookingRooms(props: BookingRoomsProps) {
 
 	const KBSCheckOutButtonCheck = () => {
 		return (
+			props.kbs &&
 			roomGuests.some((guest) => !guest.can_be_check_out && !guest.can_be_check_in) &&
 			roomGuests.length > 0 &&
 			selectedBookingGuests.every(

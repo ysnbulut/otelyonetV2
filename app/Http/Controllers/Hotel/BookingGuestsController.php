@@ -76,7 +76,7 @@ class BookingGuestsController extends Controller
             $bookingGuest->update([
                 'status' => 'check_in',
                 'check_in' => true,
-                'check_in_date' => Carbon::now()->format('Y-m-d'),
+                'check_in_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
         return redirect()->back()->with('success', 'Guests checked in successfully');
@@ -90,7 +90,7 @@ class BookingGuestsController extends Controller
             $bookingGuest->update([
                 'status' => 'check_out',
                 'check_out' => true,
-                'check_out_date' => Carbon::now()->format('Y-m-d'),
+                'check_out_date' => Carbon::now()->format('Y-m-d H:i:s'),
             ]);
         }
         return redirect()->back()->with('success', 'Guests checked out successfully');

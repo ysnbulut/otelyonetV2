@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hotel;
 
 use App\Helpers\Currencies;
 use App\Http\Controllers\Controller;
+use App\Models\BookingGuests;
 use App\Models\BookingRoom;
 use App\Models\Guest;
 use App\Models\Room;
@@ -27,8 +28,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $now = Carbon::now('Europe/Istanbul')->format('Y-m-d');
-        $tomorrow = Carbon::now('Europe/Istanbul')->addDay()->format('Y-m-d');
+        $now = Carbon::now('Europe/Istanbul')->format('Y-m-d H:i:s');
+        $tomorrow = Carbon::now('Europe/Istanbul')->addDay()->format('Y-m-d H:i:s');
         $rooms = Room::all();
         $booked_rooms = BookingRoom::whereDate('check_out', '>=', $now)->whereDate('check_in', '<=', $now)->get()
             ->map(function ($booking_room) {
@@ -64,8 +65,7 @@ class DashboardController extends Controller
                 ];
             });
         $available_rooms = Room::whereDoesntHave('bookingRooms')->orWhereHas('bookingRooms', function ($query) use ($now, $booked_rooms) {
-            $query->whereDate('check_out', '<=', $now)->orWhereDate('check_in', '>', $now)->whereNotIn('room_id',
-                $booked_rooms->pluck('id'));
+            $query->whereNotIn('room_id', $booked_rooms->pluck('id'));
         })->where('is_clean', '=', true)->where('status', '=', true)->get(['id', 'name'])->map(function ($room) use ($now) {
             $firstBooked = BookingRoom::where('room_id', $room->id)->whereDate
             ('check_in', '>', $now)->orderBy('check_in', 'asc')->first()->check_in ?? null;
@@ -108,23 +108,43 @@ class DashboardController extends Controller
             'dirty_rooms_percent' => '%' . round($rooms->count() > 0 ? ($dirty_rooms->count() / $rooms->count() * 100) : 0),
             'out_of_order_rooms' => $out_of_order_rooms,
             'out_of_order_rooms_percent' => '%' . round($rooms->count() > 0 ? ($out_of_order_rooms->count() / $rooms->count() * 100) : 0),
-            'guest_count' => Guest::whereHas('booking_room', function ($query) use ($now) {
+            'guest_count' => Guest::whereHas('booking_room', static function ($query) use ($now) {
                 $query->where('booking_rooms.check_out', '>=', $now)
                     ->where('booking_rooms.check_in', '<=', $now);
             })->get('id')->unique('id')->count(),
-            'today_check_in_guest_count' => Guest::whereHas('booking_room', function ($query) use ($now) {
+            'today_check_in_guest_count' => Guest::whereHas('booking_room', static function ($query) use ($now) {
                 $query->where('booking_rooms.check_in', '=', $now);
             })->count(),
-            'today_check_out_guest_count' => Guest::whereHas('booking_room', function ($query) use ($now) {
+            'today_check_out_guest_count' => Guest::whereHas('booking_room', static function ($query) use ($now) {
                 $query->where('booking_rooms.check_out', '=', $now);
             })->count(),
-            'tomorrow_check_in_guest_count' => Guest::whereHas('booking_room', function ($query) use ($tomorrow) {
+            'tomorrow_check_in_guest_count' => Guest::whereHas('booking_room', static function ($query) use ($tomorrow) {
                 $query->where('booking_rooms.check_in', '=', $tomorrow);
             })->count(),
-            'tomorrow_check_out_guest_count' => Guest::whereHas('booking_room', function ($query) use ($tomorrow) {
+            'tomorrow_check_out_guest_count' => Guest::whereHas('booking_room', static function ($query) use ($tomorrow) {
                 $query->where('booking_rooms.check_out', '=', $tomorrow);
             })->count(),
-            'transactions' => []// $transactions,
+            'transactions' => [],
+            'kbs_guests_list' => BookingGuests::with(['guest', 'booking_room' => function ($query) {
+                $query->whereDate('check_in', '<=', Carbon::now('Europe/Istanbul')->format('Y-m-d H:i:s'));
+            }])->get()->map(function ($booking_guest) {
+                return [
+                    'id' => $booking_guest->id,
+                    'room_id' => $booking_guest->booking_room->room_id,
+                    'room_name' => $booking_guest->booking_room->room->name,
+                    'booking_id' => $booking_guest->booking_room->booking_id,
+                    'guest_id' => $booking_guest->guest_id,
+                    'guest_name' => $booking_guest->guest->name,
+                    'guest_surname' => $booking_guest->guest->surname,
+                    'status' => $booking_guest->status,
+                    'check_in' => $booking_guest->check_in,
+                    'check_out' => $booking_guest->check_out,
+                    'kbs_check_in' => $booking_guest->check_in_kbs,
+                    'kbs_check_out' => $booking_guest->check_out_kbs,
+                    'check_in_date' => $booking_guest->check_in_date,
+                    'check_out_date' => $booking_guest->check_out_date,
+                ];
+            }),
         ]);
     }
 }

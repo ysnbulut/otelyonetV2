@@ -36,7 +36,6 @@ class BookingObserver
         $booking_code = $sqids->encode([$datePart . $count . $randomNumber]);
 
         $booking->booking_code = $booking_code;
-
         $booking->save();
 
 //        if ($booking->channel_id < 122) {

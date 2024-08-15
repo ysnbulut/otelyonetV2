@@ -22,6 +22,7 @@ use App\Models\SalesUnit;
 use App\Models\Tax;
 use App\Models\Transaction;
 use App\Models\TypeHasView;
+use App\Settings\HotelSettings;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -35,10 +36,12 @@ use Random\RandomException;
 class BookingController extends Controller
 {
     protected PricingPolicySettings $settings;
+    protected HotelSettings $hotelSettings;
 
     public function __construct()
     {
         $this->settings = new PricingPolicySettings();
+        $this->hotelSettings = new HotelSettings();
     }
 
     /**
@@ -85,7 +88,8 @@ class BookingController extends Controller
                         'remaining_balance' => round($remainingBalance, 2),
                         'remaining_balance_formatted' => number_format($remainingBalance, 2, '.', ',') . ' ' . $this->settings->currency['value'],
                     ];
-                })
+                }),
+            'kbs_list' => BookingGuests::with(['guest', 'bookingRoom'])->where('status', 'check_in')->get(),
         ]);
     }
 
@@ -93,7 +97,7 @@ class BookingController extends Controller
     {
         return BookingRoom::orderBy('check_in', 'asc')->with(['booking', 'room'])->whereDate('check_in', '>=',
             Carbon::now()
-                ->format('Y-m-d'))
+                ->format('Y-m-d H:i:s'))
             ->cursorPaginate(10)
             ->withQueryString()
             ->through(fn($booking_room) => [
@@ -433,6 +437,7 @@ class BookingController extends Controller
             'currency' => $this->settings->currency['value'],
             'accommodation_type' => $this->settings->accommodation_type['value'],
             'pricing_policy' => $this->settings->pricing_policy['value'],
+            'kbs' => !($this->hotelSettings->kbs['value'] === 'closed'),
             'citizens' => Citizen::select(['id', 'name'])->get(),
             'taxes' => Tax::select(['id', 'name', 'rate'])->get(),
             'items' => SalesUnit::find(1)->items->map(function ($item) {

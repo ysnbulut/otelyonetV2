@@ -218,6 +218,7 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
 	currency: string
 	accommodation_type: string
 	pricing_policy: string
+	kbs: boolean
 	citizens: CitizenProps[]
 	taxes: TaxesProps[]
 	items: ItemsProps[]

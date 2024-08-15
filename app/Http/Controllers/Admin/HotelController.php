@@ -329,7 +329,7 @@ class HotelController extends Controller
                             'number_of_rooms' => $reservation['total_rooms'],
                             'number_of_adults' => $reservation['total_guests'],
                             'number_of_children' => 0,
-                            'calendar_colors' => json_encode($this->getRandomColors(), JSON_THROW_ON_ERROR),
+                            'calendar_colors' => $this->getRandomColors(),
                         ];
                         $booking = Booking::create($booking_data);
                         $booking->cMBooking()->create([

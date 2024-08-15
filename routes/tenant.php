@@ -72,8 +72,7 @@ Route::middleware([
 ])->group(function () {
 
     Route::get('/test', static function () {
-        $booking = Booking::find(14);
-        return \App\Http\Resources\BookingResource::collection(Booking::all());
+        return tenancy()->tenant->hotel;
     })->name('test');
 
     Route::middleware('guest')->group(function () {

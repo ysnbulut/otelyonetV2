@@ -130,15 +130,12 @@ export default function Index({
 						{/* END: General Report */}
 						{/*TODO: Buraya ROOMRACK GELECEK*/}
 						<fieldset className="relative col-span-12 grid grid-cols-12 gap-4 rounded-lg border p-2">
-							<legend className="col-span-12 text-center text-lg font-thin text-[#e5e7eb] dark:text-white/5">
-								Room Rack
-							</legend>
+							<legend className="col-span-12 text-center text-lg font-thin text-[#e5e7eb] dark:text-white/5">Room Rack</legend>
 							<Menu className="absolute -top-8 right-3">
 								<div className="rounded-md bg-white dark:bg-darkmode-700">
 									<Menu.Button
 										className={twMerge(
-											'flex w-44 items-center justify-between rounded-md px-2 py-1 text-center text-xs font-bold' +
-												' shadow',
+											'flex w-44 items-center justify-between rounded-md px-2 py-1 text-center text-xs font-bold' + ' shadow',
 											selectedRack.value === 'booked_rooms' && 'border-2 border-success bg-success/10',
 											selectedRack.value === 'available_rooms' && 'border-2 border-slate-300 bg-slate-300/10',
 											selectedRack.value === 'dirty_rooms' && 'border-2 border-pending bg-pending/10',
@@ -179,9 +176,7 @@ export default function Index({
 									/>
 								))
 							) : (
-								<div className="col-span-12 flex h-40 items-center justify-center text-center text-lg font-thin text-[#e5e7eb] dark:text-white/5">
-									Oda Bulunamadı...
-								</div>
+								<div className="col-span-12 flex h-40 items-center justify-center text-center text-lg font-thin text-[#e5e7eb] dark:text-white/5">Oda Bulunamadı...</div>
 							)}
 						</fieldset>
 						{/* BEGIN: Weekly Top Items */}

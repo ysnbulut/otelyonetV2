@@ -48,6 +48,8 @@ class TenantCreateHotelSettingsJob implements ShouldQueue, ShouldBeUnique
             $defaultHotelSettings = json_decode(file_get_contents(base_path('database/data/defaultHotelSettings.json')), true);
             $migrator->add('hotel.channel_manager', $defaultHotelSettings['channel_manager']);
             $migrator->add('hotel.api_settings', $defaultHotelSettings['api_settings']);
+            $migrator->add('hotel.kbs', $defaultHotelSettings['kbs']);
+            $migrator->add('hotel.kbs_settings', $defaultHotelSettings['kbs_settings']);
         });
     }
 }

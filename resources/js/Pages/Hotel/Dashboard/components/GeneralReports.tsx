@@ -8,6 +8,7 @@ type IdName = {
 	id: number
 	name: string
 }
+
 interface Props {
 	bookedRooms: IdName[]
 	bookedRoomsPercent: string
@@ -18,6 +19,7 @@ interface Props {
 	outOfOrderRooms: IdName[]
 	outOfOrderRoomsPercent: string
 }
+
 function GeneralReports(props: Props) {
 	return (
 		<div className="col-span-12 mt-2">
@@ -41,22 +43,22 @@ function GeneralReports(props: Props) {
 					title="Boş Oda"
 					content={props.availableRooms}
 				/>
-				<GeneralReportCard
-					icon="PartyPopper"
-					color="pending"
-					percent={props.dirtyRoomsPercent}
-					count={props.dirtyRooms.length}
-					title="Kirli Oda"
-					content={props.dirtyRooms}
-				/>
-				<GeneralReportCard
-					icon="Construction"
-					color="danger"
-					percent={props.outOfOrderRoomsPercent}
-					count={props.outOfOrderRooms.length}
-					title="Satışa Kapalı Oda"
-					content={props.outOfOrderRooms}
-				/>
+				{/*<GeneralReportCard*/}
+				{/*	icon="PartyPopper"*/}
+				{/*	color="pending"*/}
+				{/*	percent={props.dirtyRoomsPercent}*/}
+				{/*	count={props.dirtyRooms.length}*/}
+				{/*	title="Kirli Oda"*/}
+				{/*	content={props.dirtyRooms}*/}
+				{/*/>*/}
+				{/*<GeneralReportCard*/}
+				{/*	icon="Construction"*/}
+				{/*	color="danger"*/}
+				{/*	percent={props.outOfOrderRoomsPercent}*/}
+				{/*	count={props.outOfOrderRooms.length}*/}
+				{/*	title="Satışa Kapalı Oda"*/}
+				{/*	content={props.outOfOrderRooms}*/}
+				{/*/>*/}
 			</div>
 		</div>
 	)
