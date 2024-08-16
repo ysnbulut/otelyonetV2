@@ -139,10 +139,16 @@ function BookingRooms(props: BookingRoomsProps) {
 				booking_guests: selectedBookingGuests,
 			},
 			{
-				preseveScroll: true,
-				preseveState: false,
+				preserveScroll: true,
+				preserveState: false,
 				// @ts-ignore
-				onSuccess: (response: {props: PageProps}) => {},
+				onSuccess: (response: {props: PageProps}) => {
+					setSelectedBookingGuests([])
+					Toast.fire({
+						icon: 'success',
+						title: 'Seçilen Misafirler KBS Giriş yapıldı',
+					})
+				},
 			},
 		)
 	}
@@ -156,10 +162,16 @@ function BookingRooms(props: BookingRoomsProps) {
 				booking_guests: selectedBookingGuests,
 			},
 			{
-				preseveScroll: true,
-				preseveState: false,
+				preserveScroll: true,
+				preserveState: false,
 				// @ts-ignore
-				onSuccess: (response: {props: PageProps}) => {},
+				onSuccess: (response: {props: PageProps}) => {
+					setSelectedBookingGuests([])
+					Toast.fire({
+						icon: 'success',
+						title: 'Seçilen Misafirler KBS Çıkış yapıldı',
+					})
+				},
 			},
 		)
 	}

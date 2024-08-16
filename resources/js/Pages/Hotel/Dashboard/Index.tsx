@@ -16,6 +16,7 @@ import Menu from '@/Components/Headless/Menu'
 import Button from '@/Components/Button'
 import BookedRoomCard from '@/Pages/Hotel/Dashboard/components/BookedRoomCard'
 import RoomRackCards from '@/Pages/Hotel/Dashboard/components/RoomRackCards'
+import KbsGuestList from '@/Pages/Hotel/Dashboard/components/KBSGuestList'
 
 export default function Index({
 	is_tenant,
@@ -36,6 +37,7 @@ export default function Index({
 	// booked_rooms_yearly,
 	// booked_rooms_weekly,
 	transactions,
+	kbs_guests_list,
 }: PageProps) {
 	//['EUR','USD', 'GBP', 'SAR', 'AUD', 'CHF', 'CAD', 'KWD', 'JPY', 'DKK', 'SEK', 'NOK']
 	const currencies = [
@@ -180,6 +182,7 @@ export default function Index({
 							)}
 						</fieldset>
 						{/* BEGIN: Weekly Top Items */}
+						<KbsGuestList kbsGuestsList={kbs_guests_list} />
 						<UpcomingBokingsSection
 							onEnterViewport={() => console.log('inner')}
 							onLeaveViewport={() => console.log('leave')}

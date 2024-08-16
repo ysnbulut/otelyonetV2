@@ -52,7 +52,9 @@ class IDStatementController extends Controller implements IDStatement
             $this->services = (new KimlikBildirimService($this->hotelSettings->kbs_settings['TssKod'], $this->hotelSettings->kbs_settings['KullaniciTC'], $this->hotelSettings->kbs_settings['Sifre']));
             if ($bookingGuest->guest->citizen->name === 'TURKIYE') {
                 $response = $this->services->musteriKimlikNoGiris([
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_in_date)) ? $bookingGuest->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'GRSTRH' => !is_null($bookingGuest->check_in_date) ? Carbon::createFromFormat('Y-m-d H:i:s', $bookingGuest->check_in_date)->format
+                    ('Y-m-d\TH:i:s') : Carbon::now
+                    ()->format('Y-m-d\TH:i:s'),
                     'KIMLIKNO' => $bookingGuest->guest->identification_number,
                     'KULLANIMSEKLI' => 'KONAKLAMA',
                     'ODANO' => $bookingGuest->booking_room->room->name,
@@ -75,8 +77,11 @@ class IDStatementController extends Controller implements IDStatement
                     'BABAADI' => '',
                     'BELGENO' => $bookingGuest->guest->identification_number,
                     'CINSIYET' => '',
-                    'DOGUMTARIHI' => sprintf('%sT00:00:00', $bookingGuest->guest->birthday),
-                    'GRSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_in_date)) ? $bookingGuest->check_in_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'DOGUMTARIHI' => Carbon::createFromFormat('Y-m-d', $bookingGuest->guest->birthday)->format
+                    ('Y-m-d\TH:i:s'),
+                    'GRSTRH' => !is_null($bookingGuest->check_in_date) ? Carbon::createFromFormat('Y-m-d H:i:s', $bookingGuest->check_in_date)->format
+                    ('Y-m-d\TH:i:s') : Carbon::now
+                    ()->format('Y-m-d\TH:i:s'),
                     'MEDENIHAL' => 'EVLI', // EVLI, BEKAR
                     'ODANO' => $bookingGuest->booking_room->room->name,
                     'PLKNO' => '',

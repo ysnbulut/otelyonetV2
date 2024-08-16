@@ -69,6 +69,23 @@ export interface Transactions {
 	info: string
 }
 
+export interface KBSGuestsList {
+	id: number
+	room_id: number
+	room_name: string
+	booking_id: number
+	guest_id: number
+	guest_name: string
+	guest_surname: string
+	status: string
+	check_in: boolean
+	check_out: boolean
+	kbs_check_in: boolean
+	kbs_check_out: boolean
+	check_in_date: string
+	check_out_date: string
+}
+
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {
 	eur_exchange_rate: number
 	room_count: number
@@ -89,4 +106,5 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
 	// booked_rooms_weekly: number[]
 	transactions: Transactions[]
 	is_tenant: boolean
+	kbs_guests_list: KBSGuestsList[]
 }
