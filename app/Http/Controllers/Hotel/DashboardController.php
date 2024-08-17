@@ -10,6 +10,7 @@ use App\Models\Guest;
 use App\Models\Room;
 use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Teknomavi\Tcmb\Doviz;
 
@@ -58,10 +59,10 @@ class DashboardController extends Controller
                     'now' => Carbon::now('Europe/Istanbul')->format('Y-m-d H:i:s'),
                     'stay_duration' => $stay_duration,
                     'remaining_time' => $remaining_time,
-                    'remaining_time_text' => $remaining_time > 0 ? ($remaining_time === 1 ? 'Yarın çıkış' :
-                        ($stay_duration - $remaining_time === 0 ? 'Bugün giriş' : $remaining_time . ' gün sonra çıkış')) : 'Bugün çıkış',
-                    'remaining_time_bgcolor' => $remaining_time > 0 ? $stay_duration - $remaining_time === 0 ?
-                        'bg-warning' : 'bg-success' : 'bg-danger',
+                    'remaining_time_text' => $remaining_time > 0 ? (($remaining_time === 1) ? 'Yarın çıkış' :
+                        ((($stay_duration - $remaining_time) === 0) ? 'Bugün giriş' : $remaining_time . ' gün sonra çıkış')) : 'Bugün çıkış',
+                    'remaining_time_bgcolor' => $remaining_time > 0 ? ((($stay_duration - $remaining_time) === 0) ?
+                        'bg-warning' : 'bg-success') : 'bg-danger',
                 ];
             });
         $available_rooms = Room::whereDoesntHave('bookingRooms')->orWhereHas('bookingRooms', function ($query) use ($now, $booked_rooms) {
@@ -125,14 +126,18 @@ class DashboardController extends Controller
                 $query->where('booking_rooms.check_out', '=', $tomorrow);
             })->count(),
             'transactions' => [],
-            'kbs_guests_list' => BookingGuests::with(['guest', 'booking_room' => function ($query) {
+            'kbs_guests_list' => BookingGuests::with(['guest', 'booking_room'])->where('check_in', '!=', true)->orWhere('check_out', '!=', true)->orWhere('check_in_kbs', '!=', true)->orWhere
+            ('check_out_kbs', '!=', true)->whereHas('booking_room', function ($query) {
                 $query->whereDate('check_in', '<=', Carbon::now('Europe/Istanbul')->format('Y-m-d H:i:s'));
-            }])->get()->map(function ($booking_guest) {
+            })->get()->map(function ($booking_guest) {
                 return [
                     'id' => $booking_guest->id,
+                    'booking_room_id' => $booking_guest->booking_room->id,
                     'room_id' => $booking_guest->booking_room->room_id,
                     'room_name' => $booking_guest->booking_room->room->name,
                     'booking_id' => $booking_guest->booking_room->booking_id,
+                    'room_check_in_date' => Carbon::createFromFormat('Y-m-d H:i:s', $booking_guest->booking_room->check_in)->format('d.m.Y'),
+                    'room_check_out_date' => Carbon::createFromFormat('Y-m-d H:i:s', $booking_guest->booking_room->check_out)->format('d.m.Y'),
                     'guest_id' => $booking_guest->guest_id,
                     'guest_name' => $booking_guest->guest->name,
                     'guest_surname' => $booking_guest->guest->surname,
@@ -141,8 +146,8 @@ class DashboardController extends Controller
                     'check_out' => $booking_guest->check_out,
                     'kbs_check_in' => $booking_guest->check_in_kbs,
                     'kbs_check_out' => $booking_guest->check_out_kbs,
-                    'check_in_date' => $booking_guest->check_in_date,
-                    'check_out_date' => $booking_guest->check_out_date,
+                    'guest_check_in_date' => $booking_guest->check_in_date !== NULL ? Carbon::createFromFormat('Y-m-d H:i:s', $booking_guest->check_in_date)->format('d.m.Y H:i:s') : NULL,
+                    'guest_check_out_date' => $booking_guest->check_out_date !== NULL ? Carbon::createFromFormat('Y-m-d H:i:s', $booking_guest->check_out_date)->format('d.m.Y H:i:s') : NULL,
                 ];
             }),
         ]);

@@ -1,21 +1,14 @@
 <?php
 
-use App\Helpers\PriceCalculator;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\HotelController;
 use App\Http\Controllers\Site\IndexController;
 use App\Http\Controllers\SyncController;
-use App\Models\BedType;
-use App\Models\Booking;
-use App\Models\Customer;
+use App\Models\BookingRoom;
 use App\Models\Tenant;
-use App\Models\TypeHasView;
-use App\Settings\PricingPolicySettings;
 use Carbon\Carbon;
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +41,35 @@ Route::middleware('auth')->group(function () {
 //    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::get('/', [IndexController::class, 'index'])->name('site.index');
+
+Route::get('/blabla', function () {
+    Tenant::all()->each(function ($tenant) use (&$response) {
+        $tenant->run(function () {
+            BookingRoom::with('booking_guests')->whereDate('check_out', '<=', Carbon::now()->subDay()->format('Y-m-d H:i:s'))->whereHas('booking_guests', static function ($query) {
+                $query->where('check_in', false)->orWhere('check_out', false)->orWhere('check_in_kbs', false)->orWhere('check_out_kbs', false);
+            })->get()->map(static function ($bookingRoom) {
+                $bookingRoom->booking_guests->each(static function ($bookingGuest) use ($bookingRoom) {
+                    if ($bookingGuest->check_in === false) {
+                        $bookingGuest->update(['check_in_date' => $bookingRoom->check_in, 'check_in' => true]);
+                    }
+                    if ($bookingGuest->check_out === false) {
+                        $bookingGuest->update(['check_out_date' => $bookingRoom->check_out, 'check_out' => true]);
+                    }
+                    if ($bookingGuest->check_in_kbs === false) {
+                        $bookingGuest->update(['check_in_kbs' => true]);
+                    }
+                    if ($bookingGuest->check_out_kbs === false) {
+                        $bookingGuest->update(['check_out_kbs' => true]);
+                    }
+                    $bookingGuest->update(['status' => 'check_out']);
+                });
+            });
+        });
+        DB::disconnect($tenant->tenancy_db_name);
+        DB::disconnect('tenant');
+        $tenant->getConnection()->disconnect();
+    });
+});
 
 Route::get('/syncwebhookerrors', [SyncController::class, 'index'])->name('test.index');
 

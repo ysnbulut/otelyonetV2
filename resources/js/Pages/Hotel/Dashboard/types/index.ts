@@ -71,9 +71,12 @@ export interface Transactions {
 
 export interface KBSGuestsList {
 	id: number
+	booking_room_id: number
 	room_id: number
 	room_name: string
 	booking_id: number
+	room_check_in_date: string
+	room_check_out_date: string
 	guest_id: number
 	guest_name: string
 	guest_surname: string
@@ -82,8 +85,8 @@ export interface KBSGuestsList {
 	check_out: boolean
 	kbs_check_in: boolean
 	kbs_check_out: boolean
-	check_in_date: string
-	check_out_date: string
+	guest_check_in_date: string
+	guest_check_out_date: string
 }
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = BasePageProps<T> & {

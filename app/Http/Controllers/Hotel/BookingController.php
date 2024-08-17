@@ -89,7 +89,6 @@ class BookingController extends Controller
                         'remaining_balance_formatted' => number_format($remainingBalance, 2, '.', ',') . ' ' . $this->settings->currency['value'],
                     ];
                 }),
-            'kbs_list' => BookingGuests::with(['guest', 'bookingRoom'])->where('status', 'check_in')->get(),
         ]);
     }
 

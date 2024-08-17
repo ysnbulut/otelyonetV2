@@ -28,6 +28,7 @@ function KbsGuestList(props: KBSGuestsListProps) {
 								<Table.Tr>
 									<Table.Th className="whitespace-nowrap border-b-0">ODA</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">MİSAFİR</Table.Th>
+									<Table.Th className="whitespace-nowrap border-b-0 text-center">GİRİŞ - ÇIKIŞ TARİH</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0 text-center">CHECK İN</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0 text-center">CHECK OUT</Table.Th>
 									<Table.Th className="whitespace-nowrap border-b-0">KBS GİRİŞ</Table.Th>
@@ -43,13 +44,20 @@ function KbsGuestList(props: KBSGuestsListProps) {
 										<Table.Td
 											dataLabel="Oda"
 											className="w-full rounded-t-md bg-white lg:w-40 lg:rounded-l-md lg:rounded-tr-none lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
-											<span className="rounded bg-primary/10 px-2 py-1 font-bold text-primary shadow-inner">{guest.room_name}</span>
+											<span className="flex whitespace-nowrap rounded bg-primary/10 px-2 py-1 font-bold text-primary shadow-inner">{guest.room_name}</span>
 										</Table.Td>
 										<Table.Td
 											dataLabel="Misafir"
 											className="w-full bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
 											<div className="flex whitespace-nowrap">
 												{guest.guest_name} {guest.guest_surname}
+											</div>
+										</Table.Td>
+										<Table.Td
+											dataLabel="Misafir"
+											className="w-full bg-white lg:shadow-[20px_3px_20px_#0000000b] lg:first:rounded-l-md lg:last:rounded-r-md dark:bg-darkmode-600">
+											<div className="flex whitespace-nowrap text-xs font-semibold">
+												{guest.room_check_in_date} - {guest.room_check_out_date}
 											</div>
 										</Table.Td>
 										<Table.Td
