@@ -17,6 +17,8 @@ import withReactContent from 'sweetalert2-react-content'
 import {DateTime} from 'litepicker/dist/types/datetime'
 import Litepicker, {LitepickerElement} from '@/Components/Litepicker'
 import {includes} from 'lodash'
+import {useAppSelector} from '@/stores/hooks'
+import {selectDarkMode} from '@/stores/darkModeSlice'
 
 interface BookingRoomsProps {
 	room: RoomsProps
@@ -38,6 +40,7 @@ interface BookingRoomsProps {
 
 function BookingRooms(props: BookingRoomsProps) {
 	const MySwal = withReactContent(Swal)
+	const darkMode = useAppSelector(selectDarkMode)
 	const expendableDaysPicker = createRef<LitepickerElement>()
 	const buttonRef = useRef<HTMLButtonElement>(null)
 	const [selectedBookingGuests, setSelectedBookingGuests] = useState<number[]>([])
@@ -394,8 +397,12 @@ function BookingRooms(props: BookingRoomsProps) {
 				<h3 className="w-full rounded-t-lg border-b bg-white px-5 py-1 text-right text-sm font-bold text-slate-400 lg:flex-row lg:gap-2 dark:bg-darkmode-600">
 					Check-in - Check-out :
 					<span
-						className="ml-2 font-bold text-primary"
-						style={{textShadow: '0.5px 0.5px 2px rgba(177, 200, 222, 0.9), -0.5px -0.5px rgba(177, 200, 222, 0.9)'}}>
+						className="ml-2 font-bold text-primary dark:text-white"
+						style={{
+							textShadow: darkMode
+								? '0.5px 0.5px 2px rgba(35,77,204, 0.9), -0.5px -0.5px rgba(35,77,204, 0.9)'
+								: '0.5px 0.5px 2px rgba(177, 200, 222, 0.9), -0.5px -0.5px' + ' rgba(177, 200, 222, 0.9)',
+						}}>
 						{props.room.check_in} - {props.room.check_out}
 					</span>
 				</h3>
@@ -420,6 +427,9 @@ function BookingRooms(props: BookingRoomsProps) {
 					{/*{roomGuests.length > 0 ? (*/}
 					<BookingRoomGuestsTable
 						guests={roomGuests}
+						citizens={props.citizens}
+						setRoomGuests={setRoomGuests}
+						roomId={props.room.id}
 						setSelectedBookingGuests={setSelectedBookingGuests}
 					/>
 					{/*) : (*/}
@@ -439,7 +449,7 @@ function BookingRooms(props: BookingRoomsProps) {
 							<div className="flex gap-2">
 								{roomGuests.find((guest) => guest.can_be_check_in) &&
 									roomGuests.length > 0 &&
-									!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_in) && (
+									!roomGuests.filter((guest) => guest.booking_guests_id && selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_in) && (
 										<Tippy content="Seçilenleri Check-in Yap">
 											<Button
 												variant="soft-success"
@@ -451,7 +461,7 @@ function BookingRooms(props: BookingRoomsProps) {
 									)}
 								{roomGuests.find((guest) => guest.can_be_check_out) &&
 									roomGuests.length > 0 &&
-									!roomGuests.filter((guest) => selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_out) && (
+									!roomGuests.filter((guest) => guest.booking_guests_id && selectedBookingGuests.includes(guest.booking_guests_id)).find((guest) => !guest.can_be_check_out) && (
 										<Tippy content="Seçilenleri Check-out Yap">
 											<Button
 												variant="soft-dark"

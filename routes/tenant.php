@@ -269,8 +269,6 @@ Route::middleware([
         Route::get('/{booking}', [BookingController::class, 'show'])->name('hotel.bookings.show');
         Route::post('/{booking}/transaction', [BookingController::class, 'transactionAdd'])
             ->name('hotel.bookings.transaction.store');
-        Route::post('/booking_room/add_guest', [BookingRoomsController::class, 'addGuests'])
-            ->name('hotel.bookings.booking_room.add_guest');
         Route::get('/{booking}/edit', [BookingController::class, 'edit'])->name('hotel.bookings.edit');
         Route::put('/{booking}', [BookingController::class, 'update'])->name('hotel.bookings.update');
         Route::delete('/{booking}', [BookingController::class, 'destroy'])->name('hotel.bookings.destroy');
@@ -310,11 +308,11 @@ Route::middleware([
     Route::prefix('booking_guests')->middleware('auth')->group(function () {
 //        Route::get('/', [BookingController::class, 'index'])->name('hotel.booking_guests.index');
 //        Route::get('/create', [BookingController::class, 'create'])->name('hotel.booking_guests.create');
-//        Route::post('/', [BookingController::class, 'store'])->name('hotel.booking_guests.store');
+        Route::post('/', [BookingGuestsController::class, 'store'])->name('hotel.booking_guests.store');
 //        Route::get('/{booking_guest}', [BookingController::class, 'show'])->name('hotel.booking_guests.show');
 //        Route::get('/{booking_guest}/edit', [BookingController::class, 'edit'])->name('hotel.booking_guests.edit');
 //        Route::put('/{booking_guest}', [BookingController::class, 'update'])->name('hotel.booking_guests.update');
-//        Route::delete('/{booking_guest}', [BookingController::class, 'destroy'])->name('hotel.booking_guests.destroy');
+        Route::delete('/{booking_guest}', [BookingGuestsController::class, 'destroy'])->name('hotel.booking_guests.destroy');
         Route::post('/check_out', [BookingGuestsController::class, 'checkOut'])
             ->name('hotel.booking_guests.check_out');
         Route::post('/check_in', [BookingGuestsController::class, 'checkIn'])

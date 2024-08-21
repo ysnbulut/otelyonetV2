@@ -113,7 +113,9 @@ class IDStatementController extends Controller implements IDStatement
                 $response = $this->services->musteriKimlikNoCikis(
                     [
                         'CKSTIP' => 'TESISTENCIKIS',
-                        'CKSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_out_date)) ? $bookingGuest->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                        'CKSTRH' => !is_null($bookingGuest->check_out_date) ? Carbon::createFromFormat('Y-m-d H:i:s', $bookingGuest->check_out_date)->format
+                        ('Y-m-d\TH:i:s') : Carbon::now
+                        ()->format('Y-m-d\TH:i:s'),
                         'KIMLIKNO' => $bookingGuest->guest->identification_number,
                     ]);
                 if ($response['aBasarili'] === 'true') {
@@ -124,7 +126,9 @@ class IDStatementController extends Controller implements IDStatement
             } else {
                 $response = $this->services->musteriYabanciCikis([
                     'CKSTIP' => 'TESISTENCIKIS',
-                    'CKSTRH' => sprintf('%sT%s', (!is_null($bookingGuest->check_out_date)) ? $bookingGuest->check_out_date : Carbon::now()->format('Y-m-d'), Carbon::now()->format('H:i:s')),
+                    'CKSTRH' => !is_null($bookingGuest->check_out_date) ? Carbon::createFromFormat('Y-m-d H:i:s', $bookingGuest->check_out_date)->format
+                    ('Y-m-d\TH:i:s') : Carbon::now
+                    ()->format('Y-m-d\TH:i:s'),
                     'BELGENO' => $bookingGuest->guest->identification_number,
                 ]);
                 if ($response['aBasarili'] === 'true') {

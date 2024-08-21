@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react'
 import {FormCheck} from '@/Components/Form'
 import TableItem from '@/Pages/Hotel/Booking/components/TableItem'
-import {GuestsProps} from '@/Pages/Hotel/Booking/types/show'
+import {CitizenProps, GuestsProps} from '@/Pages/Hotel/Booking/types/show'
 
 interface BookingRoomGuestsTableProps {
+	citizens: CitizenProps[]
+	roomId: number
 	guests: GuestsProps[]
+	setRoomGuests: React.Dispatch<React.SetStateAction<GuestsProps[]>>
 	setSelectedBookingGuests: React.Dispatch<React.SetStateAction<number[]>>
 }
 
@@ -13,7 +16,7 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 
 	useEffect(() => {
 		if (guestAllChecked) {
-			props.setSelectedBookingGuests(props.guests.map((guest) => guest.booking_guests_id))
+			props.setSelectedBookingGuests(props.guests.map((guest) => guest.booking_guests_id).filter((id): id is number => id !== undefined))
 		} else {
 			props.setSelectedBookingGuests([])
 		}
@@ -72,6 +75,11 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 						style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}>
 						KBS
 					</th>
+					<th
+						className="text-left text-xs"
+						style={{paddingLeft: '0.50rem', paddingRight: '0.50rem', textAlign: 'right'}}>
+						Düzenle / Sil
+					</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -79,6 +87,9 @@ function BookingRoomGuestsTable(props: BookingRoomGuestsTableProps) {
 					<TableItem
 						key={index}
 						index={index}
+						citizens={props.citizens}
+						roomId={props.roomId}
+						setRoomGuests={props.setRoomGuests}
 						guest={guest}
 						checked={guestAllChecked}
 						setSelectedBookingGuests={props.setSelectedBookingGuests}

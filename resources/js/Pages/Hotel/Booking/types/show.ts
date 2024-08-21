@@ -1,24 +1,33 @@
 import {PageProps as BasePageProps} from '@/types'
 
 export interface GuestsProps {
-	booking_guests_id: number
-	id: number
+	booking_guests_id?: number
+	id?: number
 	name: string
 	surname: string
 	birthday: string
 	gender: string
-	citizen: string
+	citizen?: string
 	citizen_id: string
 	identification_number: string
-	can_be_check_in: boolean
-	can_be_check_out: boolean
+	can_be_check_in?: boolean
+	can_be_check_out?: boolean
 	is_check_in?: boolean
 	is_check_out?: boolean
-	status: string
-	check_in_date: string
-	check_out_date: string
-	check_in_kbs: boolean
-	check_out_kbs: boolean
+	status?: string
+	check_in_date?: string
+	check_out_date?: string
+	check_in_kbs?: boolean
+	check_out_kbs?: boolean
+}
+
+export interface AddGuestsProps {
+	name: string
+	surname: string
+	birthday: string
+	gender: string
+	citizen_id: string
+	identification_number: string
 }
 
 export interface DocumentItemsProps {

@@ -20,18 +20,9 @@ interface ShowRoomGuestProps {
 	roomId: number
 }
 
-interface AddGuestsProps {
-	name: string
-	surname: string
-	birthday: string
-	gender: string
-	citizen_id: string
-	identification_number: string
-}
-
 function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 	const MySwal = withReactContent(Swal)
-	const [roomGuests, setRoomGuests] = useState<AddGuestsProps[]>([])
+	const [roomGuests, setRoomGuests] = useState<GuestsProps[]>([])
 	const [errors, setErrors] = useState()
 	const [addGuest, setAddGuest] = useState<boolean>(false)
 
@@ -46,7 +37,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 			toast.addEventListener('mouseleave', MySwal.resumeTimer)
 		},
 	})
-	const updateRoomGuests = (index: number, newGuest: AddGuestsProps): void => {
+	const updateRoomGuests = (index: number, newGuest: GuestsProps): void => {
 		setRoomGuests((roomGuests) => {
 			const newRoomGuests = [...roomGuests]
 			newRoomGuests[index] = newGuest
@@ -80,7 +71,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 								citizen_id: '',
 								identification_number: '',
 							},
-						] as AddGuestsProps[],
+						] as GuestsProps[],
 				)
 			} else {
 				setRoomGuests([
@@ -92,7 +83,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 						citizen_id: '',
 						identification_number: '',
 					},
-				] as AddGuestsProps[])
+				] as GuestsProps[])
 			}
 			setAddGuest(false)
 		}
@@ -100,7 +91,7 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 
 	const handleSaveRoomGuests = () => {
 		router.post(
-			route('hotel.bookings.booking_room.add_guest'),
+			route('hotel.booking_guests.store'),
 			{booking_room_id: props.bookingRoomId, guests: roomGuests as unknown as FormDataConvertible},
 			{
 				preserveScroll: true,
@@ -132,10 +123,10 @@ function ShowRoomGuestAdd(props: ShowRoomGuestProps) {
 					{roomGuests.map((guest, index) => (
 						<ShowRoomGuest
 							key={index}
+							deleted={true}
 							guestIndex={index}
-							guest={roomGuests[index] as AddGuestsProps}
+							guest={roomGuests[index] as GuestsProps}
 							citizens={props.citizens}
-							setRoomGuests={setRoomGuests}
 							updateRoomGuests={updateRoomGuests}
 							deleteRoomGuest={deleteRoomGuest}
 							errors={errors}

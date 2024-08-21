@@ -7,10 +7,8 @@ use App\Http\Requests\UpdateBookingGuestsCheckInOutRequest;
 use App\Models\BookingGuests;
 use App\Http\Requests\StoreBookingGuestsRequest;
 use App\Http\Requests\UpdateBookingGuestsRequest;
-use App\Models\BookingRoom;
-use Illuminate\Support\Facades\Log;
+use App\Models\Guest;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
 
 class BookingGuestsController extends Controller
 {
@@ -35,7 +33,22 @@ class BookingGuestsController extends Controller
      */
     public function store(StoreBookingGuestsRequest $request)
     {
-        //
+        $data = $request->validated();
+        foreach ($data['guests'] as $guest) {
+            $guest = Guest::create([
+                'name' => $guest['name'],
+                'surname' => $guest['surname'],
+                'birthday' => Carbon::parse($guest['birthday'])->format('Y-m-d'),
+                'is_foreign_nationnal' => $guest['citizen_id'] !== 1001 ? 1 : 0,
+                'citizen_id' => $guest['citizen_id'],
+                'identification_number' => $guest['identification_number'],
+            ]);
+            $booking_guest = BookingGuests::create([
+                'booking_room_id' => $data['booking_room_id'],
+                'guest_id' => $guest->id,
+            ]);
+        }
+        return redirect()->back()->with('error', 'Guests could not be added');
     }
 
     /**
@@ -99,8 +112,9 @@ class BookingGuestsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BookingGuests $bookingGuests)
+    public function destroy(BookingGuests $bookingGuest)
     {
-        //
+        $bookingGuest->delete();
+        return redirect()->back()->with('success', 'Guest deleted successfully');
     }
 }
